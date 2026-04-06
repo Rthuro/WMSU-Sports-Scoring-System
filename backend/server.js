@@ -41,11 +41,15 @@ import { initDB } from "./config/init/init.js";
 dotenv.config();
 
 const app = express();
+const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
 const PORT = process.env.PORT || 3000;
 const __dirname = path.resolve();
 
 app.use(express.json()); 
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigin,
+  credentials: true
+}));
 app.use(
   helmet({
     contentSecurityPolicy: false,

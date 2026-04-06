@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 const matchId = () => crypto.randomUUID?.();
 
 
-const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000" : "";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 
 export const useMatchStore = create((set, get) => ({
