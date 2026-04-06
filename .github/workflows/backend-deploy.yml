@@ -53,6 +53,7 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
+    environment: Production
     steps:
       - name: Trigger Render Deployment
         run: curl -X POST ${{ env.RENDER_HOOK }}
