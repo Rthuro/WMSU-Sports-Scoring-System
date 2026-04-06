@@ -11,6 +11,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}-backend
   # This silences the Node 20 deprecation warning
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: true
+  RENDER_HOOK: ${{ secrets.RENDER_HOOK }}
 
 jobs:
   build-and-push:
@@ -49,10 +50,9 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           network: host
-
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Render Deployment
-        run: curl -X POST ${{ secrets.RENDER_HOOK }}
+        run: curl -X POST ${{ env.RENDER_HOOK }}
