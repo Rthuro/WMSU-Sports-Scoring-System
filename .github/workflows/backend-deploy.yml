@@ -55,7 +55,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Render Deployment
-        env:
-          deploy_url: ${{ secrets.RENDER_HOOK }}
-        run: |
-          curl "$deploy_url"
+        run: curl ${{ secrets.RENDER_HOOK }}
