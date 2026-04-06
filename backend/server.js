@@ -87,16 +87,23 @@ app.use("/api/tournament-tally", tournamentTallyRoutes)
 app.use("/api/match-points", matchPointsRoutes)
 app.use("/api/match-participants", matchParticipantsRoutes)
 
-if (process.env.NODE_ENV !== "development") {
-  app.use(express.static(path.join(__dirname, "/frontend/dist")));
+// if (process.env.NODE_ENV !== "development") {
+//   app.use(express.static(path.join(__dirname, "/frontend/dist")));
 
-  app.get("/{*any}", (_, res) => {
-    res.sendFile(path.resolve(__dirname,"frontend", "dist", "index.html"));
-  });
-}
+//   app.get("/{*any}", (_, res) => {
+//     res.sendFile(path.resolve(__dirname,"frontend", "dist", "index.html"));
+//   });
+// }
 
-initDB().then( () => {
-    app.listen(PORT, () => {
-        console.log("running");
+initDB()
+  .then(() => {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server is running on port ${PORT}`);
+      console.log(`📡 Allowing requests from: ${allowedOrigin}`);
     });
-})
+  })
+  .catch((err) => {
+    console.error("❌ DATABASE CONNECTION FAILED:");
+    console.error(err);
+    process.exit(1); 
+  });
