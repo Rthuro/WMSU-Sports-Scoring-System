@@ -3,7 +3,9 @@ name: Frontend Professional Deploy
 on:
   push:
     branches: [main]
-    paths: ["frontend/**"]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-deploy.yml"
 
 jobs:
   deploy:
