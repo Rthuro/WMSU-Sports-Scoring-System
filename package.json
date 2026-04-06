@@ -1,0 +1,35 @@
+{
+  "name": "wmsu-sports-event-scoring-system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "backend/server.js",
+  "scripts": {
+    "dev": "nodemon backend/server.js ",
+    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "node backend/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rthuro/WMSU-Sports-Scoring-System.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Rthuro/WMSU-Sports-Scoring-System/issues"
+  },
+  "homepage": "https://github.com/Rthuro/WMSU-Sports-Scoring-System#readme",
+  "dependencies": {
+    "@arcjet/node": "^1.0.0-beta.8",
+    "@neondatabase/serverless": "^1.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.0",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
