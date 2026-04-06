@@ -7,8 +7,9 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # format: ghcr.io/username/repo-backend
   IMAGE_NAME: ${{ github.repository }}-backend
+  # This silences the Node 20 deprecation warning
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: true
 
 jobs:
   build-and-push:
@@ -16,8 +17,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    outputs:
-      image_tag: ${{ steps.meta.outputs.version }}
 
     steps:
       - name: Checkout code
@@ -35,15 +34,19 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: type=sha,format=long
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long
 
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: ./backend
+          file: ./backend/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          network: host
 
   deploy:
     needs: build-and-push

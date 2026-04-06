@@ -1,16 +1,19 @@
-FROM node:20-alpine AS builder
+# Use "slim" instead of "alpine" for better compatibility
+FROM node:20-slim AS builder
 WORKDIR /app
-# We assume the build context is the root or backend folder
+
 COPY package*.json ./
-RUN npm install
+
+RUN npm ci
+
 COPY . .
 
-FROM node:20-alpine
+# Final Stage
+FROM node:20-slim
 WORKDIR /app
 COPY --from=builder /app ./
 
 ENV NODE_ENV=production
 EXPOSE 10000
 
-# Use the script defined in your package.json
 CMD ["npm", "start"]
