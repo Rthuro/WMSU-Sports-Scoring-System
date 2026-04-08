@@ -184,8 +184,12 @@ export function Tournament() {
             </div>
             <TournamentBracketPreview
                 bracketingType={tournament?.bracketing}
-                matches={previewMatches}
+                matches={tournamentMatch && tournamentMatch.length > 0 ? tournamentMatch : previewMatches}
                 teams={teams}
+                onMatchClick={(match) => {
+                    if (!match) return;
+                    setSelectedEditMatch(match);
+                }}
             />
         </div>
 
