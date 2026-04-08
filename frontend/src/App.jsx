@@ -15,6 +15,7 @@ import { PlayerStats } from "./pages/Player/Player-Stats";
 import { TeamManagement } from "./pages/Team/Team-Management";
 import { MatchDetails } from "./pages/Match/Match-Details";
 import { CreateTeam } from "./pages/Team/Create-Team";
+import { TeamProfile } from "./pages/Team/Team-Profile";
 import {HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { Settings } from "./pages/Settings"
@@ -64,6 +65,7 @@ export default function App() {
               <Route path='/PlayerStats' element={<PlayerStats/>}></Route>
               <Route path='/TeamManagement' element={<TeamManagement/>}></Route>
               <Route path='/TeamManagement/CreateTeam' element={<CreateTeam/>}></Route>
+              <Route path='/ManageTeam/:id' element={<TeamProfile/>}></Route>
               <Route path='/Settings' element={<Settings/>}></Route>
             </Route>
           </Routes>

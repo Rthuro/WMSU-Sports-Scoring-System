@@ -7,12 +7,14 @@ import {
     createTeam, 
     updateTeam,
     deleteTeam,
+    getTeamProfile,
 } from "../controllers/teamController.js";
 
 const router = express.Router();
 
 router.get("/", getTeams);
 router.get("/:sportId", getTeamsBySport);
+router.get("/:id/profile", getTeamProfile);
 router.post("/", validate(createTeamSchema), createTeam);
 router.put("/:id", updateTeam);
 router.delete("/:id", deleteTeam);

@@ -58,3 +58,15 @@ export const deleteTeam = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getTeamProfile = async (req, res, next) => {
+    try {
+        const profile = await teamRepo.findProfileById(req.params.id);
+        if (!profile) {
+            throw new AppError("Team profile not found", 404);
+        }
+        res.status(200).json({ success: true, data: profile });
+    } catch (error) {
+        next(error);
+    }
+};

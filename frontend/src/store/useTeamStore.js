@@ -8,8 +8,10 @@ const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000
 export const useTeamStore = create((set, get) => ({
     teams: [],
     teamsBySport: [],
+    teamProfile: null,
     error: null,
     loading: false,
+    profileLoading: false,
 
     fetchTeams: async () => {
         set({ loading: true, error: null });
@@ -18,6 +20,16 @@ export const useTeamStore = create((set, get) => ({
             set({ teams: res.data.data, loading: false });
         } catch (error) {
             set({ error, loading: false });
+        }
+    },
+
+    fetchTeamProfile: async (id) => {
+        set({ profileLoading: true, error: null, teamProfile: null });
+        try {
+            const res = await axios.get(`${BASE_URL}/api/teams/${id}/profile`);
+            set({ teamProfile: res.data.data, profileLoading: false });
+        } catch (error) {
+            set({ error, profileLoading: false });
         }
     },
 
