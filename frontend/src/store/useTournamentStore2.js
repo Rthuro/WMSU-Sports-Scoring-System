@@ -107,6 +107,36 @@ export const useTournamentStore = create((set, get) => ({
             return false;
         }
     },
+    updateTournament: async (id, data) => {
+        try {
+            const res = await axios.put(`${BASE_URL}/api/tournaments/${id}`, data);
+            set((state) => ({
+                tournament: res.data.data,
+                tournaments: state.tournaments.map(t => t.tournament_id === id ? res.data.data : t)
+            }));
+            toast.success("Tournament updated successfully");
+            return true;
+        } catch (error) {
+            set({ error });
+            toast.error("Failed to update tournament");
+            return false;
+        }
+    },
+
+    deleteTournament: async (id) => {
+        try {
+            await axios.delete(`${BASE_URL}/api/tournaments/${id}`);
+            set((state) => ({
+                tournaments: state.tournaments.filter(t => t.tournament_id !== id)
+            }));
+            toast.success("Tournament deleted successfully");
+            return true;
+        } catch (error) {
+            set({ error });
+            toast.error("Failed to delete tournament");
+            return false;
+        }
+    },
 
 }));
 

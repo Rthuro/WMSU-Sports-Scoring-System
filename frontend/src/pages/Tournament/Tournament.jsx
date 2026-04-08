@@ -24,6 +24,8 @@ import { autoTable } from 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 import { TournamentBracketPreview, generateMockBracket } from "@/components/custom/TournamentBracketPreview";
 import { MatchDetailsDialog } from "@/components/custom/MatchDetailsDialog";
+import { EditTournamentDialog } from "@/components/custom/EditTournamentDialog";
+import { TeamRecordDialog } from "@/components/custom/TeamRecordDialog";
 
 export function Tournament() {
     const navigate = useNavigate();
@@ -40,6 +42,8 @@ export function Tournament() {
 
     const bracketRef = React.useRef(null);
     const [selectedEditMatch, setSelectedEditMatch] = React.useState(null);
+    const [isEditTournamentOpen, setIsEditTournamentOpen] = React.useState(false);
+    const [selectedTeamRecord, setSelectedTeamRecord] = React.useState(null);
 
     useEffect(() => {
         if (tournamentId) {
@@ -122,8 +126,9 @@ export function Tournament() {
             <p className="text-lg font-semibold "></p>
         </div>
         <div className="flex items-start justify-between">
-            <div className="flex flex-col items-start gap-2">
+            <div className="flex flex-col items-start gap-1">
                 <h1 className=" text-2xl text-red font-freshman tracking-widest">{tournament.name?.toUpperCase()}</h1>
+                <p className="text-muted-foreground">{tournament.description}</p>
 
                 {tournamentEvent && (
                     <Link to={`/ManageEvents/${tournament.event_id}`} className="flex items-center gap-2 ">
@@ -156,7 +161,7 @@ export function Tournament() {
                 </div>
 
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => setIsEditTournamentOpen(true)}>
                 Edit
                 <Edit3 />
             </Button>
@@ -200,7 +205,7 @@ export function Tournament() {
                             <TableHead> Team</TableHead>
                             <TableHead> Wins</TableHead>
                             <TableHead> Losses </TableHead>
-                            <TableHead>Actions</TableHead>
+                            <TableHead> Match Records</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -216,9 +221,9 @@ export function Tournament() {
                                     {team.losses}
                                 </TableCell>
                                 <TableCell >
-                                    <Button variant="outline" size="sm"
-                                    >
-                                        <Eye />
+                                    <Button variant="outline" size="sm" onClick={() => setSelectedTeamRecord(team.team_id)}>
+                                        <Eye className="w-4 h-4 mr-2" />
+                                        View
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -309,6 +314,20 @@ export function Tournament() {
             tournamentTeams={tournamentTeams}
             teams={teams}
             onSave={handleSaveMatchEdit}
+        />
+
+        <EditTournamentDialog
+            isOpen={isEditTournamentOpen}
+            onClose={() => setIsEditTournamentOpen(false)}
+            tournament={tournament}
+        />
+
+        <TeamRecordDialog
+            isOpen={!!selectedTeamRecord}
+            onClose={() => setSelectedTeamRecord(null)}
+            teamId={selectedTeamRecord}
+            tournamentMatch={tournamentMatch}
+            teams={teams}
         />
 
     </>
