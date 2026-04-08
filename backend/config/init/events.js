@@ -11,6 +11,7 @@ export async function initEventsTable() {
         end_date DATE,
         location VARCHAR(255),
         banner_image TEXT,
+        is_deleted BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )

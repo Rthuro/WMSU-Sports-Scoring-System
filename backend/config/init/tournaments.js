@@ -13,11 +13,14 @@ export async function initTournamentsTable() {
         end_date DATE,
         location VARCHAR(255),
         banner_image TEXT,
-        bracketing VARCHAR(255) NOT NULL,
+        bracketing VARCHAR(255) NOT NULL CHECK (bracketing IN ('single-elimination', 'double-elimination', 'round-robin')),
+        is_deleted BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_tournaments_event_id ON tournaments(event_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_tournaments_sport_id ON tournaments(sport_id)`;
     console.log("✅ tournaments table created");
   } catch (error) {
     console.error("❌ Failed to create tournaments table:", error);
@@ -34,12 +37,13 @@ export async function initTournamentTeamsTable() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_tournament_teams_tournament_id ON tournament_teams(tournament_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_tournament_teams_team_id ON tournament_teams(team_id)`;
     console.log("✅ tournament_teams table initialized");
   } catch (error) {
     console.error("❌ Error initializing tournament_teams table:", error);
   }
 }
-
 
 export async function initTournamentMatchesTable() {
   try {
@@ -55,12 +59,13 @@ export async function initTournamentMatchesTable() {
         location VARCHAR(255),
         team_a_id INT REFERENCES teams(team_id),
         team_b_id INT REFERENCES teams(team_id),
-        round INT NOT NULL,
+        round INT NOT NULL CHECK (round > 0),
         is_finished BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_tournament_matches_tournament_id ON tournament_matches(tournament_id)`;
     console.log("✅ tournament_matches table initialized");
   } catch (error) {
     console.error("❌ Error initializing tournament_matches table:", error);
@@ -74,12 +79,13 @@ export async function initTournamentTallyTable() {
         tally_id SERIAL PRIMARY KEY,
         tournament_id TEXT REFERENCES tournaments(tournament_id) ON DELETE CASCADE,
         team_id INT REFERENCES teams(team_id),
-        wins INT DEFAULT 0,
-        losses INT DEFAULT 0,
+        wins INT DEFAULT 0 CHECK (wins >= 0),
+        losses INT DEFAULT 0 CHECK (losses >= 0),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_tournament_tally_tournament_id ON tournament_tally(tournament_id)`;
     console.log("✅ tournament_tally table initialized");
   } catch (error) {
     console.error("❌ Error initializing tournament_tally table:", error);

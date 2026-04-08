@@ -9,11 +9,13 @@ export async function initPlayersTable() {
         first_name VARCHAR(100) NOT NULL,
         last_name VARCHAR(100) NOT NULL,
         middle_initial VARCHAR(10),
-        gender VARCHAR(10),
+        gender VARCHAR(10) CHECK (gender IN ('Male', 'Female')),
         student_id VARCHAR(50),
-        photo TEXT
+        photo TEXT,
+        is_deleted BOOLEAN DEFAULT FALSE
       )
     `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_players_sport_id ON players(sport_id)`;
     console.log("✅ players table initialized");
   } catch (error) {
     console.error("❌ Error initializing players table:", error);
@@ -33,6 +35,8 @@ export async function initPlayerPenaltiesTable() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_player_penalties_player_id ON player_penalties(player_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_player_penalties_match_id ON player_penalties(match_id)`;
     console.log("✅ player_penalties table initialized");
   } catch (error) {
     console.error("❌ Error initializing player_penalties table:", error);
@@ -52,6 +56,8 @@ export async function initPlayerStatsTable() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_player_stats_player_id ON player_stats(player_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_player_stats_match_id ON player_stats(match_id)`;
     console.log("✅ player_stats table initialized");
   } catch (error) {
     console.error("❌ Error initializing player_stats table:", error);
@@ -69,9 +75,10 @@ export async function initPlayerTeamsTable() {
         jersey_number INT
       )
     `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_player_teams_player_id ON player_teams(player_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_player_teams_team_id ON player_teams(team_id)`;
     console.log("✅ player_teams table initialized");
   } catch (error) {
     console.error("❌ Error initializing player_teams table:", error);
   }
 }
-

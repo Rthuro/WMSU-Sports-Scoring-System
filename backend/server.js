@@ -5,6 +5,20 @@ import cors from "cors"
 import dotenv from "dotenv"
 import path from "path";
 
+// Middleware
+import { errorHandler } from "./middleware/errorHandler.js";
+import { validate } from "./middleware/validate.js";
+
+// Validators
+import { createSportSchema } from "./validators/sportSchema.js";
+import { createMatchSchema } from "./validators/matchSchema.js";
+import { createTeamSchema } from "./validators/teamSchema.js";
+import { createTournamentSchema } from "./validators/tournamentSchema.js";
+import { createEventSchema } from "./validators/commonSchemas.js";
+import { createAccountSchema } from "./validators/commonSchemas.js";
+import { createDepartmentSchema } from "./validators/commonSchemas.js";
+import { createPlayerSchema } from "./validators/commonSchemas.js";
+
 // main routes
 import matchRoutes from "./routes/matchRoutes.js";
 import accountRoutes from "./routes/accountRoutes.js"
@@ -86,6 +100,9 @@ app.use("/api/tournament-tally", tournamentTallyRoutes)
 // // match related routes
 app.use("/api/match-points", matchPointsRoutes)
 app.use("/api/match-participants", matchParticipantsRoutes)
+
+// Global error handler — MUST be after all routes
+app.use(errorHandler);
 
 // if (process.env.NODE_ENV !== "development") {
 //   app.use(express.static(path.join(__dirname, "/frontend/dist")));

@@ -11,9 +11,10 @@ export async function initAccountsTable(){
             first_name VARCHAR(150) NOT NULL,
             last_name VARCHAR(150) NOT NULL,
             middle_name VARCHAR(5) NOT NULL,
-            role VARCHAR(25) NOT NULL,
+            role VARCHAR(25) NOT NULL CHECK (role IN ('super_admin', 'admin')),
             email VARCHAR(255) NOT NULL,
             password_hash TEXT NOT NULL,
+            is_deleted BOOLEAN DEFAULT FALSE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         `;

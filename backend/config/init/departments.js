@@ -8,6 +8,7 @@ export async function initDepartmentsTable() {
         name VARCHAR(255) NOT NULL,
         abbreviation VARCHAR(50),
         logo TEXT,
+        is_deleted BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )

@@ -75,39 +75,22 @@ export const useMatchStore = create((set, get) => ({
             const id = matchId();
             formData.match_id = id;
             
+            // Single POST — backend handles participant creation in a transaction
             const res = await axios.post(`${BASE_URL}/api/match`, formData);
             set((state) => ({
                 matches: [...state.matches, res.data.data]
             }));
-
-            if(formData.is_team) {
-                await axios.post(`${BASE_URL}/api/match-participants`, {
-                    match_id: id,
-                    team_id: formData.team_a_id
-                });
-
-                await axios.post(`${BASE_URL}/api/match-participants`, {
-                    match_id: id,
-                    team_id: formData.team_b_id
-                });
-            } else {
-                await axios.post(`${BASE_URL}/api/match-participants`, {
-                    match_id: matchId,
-                    player_id: formData.team_a_id
-                });
-
-                await axios.post(`${BASE_URL}/api/match-participants`, {
-                    match_id: id,
-                    player_id: formData.team_b_id
-                });
-            }
             
             toast.success("Match added successfully");
             get().resetFormData();
             return res.data.data.match_id;
         } catch (error) {
             set({ error, loading: false });
-            toast.error("Failed to add match");
+            if (error.response?.data?.errors) {
+                toast.error(error.response.data.errors[0]?.message || "Validation failed");
+            } else {
+                toast.error("Failed to add match");
+            }
         }
     },
 }));

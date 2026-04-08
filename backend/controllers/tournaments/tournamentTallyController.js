@@ -1,69 +1,32 @@
-import { sql } from "../../config/db.js";
+import * as tournamentTallyRepo from "../../repositories/tournaments/tournamentTallyRepo.js";
+import { AppError } from "../../middleware/errorHandler.js";
 
-export const getTournamentTally = async (req, res) => {
+export const getTournamentTally = async (req, res, next) => {
     try {
-        const tally = await sql`
-            SELECT * FROM tournament_tally
-        `;
+        const tally = await tournamentTallyRepo.findAll();
         res.status(200).json({ success: true, data: tally });
-    } catch (error) {
-        console.log("Error fetching tally: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
+    } catch (error) { next(error); }
 };
 
-export const createTournamentTally = async (req, res) => {
-    const { tournament_id, team_id, wins = 0, losses = 0 } = req.body;
+export const createTournamentTally = async (req, res, next) => {
     try {
-        const [newTally] = await sql`
-            INSERT INTO tournament_tally (tournament_id, team_id, wins, losses)
-            VALUES ( ${tournament_id}, ${team_id}, ${wins}, ${losses})
-            RETURNING *
-        `;
-        res.status(201).json({ success: true, data: newTally });
-    } catch (error) {
-        console.log("Error creating tally: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
+        const tally = await tournamentTallyRepo.create(req.body);
+        res.status(201).json({ success: true, data: tally });
+    } catch (error) { next(error); }
 };
 
-export const updateTournamentTally = async (req, res) => {
-    const { tournament_id , team_id} = req.params;
-    const { wins, losses } = req.body;
+export const updateTournamentTally = async (req, res, next) => {
     try {
-        const [updatedTally] = await sql`
-            UPDATE tournament_tally
-            SET
-                wins = COALESCE(${wins}, wins),
-                losses = COALESCE(${losses}, losses)
-            WHERE tournament_id = ${tournament_id} AND team_id = ${team_id}
-            RETURNING *
-        `;
-        if (!updatedTally) {
-            return res.status(404).json({ success: false, error: "Tally not found" });
-        }
-        res.status(200).json({ success: true, data: updatedTally });
-    } catch (error) {
-        console.log("Error updating tally: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
+        const tally = await tournamentTallyRepo.update(req.params.tournament_id, req.params.team_id, req.body);
+        if (!tally) throw new AppError("Tally not found", 404);
+        res.status(200).json({ success: true, data: tally });
+    } catch (error) { next(error); }
 };
 
-export const deleteTournamentTally = async (req, res) => {
-    const { tally_id } = req.params;
+export const deleteTournamentTally = async (req, res, next) => {
     try {
-        const result = await sql`
-            DELETE FROM tournament_tally
-            WHERE tally_id = ${tally_id}
-            RETURNING *
-        `;
-        if (result.length === 0) {
-            return res.status(404).json({ success: false, error: "Tally not found" });
-        }
-        console.log("Deleted tally: ", result[0]);
+        const tally = await tournamentTallyRepo.remove(req.params.tally_id);
+        if (!tally) throw new AppError("Tally not found", 404);
         res.status(200).json({ success: true, message: "Tally deleted successfully" });
-    } catch (error) {
-        console.log("Error deleting tally: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
+    } catch (error) { next(error); }
 };

@@ -12,6 +12,7 @@ export async function initStatsTable() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_stats_sport_id ON stats(sport_id)`;
     console.log("✅ stats table initialized");
   } catch (error) {
     console.error("❌ Error initializing stats table:", error);
