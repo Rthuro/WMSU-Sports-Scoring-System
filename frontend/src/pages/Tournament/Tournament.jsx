@@ -22,11 +22,8 @@ import { useMatchPointsStore } from "@/store/useMatchStore";
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
 import html2canvas from 'html2canvas';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { TournamentBracketPreview, generateMockBracket } from "@/components/custom/TournamentBracketPreview";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { MatchDetailsDialog } from "@/components/custom/MatchDetailsDialog";
 
 export function Tournament() {
     const navigate = useNavigate();
@@ -43,8 +40,6 @@ export function Tournament() {
 
     const bracketRef = React.useRef(null);
     const [selectedEditMatch, setSelectedEditMatch] = React.useState(null);
-    const [editTeamA, setEditTeamA] = React.useState(null);
-    const [editTeamB, setEditTeamB] = React.useState(null);
 
     useEffect(() => {
         if (tournamentId) {
@@ -108,12 +103,8 @@ export function Tournament() {
         }
     };
 
-    const handleSaveMatchEdit = async () => {
+    const handleSaveMatchEdit = async (payload) => {
         if (!selectedEditMatch) return;
-        const payload = {
-            team_a_id: editTeamA,
-            team_b_id: editTeamB
-        };
         const success = await updateTournamentMatch(selectedEditMatch.match_id, payload);
         if (success) {
             fetchTournamentMatch(tournamentId);
@@ -292,8 +283,6 @@ export function Tournament() {
                                     </Button>
                                     <Button variant="outline" size="sm" className="mr-2" onClick={() => {
                                         setSelectedEditMatch(match);
-                                        setEditTeamA(match.team_a_id ? String(match.team_a_id) : 'empty');
-                                        setEditTeamB(match.team_b_id ? String(match.team_b_id) : 'empty');
                                     }}>
                                         <Edit3 className=" h-4 w-4" />
                                     </Button>
@@ -312,53 +301,15 @@ export function Tournament() {
 
         </div>
 
-        {/* Edit Match Dialog */}
-        <Dialog open={!!selectedEditMatch} onOpenChange={(open) => !open && setSelectedEditMatch(null)}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Edit Match Teams</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                        <Label>Team A</Label>
-                        <Select value={editTeamA} onValueChange={setEditTeamA}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select Team A" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="empty">TBD (To Be Decided)</SelectItem>
-                                {tournamentTeams.map(t => (
-                                    <SelectItem key={t.team_id} value={String(t.team_id)}>
-                                        {teams.find(tm => tm.team_id === t.team_id)?.name || "Unknown"}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="grid gap-2">
-                        <Label>Team B</Label>
-                        <Select value={editTeamB} onValueChange={setEditTeamB}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select Team B" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="empty">TBD (To Be Decided)</SelectItem>
-                                {tournamentTeams.map(t => (
-                                    <SelectItem key={t.team_id} value={String(t.team_id)}>
-                                        {teams.find(tm => tm.team_id === t.team_id)?.name || "Unknown"}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setSelectedEditMatch(null)}>Cancel</Button>
-                    <Button onClick={handleSaveMatchEdit}>Save Changes</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-
+        {/* Edit Match Dialog Custom Component */}
+        <MatchDetailsDialog
+            isOpen={!!selectedEditMatch}
+            onClose={() => setSelectedEditMatch(null)}
+            match={selectedEditMatch}
+            tournamentTeams={tournamentTeams}
+            teams={teams}
+            onSave={handleSaveMatchEdit}
+        />
 
     </>
 }

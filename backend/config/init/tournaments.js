@@ -59,12 +59,15 @@ export async function initTournamentMatchesTable() {
         location VARCHAR(255),
         team_a_id INT REFERENCES teams(team_id),
         team_b_id INT REFERENCES teams(team_id),
+        winner_id INT REFERENCES teams(team_id) DEFAULT NULL,
         round INT NOT NULL CHECK (round > 0),
         is_finished BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
+    // Ensure winner_id exists if table was already created
+    await sql`ALTER TABLE tournament_matches ADD COLUMN IF NOT EXISTS winner_id INT REFERENCES teams(team_id) DEFAULT NULL`;
     await sql`CREATE INDEX IF NOT EXISTS idx_tournament_matches_tournament_id ON tournament_matches(tournament_id)`;
     console.log("✅ tournament_matches table initialized");
   } catch (error) {

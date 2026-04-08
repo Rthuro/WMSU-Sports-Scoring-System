@@ -15,14 +15,14 @@ const WMSUTheme = createTheme({
   svgBackground: "#ffffff",
 });
 
-function getTeamDetails(teamId, teams) {
+function getTeamDetails(teamId, teams, winnerId) {
   if (!teamId) return { id: crypto.randomUUID(), name: "TBD", isWinner: false, resultText: "" };
   const team = teams.find(t => t.team_id === teamId);
   return {
     id: teamId,
     name: team ? team.name : "Unknown",
-    isWinner: false, // We'll set this below if match is finished
-    resultText: ""
+    isWinner: winnerId && teamId === winnerId,
+    resultText: winnerId && teamId === winnerId ? "WINNER" : ""
   };
 }
 
@@ -140,7 +140,7 @@ export function TournamentBracketPreview({ bracketingType, matches = [], teams =
                   {teams.find(t => t.team_id === m.team_a_id)?.name || 'TBD'} <span className="text-slate-400 mx-2">vs</span> {teams.find(t => t.team_id === m.team_b_id)?.name || 'TBD'}
                 </td>
                 <td className="px-4 py-3 border border-slate-200">
-                  <span className="text-blue-600 underline">Edit Match</span>
+                  <span className="text-blue-600 underline">Match Details</span>
                 </td>
               </tr>
             ))}
@@ -197,12 +197,9 @@ export function TournamentBracketPreview({ bracketingType, matches = [], teams =
       }
     }
 
-    // Determine Winners visually (if we want to read tally or is_finished)
-    const p1 = getTeamDetails(m.team_a_id, teams);
-    const p2 = getTeamDetails(m.team_b_id, teams);
-
-    // Provide a way to inject 'isWinner' nicely if the db supports it or custom UI
-    // Here we just let it be false unles handled by backend
+    // Determine Winners visually using the winner_id column
+    const p1 = getTeamDetails(m.team_a_id, teams, m.winner_id);
+    const p2 = getTeamDetails(m.team_b_id, teams, m.winner_id);
 
     return {
       id: m.match_id,
