@@ -1,28 +1,15 @@
-import { sql } from "../../config/db.js";
+import * as playerStatsRepo from "../../repositories/players/playerStatsRepo.js";
 
-export const getPlayerStats = async (req, res) => {
+export const getPlayerStats = async (req, res, next) => {
     try {
-        const playerStats = await sql`
-            SELECT * FROM player_stats
-        `;
-        res.status(200).json({ success: true, data: playerStats });
-    } catch (error) {
-        console.error("Error fetching player teams: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
+        const stats = await playerStatsRepo.findAll();
+        res.status(200).json({ success: true, data: stats });
+    } catch (error) { next(error); }
 };
 
-export const getPlayerStatsByMatch = async (req, res) => {
-    const { match_id } = req.params;
+export const getPlayerStatsByMatch = async (req, res, next) => {
     try {
-        const playerStats = await sql`
-            SELECT * FROM player_stats
-            WHERE match_id = ${match_id}
-        `;
-        res.status(200).json({ success: true, data: playerStats });
-    } catch (error) {
-        console.error("Error fetching player teams: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
+        const stats = await playerStatsRepo.findByMatch(req.params.match_id);
+        res.status(200).json({ success: true, data: stats });
+    } catch (error) { next(error); }
 };
-

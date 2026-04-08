@@ -84,6 +84,7 @@ export const useTournamentStore = create((set, get) => ({
         const tournamentID = tournamentId();
 
         try {
+            // Single POST — backend generates teams, tally, and bracket matches in a transaction
             const res = await axios.post(`${BASE_URL}/api/tournaments`, {
                 tournament_id: tournamentID,
                 ...formData
@@ -93,107 +94,46 @@ export const useTournamentStore = create((set, get) => ({
                 tournaments: [...state.tournaments, res.data.data]
             }));
 
-
-            // Generate teams for the tournament
-            await Promise.all(
-                formData.teams?.map((team) =>
-                    axios.post(`${BASE_URL}/api/tournament-teams`, {
-                        tournament_id: tournamentID,
-                        team_id: team
-                    })
-                )
-            );
-
-            // Generate tally for the tournament
-            await Promise.all(
-                formData.teams?.map((team) =>
-                    axios.post(`${BASE_URL}/api/tournament-tally`, {
-                        tournament_id: tournamentID,
-                        team_id: team
-                    })
-                )
-            );
-
-            // Generate matches for the tournament
-            const teams = formData.teams;
-            const type = formData.bracketing;
-            const matchPromises = [];
-            const allTeams = await axios.get(`${BASE_URL}/api/teams`);
-            const allTeamsData = allTeams.data.data;
-
-            if (type === "round-robin") {
-                let matchCount = 1;
-                for (let i = 0; i < teams.length; i++) {
-                    for (let j = i + 1; j < teams.length; j++) {
-                        const team1 = teams[i];
-                        const team2 = teams[j];
-
-                        const team1Name = allTeamsData.find(team => team.team_id === team1)?.name || "Team 1";
-                        const team2Name = allTeamsData.find(team => team.team_id === team2)?.name || "Team 2";
-
-                        const match_name = `${team1Name} vs ${team2Name}`;
-
-                        matchPromises.push(
-                            axios.post(`${BASE_URL}/api/tournament-matches`, {
-                                match_id: generateId(),
-                                sport_id: teams.sport_id,
-                                tournament_id: tournamentID,
-                                match_name: match_name,
-                                date: null,
-                                start_time: null,
-                                end_time: null,
-                                location: "",
-                                team_a_id: team1,
-                                team_b_id: team2 || null,
-                                round: 1
-                            })
-                        );
-                        matchCount+1;
-                    }
-                }
-            } else if (type === "single-elimination") {
-                const shuffledTeams = [...teams].sort(() => Math.random() - 0.5); // optional: randomize
-                const totalTeams = shuffledTeams.length;
-
-                for (let i = 0; i < totalTeams; i += 2) {
-                    const team1 = shuffledTeams[i];
-                    const team2 = shuffledTeams[i + 1];
-                    const team1Name = allTeamsData.find(team => team.team_id === team1)?.name || "Team 1";
-                    const team2Name = allTeamsData.find(team => team.team_id === team2)?.name || "Team 2";
-
-                    let match_name;
-
-                    if (team2) {
-                        match_name = `${team1Name} vs ${team2Name}`;
-                    } else {
-                        match_name = `${team1Name} vs Pending`; 
-                    }
-
-                    matchPromises.push(
-                        axios.post(`${BASE_URL}/api/tournament-matches`, {
-                            match_id: generateId(),
-                            sport_id: teams.sport_id,
-                            tournament_id: tournamentID,
-                            match_name: match_name,
-                            date: null,
-                            start_time: null,
-                            end_time: null,
-                            location: "",
-                            team_a_id: team1,
-                            team_b_id: team2 || null,
-                            round: 1,
-                        })
-                    );
-                }
-            }
-
-            await Promise.all(matchPromises);
             toast.success("Tournament created successfully");
             get().resetFormData();
             return true;
         } catch (error) {
             set({ error });
-            toast.error("Failed to create tournament");
+            if (error.response?.data?.errors) {
+                toast.error(error.response.data.errors[0]?.message || "Validation failed");
+            } else {
+                toast.error("Failed to create tournament");
+            }
+            return false;
+        }
+    },
+    updateTournament: async (id, data) => {
+        try {
+            const res = await axios.put(`${BASE_URL}/api/tournaments/${id}`, data);
+            set((state) => ({
+                tournament: res.data.data,
+                tournaments: state.tournaments.map(t => t.tournament_id === id ? res.data.data : t)
+            }));
+            toast.success("Tournament updated successfully");
+            return true;
+        } catch (error) {
+            set({ error });
+            toast.error("Failed to update tournament");
+            return false;
+        }
+    },
+
+    deleteTournament: async (id) => {
+        try {
+            await axios.delete(`${BASE_URL}/api/tournaments/${id}`);
+            set((state) => ({
+                tournaments: state.tournaments.filter(t => t.tournament_id !== id)
+            }));
+            toast.success("Tournament deleted successfully");
+            return true;
+        } catch (error) {
+            set({ error });
+            toast.error("Failed to delete tournament");
             return false;
         }
     },

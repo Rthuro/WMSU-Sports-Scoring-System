@@ -1,110 +1,49 @@
-import { sql } from "../../config/db.js";
+import * as playerTeamRepo from "../../repositories/players/playerTeamRepo.js";
+import { AppError } from "../../middleware/errorHandler.js";
 
-export const getPlayerTeams = async (req, res) => {
+export const getPlayerTeams = async (req, res, next) => {
     try {
-        const playerTeams = await sql`
-            SELECT * FROM player_teams
-        `;
-        res.status(200).json({ success: true, data: playerTeams });
-    } catch (error) {
-        console.error("Error fetching player teams: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
+        const teams = await playerTeamRepo.findAll();
+        res.status(200).json({ success: true, data: teams });
+    } catch (error) { next(error); }
 };
 
-export const getPlayerTeamsByTeam = async (req, res) => {
-    const { teamId } = req.params;
+export const getPlayerTeamsByTeam = async (req, res, next) => {
     try {
-        const playerTeams = await sql`
-            SELECT * FROM player_teams WHERE team_id = ${teamId}
-        `;
-        res.status(200).json({ success: true, data: playerTeams });
-    } catch (error) {
-        console.error("Error fetching player teams: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
+        const teams = await playerTeamRepo.findByTeam(req.params.teamId);
+        res.status(200).json({ success: true, data: teams });
+    } catch (error) { next(error); }
 };
 
-export const createPlayerTeam = async (req, res) => {
-    const { player_id, team_id, position_id, jersey_number } = req.body;
-
-    if (!player_id || !team_id) {
-        return res.status(400).json({ success: false, message: "Enter all required fields" });
-    }
-
+export const createPlayerTeam = async (req, res, next) => {
     try {
-        const playerTeam = await sql`
-            INSERT INTO player_teams (player_id, team_id, position_id, jersey_number)
-            VALUES (${player_id}, ${team_id}, ${position_id}, ${jersey_number})
-            RETURNING *
-        `;
-        res.status(201).json({ success: true, data: playerTeam[0] });
-    } catch (error) {
-        console.error("Error creating a player team: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
+        const team = await playerTeamRepo.create(req.body);
+        res.status(201).json({ success: true, data: team });
+    } catch (error) { next(error); }
 };
 
-export const updatePlayerTeam = async (req, res) => {
-    const { id } = req.params;
-    const { player_id, team_id, position_id, jersey_number } = req.body;
-
-    if (!player_id || !team_id) {
-        return res.status(400).json({ success: false, message: "Enter all required fields" });
-    }
-
+export const updatePlayerTeam = async (req, res, next) => {
     try {
-        const updated = await sql`
-            UPDATE player_teams
-            SET player_id = ${player_id},
-                team_id = ${team_id},
-                position_id = ${position_id},
-                jersey_number = ${jersey_number}
-            WHERE id = ${id}
-            RETURNING *
-        `;
-
-        if (updated.length === 0) {
-            return res.status(404).json({ success: false, message: "Player team not found" });
-        }
-
-        res.status(200).json({ success: true, data: updated[0] });
-    } catch (error) {
-        console.error("Error updating player team: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
+        const team = await playerTeamRepo.update(req.params.id, req.body);
+        if (!team) throw new AppError("Player team not found", 404);
+        res.status(200).json({ success: true, data: team });
+    } catch (error) { next(error); }
 };
 
-export const deletePlayerTeam = async (req, res) => {
-    const { id } = req.params;
+export const deletePlayerTeam = async (req, res, next) => {
     try {
-        const deleted = await sql`
-            DELETE FROM player_teams WHERE id = ${id} RETURNING *
-        `;
-        if (deleted.length === 0) {
-            return res.status(404).json({ success: false, message: "Player team not found" });
-        }
-
+        const team = await playerTeamRepo.remove(req.params.id);
+        if (!team) throw new AppError("Player team not found", 404);
         res.status(200).json({ success: true, message: "Player team deleted successfully" });
-    } catch (error) {
-        console.error("Error deleting player team: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
+    } catch (error) { next(error); }
 };
 
-export const checkPlayerTeamExists = async (req, res) => {
-    const { playerId, teamId } = req.params;
+export const checkPlayerTeamExists = async (req, res, next) => {
     try {
-        const playerTeam = await sql`
-            SELECT * FROM player_teams WHERE player_id = ${playerId} AND team_id = ${teamId}
-        `;
-        if (playerTeam.length > 0) {
-            return res.status(200).json({ success: true, data: playerTeam[0] });
-        } else {
-            return res.status(404).json({ success: false, message: "Player team not found" });
+        const team = await playerTeamRepo.findByPlayerAndTeam(req.params.playerId, req.params.teamId);
+        if (team) {
+            return res.status(200).json({ success: true, data: team });
         }
-    } catch (error) {
-        console.error("Error checking if player team exists: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
+        return res.status(404).json({ success: false, message: "Player team not found" });
+    } catch (error) { next(error); }
 };

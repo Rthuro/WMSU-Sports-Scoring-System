@@ -8,8 +8,10 @@ const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000
 export const useTeamStore = create((set, get) => ({
     teams: [],
     teamsBySport: [],
+    teamProfile: null,
     error: null,
     loading: false,
+    profileLoading: false,
 
     fetchTeams: async () => {
         set({ loading: true, error: null });
@@ -18,6 +20,16 @@ export const useTeamStore = create((set, get) => ({
             set({ teams: res.data.data, loading: false });
         } catch (error) {
             set({ error, loading: false });
+        }
+    },
+
+    fetchTeamProfile: async (id) => {
+        set({ profileLoading: true, error: null, teamProfile: null });
+        try {
+            const res = await axios.get(`${BASE_URL}/api/teams/${id}/profile`);
+            set({ teamProfile: res.data.data, profileLoading: false });
+        } catch (error) {
+            set({ error, profileLoading: false });
         }
     },
 
@@ -59,31 +71,22 @@ export const useTeamStore = create((set, get) => ({
         set({ loading: true, error: null });
         try {
             const formData = get().formData;
-            const players = formData.players;
+            // Single POST — backend handles player-team assignments in a transaction
             const res = await axios.post(`${BASE_URL}/api/teams`, formData);
             set((state) => ({
                 teams: [...state.teams, res.data.data]
             }));
-
-            const team_id = res.data.data.team_id;
-
-            await Promise.all(
-                players?.map((p) =>
-                    axios.post(`${BASE_URL}/api/player-team`, {
-                        player_id: p,
-                        team_id: team_id,
-                        position_id: null,
-                        jersey_number: null
-                    })
-                )
-            );
 
             toast.success("Team added successfully");
             get().resetFormData();
             return true;
         } catch (error) {
             set({ error: error, loading: false });
-            toast.error("Failed to add team");
+            if (error.response?.data?.errors) {
+                toast.error(error.response.data.errors[0]?.message || "Validation failed");
+            } else {
+                toast.error("Failed to add team");
+            }
             return false;
         }
     },

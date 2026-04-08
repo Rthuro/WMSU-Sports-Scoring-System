@@ -1,92 +1,32 @@
-import { sql } from "../../config/db.js";
+import * as setRulesRepo from "../../repositories/sports/setRulesRepo.js";
+import { AppError } from "../../middleware/errorHandler.js";
 
-
-export const getSetRules = async (req, res) => {
-    const { sportId } = req.params;
-
+export const getSetRules = async (req, res, next) => {
     try {
-        const setRules = await sql `
-            SELECT * FROM set_rules 
-            WHERE sport_id = ${sportId}
-        `
-        console.log("set rules: ", setRules)
-        res.status(200).json({ success: true, data: setRules})
-    } catch (error) {
-        console.log("Error fetching set rules: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" })
-    }
+        const rules = await setRulesRepo.findBySport(req.params.sportId);
+        res.status(200).json({ success: true, data: rules });
+    } catch (error) { next(error); }
 };
 
-export const createSetRule = async (req, res) => {
-    const { sportId, set_number, max_score, time_limit } = req.body;
-
-    if(!sportId || !set_number){
-        return res.status(400).json({ success:false, message: "Enter all required fields" })
-    }
-
+export const createSetRule = async (req, res, next) => {
     try {
-        const setRule = await sql `
-            INSERT INTO set_rules ( sport_id, set_number, max_score, time_limit) 
-            VALUES ( ${sportId}, ${set_number}, ${max_score}, ${time_limit})
-            RETURNING *
-        `
-        console.log("New set rule added successfully");
-        res.status(201).json({ success: true, data: setRule[0]}); //it returns array
-
-    } catch (error) {
-        console.log("Error creating a set rule: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" })
-    }
-
+        const rule = await setRulesRepo.create(req.body);
+        res.status(201).json({ success: true, data: rule });
+    } catch (error) { next(error); }
 };
 
-export const updateSetRule = async (req, res) => {
-    const { id } = req.params;
-     const { set_number, max_score, time_limit } = req.body;
-    
+export const updateSetRule = async (req, res, next) => {
     try {
-        const updateSetRule = await sql `
-            UPDATE set_rules 
-            SET set_number = ${set_number}, 
-                max_score = ${max_score}, 
-                time_limit = ${time_limit}
-            WHERE set_rule_id = ${id}
-            RETURNING *
-        `
-
-        if(updateSetRule.length === 0){
-            return res.status(404).json({ success: false, message: "set rule not found"});
-        }
-
-        console.log("set rule updated successfully");
-        res.status(200).json({ success: true, data: updateSetRule[0]});
-
-    } catch (error) {
-        console.log("Error updating an set rule: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" })
-    }
-    
+        const rule = await setRulesRepo.update(req.params.id, req.body);
+        if (!rule) throw new AppError("Set rule not found", 404);
+        res.status(200).json({ success: true, data: rule });
+    } catch (error) { next(error); }
 };
 
-export const deleteSetRule = async (req, res) => {
-    const { id } = req.params;
-
+export const deleteSetRule = async (req, res, next) => {
     try {
-        const deleteSetRule = await sql `
-            DELETE FROM set_rules WHERE set_rule_id = ${id}
-            RETURNING *
-        `
-
-        if(deleteSetRule.length === 0){
-            return res.status(404).json({ success: false, message: "set rule not found"});
-        }
-
-        console.log("set rule deleted successfully");
-        res.status(200).json({ success: true, data: deleteSetRule[0]});
-
-    } catch (error) {
-        console.log("Error deleting a set rule: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" })
-    }
-
+        const rule = await setRulesRepo.remove(req.params.id);
+        if (!rule) throw new AppError("Set rule not found", 404);
+        res.status(200).json({ success: true, data: rule });
+    } catch (error) { next(error); }
 };

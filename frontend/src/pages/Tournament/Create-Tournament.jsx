@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useTournamentStore } from "@/store/useTournamentStore2";
@@ -42,6 +42,7 @@ import { useTeamStore } from "@/store/useTeamStore";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils"
 import toast from "react-hot-toast";
+import { TournamentBracketPreview, generateMockBracket } from "@/components/custom/TournamentBracketPreview";
 
 export function CreateTournament(){
     const today = new Date().toISOString().split("T")[0];
@@ -104,6 +105,11 @@ export function CreateTournament(){
             fetchTeams();
         }
     }, [fetchSports, fetchEvents, fetchTeams, fetchTeamsBySport, selectedSport]);
+
+    // Generate live preview when teams or bracket type changes
+    const previewMatches = useMemo(() => {
+        return generateMockBracket(selectedTeams, formData.bracketing, teams);
+    }, [selectedTeams, formData.bracketing, teams]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -231,25 +237,6 @@ export function CreateTournament(){
                                 setFormData({ ...formData, name: e.target.value })
                             }} />
                         </div>
-                        <div className="grid gap-3 ">
-                            <Label htmlFor="bracketing">Bracketing</Label>
-                            <Select
-                                value={formData.bracketing}
-                                onValueChange={(e) => {
-                                    setFormData({ ...formData, bracketing: e })
-                                }}
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select bracketing" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectItem value="single-elimination">Single Elimination</SelectItem>
-                                        <SelectItem value="round-robin">Round Robin</SelectItem>
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                        </div>
                         <div className="grid gap-3 col-span-2">
                             <Label htmlFor="description">Description</Label>
                             <Textarea id="description" name="description" 
@@ -289,56 +276,97 @@ export function CreateTournament(){
                             onChange={(e) => setFormData({ ...formData, banner_image: e.target.files[0] })}
                         />
                     </div>
-                    <div className="flex flex-col gap-2  col-span-2">
-                        <Label htmlFor="teams" >
-                            Teams
-                            <span className="text-muted-foreground text-xs">Minimum of 2 teams</span>
-                        </Label>
-                        <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger asChild>
-                        <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={open}
-                            className="w-full justify-between"
-                        >
-                            Select teams
-                            <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                        </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-full p-0">
-                        <Command>
-                            <CommandInput placeholder="Search player..." className="h-9" />
-                            <CommandList>
-                            <CommandEmpty>No teams found.
-                                <Link to={`/TeamManagement/CreateTeam?sport=${sports?.find(s => s.sport_id === selectedSport)?.name}${selectedEvents ? `&event-id=${selectedEvents}`:''}`}className="text-blue-700 underline">Create team now.</Link>
-                            </CommandEmpty>
-                            <CommandGroup>
-                                {teamsDisplay()?.map((team) => (
-                                <CommandItem
-                                    key={team.team_id}
-                                    value={team.team_id}
-                                    onSelect={() => toggleTeam(team.team_id)}
-                                >
-                                    {capitalizeFirstLetter(team.name)}
-                                    
-                                    <Check
-                                        className={cn(
-                                        "ml-auto h-4 w-4",
-                                        selectedTeams.includes(team.team_id) ? "opacity-100" : "opacity-0"
-                                        )}
-                                    />
-                                </CommandItem>
-                                ))}
-                            </CommandGroup>
-                            </CommandList>
-                        </Command>
-                        </PopoverContent>
-                        </Popover>
-                    </div>
                 </div>
-                    
             </form>
+        </div>
+
+        {/* BRACKETING & TEAMS SECTION */}
+        <div className='flex flex-col gap-6 border rounded-xl px-6 py-5 mx-auto w-full'>
+            <div className='flex flex-col gap-1'>
+                <p className='text-xl font-bold'>Teams & Bracketing</p>
+                <p className='text-muted-foreground text-sm'>Select your bracket format and participating teams to generate the structure.</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-3">
+                    <Label htmlFor="bracketing">Bracketing Format</Label>
+                    <Select
+                        value={formData.bracketing}
+                        onValueChange={(e) => {
+                            setFormData({ ...formData, bracketing: e })
+                        }}
+                    >
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select bracketing" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem value="single-elimination">Single Elimination</SelectItem>
+                                <SelectItem value="double-elimination">Double Elimination</SelectItem>
+                                <SelectItem value="round-robin">Round Robin</SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                    <Label htmlFor="teams" >
+                        Teams
+                        <span className="text-muted-foreground text-xs ml-2">Minimum of 2 teams</span>
+                    </Label>
+                    <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                    <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        className="w-full justify-between"
+                    >
+                        {selectedTeams.length > 0 ? `${selectedTeams.length} teams selected` : "Select teams..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                    <Command>
+                        <CommandInput placeholder="Search team..." className="h-9" />
+                        <CommandList>
+                        <CommandEmpty>No teams found.
+                            <Link to={`/TeamManagement/CreateTeam?sport=${sports?.find(s => s.sport_id === selectedSport)?.name}${selectedEvents ? `&event-id=${selectedEvents}`:''}`}className="text-blue-700 underline block mt-2">Create team now.</Link>
+                        </CommandEmpty>
+                        <CommandGroup>
+                            {teamsDisplay()?.map((team) => (
+                            <CommandItem
+                                key={team.team_id}
+                                value={team.team_id}
+                                onSelect={() => toggleTeam(team.team_id)}
+                            >
+                                {capitalizeFirstLetter(team.name)}
+                                
+                                <Check
+                                    className={cn(
+                                    "ml-auto h-4 w-4",
+                                    selectedTeams.includes(team.team_id) ? "opacity-100" : "opacity-0"
+                                    )}
+                                />
+                            </CommandItem>
+                            ))}
+                        </CommandGroup>
+                        </CommandList>
+                    </Command>
+                    </PopoverContent>
+                    </Popover>
+                </div>
+            </div>
+
+            {/* LIVE PREVIEW BOX */}
+            <div className="mt-8">
+               <h3 className="text-lg font-semibold mb-4">Bracket Preview</h3>
+               <TournamentBracketPreview 
+                  bracketingType={formData.bracketing} 
+                  matches={previewMatches} 
+                  teams={teams}
+               />
+            </div>
         </div>
          
         

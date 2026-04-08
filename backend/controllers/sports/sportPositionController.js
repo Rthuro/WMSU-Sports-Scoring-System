@@ -1,92 +1,32 @@
-import { sql } from "../../config/db.js";
+import * as sportPositionRepo from "../../repositories/sports/sportPositionRepo.js";
+import { AppError } from "../../middleware/errorHandler.js";
 
-
-export const getSportPositions = async (req, res) => {
-    const { sportId } = req.params;
-
+export const getSportPositions = async (req, res, next) => {
     try {
-        const positions = await sql `
-            SELECT * FROM sports_position 
-            WHERE sport_id = ${sportId}
-        `
-        console.log("positions: ", positions)
-        res.status(200).json({ success: true, data: positions})
-    } catch (error) {
-        console.log("Error fetching positions: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" })
-    }
+        const positions = await sportPositionRepo.findBySport(req.params.sportId);
+        res.status(200).json({ success: true, data: positions });
+    } catch (error) { next(error); }
 };
 
-export const createSportPosition = async (req, res) => {
-    const { sportId, position_name } = req.body;
-
-    if(!sportId || !position_name ){
-        return res.status(400).json({ success:false, message: "Enter all required fields" })
-    }
-
+export const createSportPosition = async (req, res, next) => {
     try {
-        const position = await sql `
-            INSERT INTO sports_position ( sport_id, position_name) 
-            VALUES ( ${sportId}, ${position_name})
-            RETURNING *
-        `
-        console.log("New sport position added successfully");
-        res.status(201).json({ success: true, data: position[0]}); //it returns array
-
-    } catch (error) {
-        console.log("Error creating a sport position: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" })
-    }
-
+        const position = await sportPositionRepo.create(req.body);
+        res.status(201).json({ success: true, data: position });
+    } catch (error) { next(error); }
 };
 
-export const updateSportPosition = async (req, res) => {
-    const { id } = req.params;
-    const { position_name } = req.body;
-    
-
+export const updateSportPosition = async (req, res, next) => {
     try {
-        const updatePosition = await sql `
-            UPDATE sports_position 
-            SET position_name = ${position_name}
-            WHERE id = ${id}
-            RETURNING *
-        `
-
-        if(updatePosition.length === 0){
-            return res.status(404).json({ success: false, message: "sport position not found"});
-        }
-
-        console.log("sport position updated successfully");
-        res.status(200).json({ success: true, data: updatePosition[0]});
-
-    } catch (error) {
-        console.log("Error updating an sport position: ", error);
-        console.log("BODY:", req.body);
-        res.status(500).json({ success: false, error: "Internal Server Error" })
-    }
-    
+        const position = await sportPositionRepo.update(req.params.id, req.body);
+        if (!position) throw new AppError("Sport position not found", 404);
+        res.status(200).json({ success: true, data: position });
+    } catch (error) { next(error); }
 };
 
-export const deleteSportPosition = async (req, res) => {
-    const { id } = req.params;
-
+export const deleteSportPosition = async (req, res, next) => {
     try {
-        const deleteSportPosition = await sql `
-            DELETE FROM sports_position WHERE id = ${id}
-            RETURNING *
-        `
-
-        if(deleteSportPosition.length === 0){
-            return res.status(404).json({ success: false, message: "sport position not found"});
-        }
-
-        console.log("sport position deleted successfully");
-        res.status(200).json({ success: true, data: deleteSportPosition[0]});
-
-    } catch (error) {
-        console.log("Error deleting a sport position: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" })
-    }
-
+        const position = await sportPositionRepo.remove(req.params.id);
+        if (!position) throw new AppError("Sport position not found", 404);
+        res.status(200).json({ success: true, data: position });
+    } catch (error) { next(error); }
 };

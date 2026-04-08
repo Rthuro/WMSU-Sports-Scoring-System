@@ -12,10 +12,14 @@ export async function initTeamsTable() {
         short_name VARCHAR(50),
         banner_image TEXT,
         is_active BOOLEAN DEFAULT TRUE,
+        is_deleted BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_teams_sport_id ON teams(sport_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_teams_event_id ON teams(event_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_teams_department_id ON teams(department_id)`;
     console.log("✅ teams table initialized");
   } catch (error) {
     console.error("❌ Error initializing teams table:", error);

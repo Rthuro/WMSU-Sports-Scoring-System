@@ -1,104 +1,72 @@
-import { sql } from "../config/db.js";
+import * as teamRepo from "../repositories/teamRepo.js";
+import { AppError } from "../middleware/errorHandler.js";
 
-export const getTeams = async (req, res) => {
+export const getTeams = async (req, res, next) => {
     try {
-        const teams = await sql`
-            SELECT * FROM teams 
-            WHERE is_active = true
-            ORDER BY name
-        `;
+        const teams = await teamRepo.findAll();
         res.status(200).json({ success: true, data: teams });
     } catch (error) {
-        console.error("Error fetching teams: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
+        next(error);
     }
 };
 
-
-export const getTeamsBySport = async (req, res) => {
-    const { sportId } = req.params
+export const getTeamsBySport = async (req, res, next) => {
     try {
-        const teams = await sql`
-            SELECT * FROM teams 
-            WHERE is_active = true AND sport_id = ${sportId}
-            ORDER BY name
-        `;
+        const teams = await teamRepo.findBySport(req.params.sportId);
         res.status(200).json({ success: true, data: teams });
     } catch (error) {
-        console.error("Error fetching teams: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
+        next(error);
     }
 };
 
-// Create a new team
-export const createTeam = async (req, res) => {
-    const {event_id, department_id, sport_id,  name, short_name, banner_image } = req.body;
-
-    if (!sport_id || !name) {
-        return res.status(400).json({ success: false, message: "Enter all required fields" });
-    }
-
+export const createTeam = async (req, res, next) => {
     try {
-        const team = await sql`
-            INSERT INTO teams (event_id, department_id, sport_id, name, short_name, banner_image)
-            VALUES (${event_id}, ${department_id}, ${sport_id}, ${name}, ${short_name}, ${banner_image})
-            RETURNING *
-        `;
-        res.status(201).json({ success: true, data: team[0] });
-    } catch (error) {
-        console.error("Error creating a team: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
-    }
-};
-
-// Update a team
-export const updateTeam = async (req, res) => {
-    const { id } = req.params;
-    const { department_id, sport_id, name, short_name, banner_image, is_active } = req.body;
-
-    if (!department_id || !name) {
-        return res.status(400).json({ success: false, message: "Enter all required fields" });
-    }
-
-    try {
-        const updated = await sql`
-            UPDATE teams
-            SET department_id = ${department_id},
-                sport_id = ${sport_id},
-                name = ${name},
-                short_name = ${short_name},
-                banner_image = ${banner_image}
-                is_active = ${is_active},
-            WHERE team_id = ${id}
-            RETURNING *
-        `;
-
-        if (updated.length === 0) {
-            return res.status(404).json({ success: false, message: "Team not found" });
+        // Use transactional method that also assigns players
+        const hasPlayers = req.body.players && req.body.players.length > 0;
+        let team;
+        if (hasPlayers) {
+            team = await teamRepo.createWithPlayers(req.body);
+        } else {
+            team = await teamRepo.create(req.body);
         }
-
-        res.status(200).json({ success: true, data: updated[0] });
+        res.status(201).json({ success: true, data: team });
     } catch (error) {
-        console.error("Error updating team: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
+        next(error);
     }
 };
 
-// Delete a team
-export const deleteTeam = async (req, res) => {
-    const { id } = req.params;
+export const updateTeam = async (req, res, next) => {
     try {
-        const deleted = await sql`
-            DELETE FROM teams WHERE team_id = ${id} RETURNING *
-        `;
-        if (deleted.length === 0) {
-            return res.status(404).json({ success: false, message: "Team not found" });
+        const team = await teamRepo.update(req.params.id, req.body);
+        if (!team) {
+            throw new AppError("Team not found", 404);
         }
+        res.status(200).json({ success: true, data: team });
+    } catch (error) {
+        next(error);
+    }
+};
 
+export const deleteTeam = async (req, res, next) => {
+    try {
+        const team = await teamRepo.softDelete(req.params.id);
+        if (!team) {
+            throw new AppError("Team not found", 404);
+        }
         res.status(200).json({ success: true, message: "Team deleted successfully" });
     } catch (error) {
-        console.error("Error deleting team: ", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
+        next(error);
     }
 };
-               
+
+export const getTeamProfile = async (req, res, next) => {
+    try {
+        const profile = await teamRepo.findProfileById(req.params.id);
+        if (!profile) {
+            throw new AppError("Team profile not found", 404);
+        }
+        res.status(200).json({ success: true, data: profile });
+    } catch (error) {
+        next(error);
+    }
+};
