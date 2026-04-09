@@ -51,11 +51,11 @@ export async function createWithParticipants(data) {
 }
 
 export async function findAll() {
-  return await sql`SELECT * FROM matches WHERE is_deleted = false ORDER BY match_date DESC`;
+  return await sql`SELECT * FROM matches ORDER BY match_date DESC`;
 }
 
 export async function findById(matchId) {
-  const result = await sql`SELECT * FROM matches WHERE match_id = ${matchId} AND is_deleted = false`;
+  const result = await sql`SELECT * FROM matches WHERE match_id = ${matchId}`;
   return result[0] || null;
 }
 

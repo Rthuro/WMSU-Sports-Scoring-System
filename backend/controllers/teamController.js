@@ -61,7 +61,7 @@ export const deleteTeam = async (req, res, next) => {
 
 export const getTeamProfile = async (req, res, next) => {
     try {
-        const profile = await teamRepo.findProfileById(req.params.id);
+        const profile = await teamRepo.findProfileById(req.params.type, req.params.id);
         if (!profile) {
             throw new AppError("Team profile not found", 404);
         }

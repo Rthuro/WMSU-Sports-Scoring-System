@@ -7,20 +7,26 @@ export async function initMatchesTable() {
       match_id TEXT PRIMARY KEY,
       sport_id INT REFERENCES sports(sport_id) ON DELETE CASCADE,
       match_name VARCHAR(255),
-      match_date date,
+      date Date,
       start_time TIMESTAMP,
       end_time TIMESTAMP,
       location VARCHAR(255),
       is_team BOOLEAN DEFAULT TRUE,
       team_a_id INT REFERENCES teams(team_id),
       team_b_id INT REFERENCES teams(team_id),
+      winner_id INT REFERENCES teams(team_id) DEFAULT NULL,
       is_finished BOOLEAN DEFAULT FALSE,
-      is_deleted BOOLEAN DEFAULT FALSE,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
     await sql`CREATE INDEX IF NOT EXISTS idx_matches_sport_id ON matches(sport_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_matches_team_a_id ON matches(team_a_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_matches_team_b_id ON matches(team_b_id)`;
+    await sql`ALTER TABLE matches ADD COLUMN IF NOT EXISTS winner_id INT REFERENCES teams(team_id) DEFAULT NULL`;
+    await sql`ALTER TABLE matches ADD COLUMN IF NOT EXISTS date Date`;
+    await sql`ALTER TABLE matches DROP COLUMN IF EXISTS is_deleted`;
+    await sql`ALTER TABLE matches DROP COLUMN IF EXISTS match_date`;
     console.log("✅ matches table initialized");
   } catch (error) {
     console.error("❌ Error initializing matches table:", error);

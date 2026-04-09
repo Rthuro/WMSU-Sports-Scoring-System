@@ -27,6 +27,7 @@ import eventRoutes from "./routes/eventRoutes.js"
 import sportRoutes from "./routes/sportRoutes.js"
 import playerRoutes from "./routes/playerRoutes.js";
 import teamRoutes from "./routes/teamRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 
 // Sports related routes
 import penaltyRoutes from "./routes/sports/penaltyRoutes.js";
@@ -79,6 +80,7 @@ app.use("/api/sports", sportRoutes )
 app.use("/api/match", matchRoutes )
 app.use("/api/players", playerRoutes )
 app.use("/api/teams", teamRoutes ) 
+app.use("/api/upload", uploadRoutes ) 
 
 // Sports related routes
 app.use("/api/penalties", penaltyRoutes) 

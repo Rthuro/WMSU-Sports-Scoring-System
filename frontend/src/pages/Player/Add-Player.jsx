@@ -23,6 +23,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ImageUpload } from "@/components/custom/ImageUpload";
 
 export function AddPlayer(){
     const { sport } = useParams();
@@ -161,13 +162,13 @@ export function AddPlayer(){
                                 onChange={(e) => setFormData({ ...formData, student_id: e.target.value })}
                             />
                         </div>
-                        <div className="flex flex-col gap-2 ">
-                            <Label htmlFor="year">Photo</Label>
-                            <Input id="photo" type="file"
-                            accept="image/*"
-                                value={formData.photo}
-                                onChange={(e) => setFormData({ ...formData, photo: e.target.files[0] })}
-                            />
+                        <div className="flex flex-col gap-2 col-span-2">
+                             <ImageUpload
+                                label="Player Photo"
+                                folder="players"
+                                defaultImage={formData.photo}
+                                onUploadSuccess={(url) => setFormData({ ...formData, photo: url })}
+                             />
                         </div>
                     </div>
                 </div>

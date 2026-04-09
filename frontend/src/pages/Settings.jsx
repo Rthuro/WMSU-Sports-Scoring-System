@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { capitalizeFirstLetter } from '@/lib/helpers';
 import { useEffect } from 'react';
+import { ImageUpload } from '@/components/custom/ImageUpload';
 
 export function Settings () {
     const { formData, setFormData, addDepartment, departments, fetchDepartments, deleteDepartment } = useDepartmentStore();
@@ -68,13 +69,12 @@ export function Settings () {
                                 />
                             </div>
                             
-                            <div className="grid gap-3">
-                                <Label htmlFor="logo">Logo</Label>
-                                <Input id="logo" type="file"
-                                name="logo" accept="image/*"
-                                value={formData?.logo}
-                                onChange={(e) => setFormData({ ...formData, logo: e.target.files[0] })}
-                                placeholder="Upload logo image"
+                            <div className="grid gap-3 col-span-2">
+                                <ImageUpload
+                                    label="Department Logo"
+                                    folder="departments"
+                                    defaultImage={formData.logo}
+                                    onUploadSuccess={(url) => setFormData({ ...formData, logo: url })}
                                 />
                             </div>
                         </form>

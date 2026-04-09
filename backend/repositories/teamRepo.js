@@ -79,7 +79,7 @@ export async function softDelete(id) {
   return result[0] || null;
 }
 
-export async function findProfileById(id) {
+export async function findProfileById(type, id) {
   const [team] = await sql`
     SELECT 
       t.*, 
@@ -90,7 +90,7 @@ export async function findProfileById(id) {
     LEFT JOIN events e ON t.event_id = e.event_id
     LEFT JOIN departments d ON t.department_id = d.department_id
     LEFT JOIN sports s ON t.sport_id = s.sport_id
-    WHERE t.team_id = ${id} AND t.is_deleted = false
+    WHERE t.team_id = ${id}
   `;
 
   if (!team) return null;
@@ -114,7 +114,7 @@ export async function findProfileById(id) {
   `;
 
   // 3. Matches involving this team
-  const matches = await sql`
+  const matches = type == 'tournament' ? await sql`
     SELECT tm.*, tr.name AS tournament_name, tr.bracketing,
       ta.name AS team_a_name, tb.name AS team_b_name
     FROM tournament_matches tm
@@ -123,6 +123,15 @@ export async function findProfileById(id) {
     LEFT JOIN teams tb ON tm.team_b_id = tb.team_id
     WHERE tm.team_a_id = ${id} OR tm.team_b_id = ${id}
     ORDER BY tm.date DESC, tm.start_time DESC
+  ` : await sql`
+    SELECT m.*, s.name AS sport_name,
+      ta.name AS team_a_name, tb.name AS team_b_name
+    FROM matches m
+    JOIN sports s ON m.sport_id = s.sport_id
+    LEFT JOIN teams ta ON m.team_a_id = ta.team_id
+    LEFT JOIN teams tb ON m.team_b_id = tb.team_id
+    WHERE m.team_a_id = ${id} OR m.team_b_id = ${id}
+    ORDER BY m.date DESC, m.start_time DESC
   `;
 
   return {
@@ -132,3 +141,4 @@ export async function findProfileById(id) {
     matches
   };
 }
+

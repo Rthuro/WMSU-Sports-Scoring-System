@@ -11,8 +11,9 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Eye, ChevronDown } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-export function PlayerStats(){
+export function PlayerStats() {
     const { sports, stats } = useSportsStore();
     const { players } = usePlayerStore();
     const { playerStats } = usePlayerStatsStore();
@@ -28,7 +29,7 @@ export function PlayerStats(){
         if (selectedSport) {
             const sportStats = stats?.filter(stat => stat.sport_id === selectedSport);
             setSportTableHeaders(sportStats);
-        } 
+        }
     }, [selectedSport, stats]);
 
     // // Helper to sum all matchPoints for a player
@@ -43,7 +44,7 @@ export function PlayerStats(){
         const finishedMatches = () => {
             let matches = [];
             matchParticipants.forEach(mp => {
-                if(mp.team_id === playerTeam && mp.is_finished){
+                if (mp.team_id === playerTeam && mp.is_finished) {
                     matches.push(mp);
                 }
             });
@@ -54,16 +55,16 @@ export function PlayerStats(){
         let losses = 0;
 
         finishedMatches()?.forEach(match => {
-            if( match.is_winner){
-                wins+=1;
+            if (match.is_winner) {
+                wins += 1;
             } else {
-                losses+=1;
+                losses += 1;
             }
         });
 
-        if(stat === "wins"){
+        if (stat === "wins") {
             return wins;
-        } else if(stat === "losses"){
+        } else if (stat === "losses") {
             return losses;
         }
 
@@ -73,7 +74,7 @@ export function PlayerStats(){
     const getPlayerStats = (stats_id, playerId) => {
         let value = 0;
         playerStats.forEach(ps => {
-            if(ps.player_id === playerId && ps.stats_id === stats_id){
+            if (ps.player_id === playerId && ps.stats_id === stats_id) {
                 value += ps.value;
             }
         });
@@ -81,52 +82,52 @@ export function PlayerStats(){
         return value;
     }
     return <main className="flex flex-col gap-6">
-            <PageSync page="Player Stats" />
-            <h1 className=" text-xl font-semibold ">Player Stats</h1>
-            <section className="flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                     <Input placeholder="Search team by name" className="w-1/3"
-                        onChange={(e) => {
-                            setDisplayPlayers(players.filter(player =>
-                                player.first_name.toLowerCase().includes(e.target.value.toLowerCase()) ||
-                                player.last_name.toLowerCase().includes(e.target.value.toLowerCase())
-                            )); 
-                        } }
-                        />
-                    <Select
-                        value={selectedSport}
-                        onValueChange={(e) => {
-                            setSelectedSport(e);
-                            e === "all" ? setDisplayPlayers(players) : 
-                            setDisplayPlayers(players.filter(p => p.sport_id === e) );
-                        }}
-                    >
-                        <SelectTrigger className="">
-                            <SelectValue placeholder="Select sports" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectItem value="all">All sports</SelectItem>
-                                {sports.map(sport => (
-                                    <SelectItem key={sport.sport_id} value={sport.sport_id}>
-                                        {sport.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                   
-                </div>
-                <section className="border rounded-lg overflow-hidden">
+        <PageSync page="Player Stats" />
+        <h1 className=" text-xl font-semibold ">Player Stats</h1>
+        <section className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+                <Input placeholder="Search team by name" className="w-1/3"
+                    onChange={(e) => {
+                        setDisplayPlayers(players.filter(player =>
+                            player.first_name.toLowerCase().includes(e.target.value.toLowerCase()) ||
+                            player.last_name.toLowerCase().includes(e.target.value.toLowerCase())
+                        ));
+                    }}
+                />
+                <Select
+                    value={selectedSport}
+                    onValueChange={(e) => {
+                        setSelectedSport(e);
+                        e === "all" ? setDisplayPlayers(players) :
+                            setDisplayPlayers(players.filter(p => p.sport_id === e));
+                    }}
+                >
+                    <SelectTrigger className="">
+                        <SelectValue placeholder="Select sports" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectItem value="all">All sports</SelectItem>
+                            {sports.map(sport => (
+                                <SelectItem key={sport.sport_id} value={sport.sport_id}>
+                                    {sport.name}
+                                </SelectItem>
+                            ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+
+            </div>
+            <section className="border rounded-lg overflow-hidden">
                 <Table >
-                    <TableHeader  className="bg-muted">
+                    <TableHeader className="bg-muted">
                         <TableRow>
                             <TableHead>Player</TableHead>
                             <TableHead>Total points</TableHead>
                             <TableHead>Match wins</TableHead>
-                             <TableHead>Match losses</TableHead>
-                            
-                            { sportTableHeaders  && sportTableHeaders.map(header => (
+                            <TableHead>Match losses</TableHead>
+
+                            {sportTableHeaders && sportTableHeaders.map(header => (
                                 <TableHead key={header.stats_id}>
                                     {capitalizeFirstLetter(header.stats_name)}
                                 </TableHead>
@@ -138,7 +139,16 @@ export function PlayerStats(){
                         {displayPlayers?.length > 0 ? displayPlayers.map(player => (
                             <TableRow key={player.player_id}>
                                 <TableCell>
-                                    {player.first_name} {player.last_name}
+                                    <div className="flex items-center gap-2">
+                                        <Avatar className="w-8 h-8 rounded-lg">
+                                            <AvatarImage
+                                                src={player.photo}
+                                                alt={player.first_name}
+                                            />
+                                            <AvatarFallback>{player.first_name[0]}{player.last_name?.[0]}</AvatarFallback>
+                                        </Avatar>
+                                        {player.first_name} {player.last_name}
+                                    </div>
                                 </TableCell>
                                 <TableCell>
                                     {getTotalPoints(player.player_id)}
@@ -167,7 +177,7 @@ export function PlayerStats(){
                         )}
                     </TableBody>
                 </Table>
-                </section>
             </section>
+        </section>
     </main>
 }
