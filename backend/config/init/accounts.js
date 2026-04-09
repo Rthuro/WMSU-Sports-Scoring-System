@@ -18,6 +18,7 @@ export async function initAccountsTable(){
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         `;
+        await sql`ALTER TABLE accounts ADD COLUMN IF NOT EXISTS profile_image TEXT`;
 
         console.log("✅ accounts table initialized");
 

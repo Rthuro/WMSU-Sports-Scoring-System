@@ -23,10 +23,10 @@ export const useTeamStore = create((set, get) => ({
         }
     },
 
-    fetchTeamProfile: async (id) => {
+    fetchTeamProfile: async (type, id) => {
         set({ profileLoading: true, error: null, teamProfile: null });
         try {
-            const res = await axios.get(`${BASE_URL}/api/teams/${id}/profile`);
+            const res = await axios.get(`${BASE_URL}/api/teams/${type}/${id}/profile`);
             set({ teamProfile: res.data.data, profileLoading: false });
         } catch (error) {
             set({ error, profileLoading: false });
@@ -44,7 +44,7 @@ export const useTeamStore = create((set, get) => ({
     },
 
     formData: {
-        event_id: null, 
+        event_id: null,
         department_id: null,
         name: "",
         sport_id: null,
@@ -95,13 +95,35 @@ export const useTeamStore = create((set, get) => ({
         try {
             await axios.delete(`${BASE_URL}/api/teams/${id}`);
             toast.success("Team deleted successfully");
-            get().fetchTeams();
+            set((state) => ({
+                teams: state.teams.filter((t) => t.team_id !== id)
+            }));
             return true;
         } catch {
             toast.error("Failed to delete team");
-                return false;
+            return false;
         }
-    }, 
+    },
+
+    updateTeam: async (id, data) => {
+        set({ loading: true, error: null });
+        try {
+            const res = await axios.put(`${BASE_URL}/api/teams/${id}`, data);
+            toast.success("Team updated successfully");
+            set((state) => ({
+                teamProfile: state.teamProfile?.team_id === id
+                    ? { ...state.teamProfile, ...res.data.data }
+                    : state.teamProfile,
+                teams: state.teams.map((t) => t.team_id === id ? { ...t, ...res.data.data } : t),
+                loading: false
+            }));
+            return true;
+        } catch (error) {
+            set({ error, loading: false });
+            toast.error("Failed to update team");
+            return false;
+        }
+    },
 
 }));
 

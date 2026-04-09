@@ -4,7 +4,7 @@ import { createTeamSchema } from "../validators/teamSchema.js";
 import {
     getTeams,
     getTeamsBySport,
-    createTeam, 
+    createTeam,
     updateTeam,
     deleteTeam,
     getTeamProfile,
@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.get("/", getTeams);
 router.get("/:sportId", getTeamsBySport);
-router.get("/:id/profile", getTeamProfile);
+router.get("/:type/:id/profile", getTeamProfile);
 router.post("/", validate(createTeamSchema), createTeam);
 router.put("/:id", updateTeam);
 router.delete("/:id", deleteTeam);
