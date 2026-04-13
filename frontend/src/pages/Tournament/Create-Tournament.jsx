@@ -44,6 +44,7 @@ import { cn } from "@/lib/utils"
 import toast from "react-hot-toast";
 import { TournamentBracketPreview, generateMockBracket } from "@/components/custom/TournamentBracketPreview";
 import { ImageUpload } from "@/components/custom/ImageUpload";
+import { adminRoute } from "@/lib/helpers";
 
 export function CreateTournament() {
     const today = new Date().toISOString().split("T")[0];
@@ -330,7 +331,7 @@ export function CreateTournament() {
                                     <CommandInput placeholder="Search team..." className="h-9" />
                                     <CommandList>
                                         <CommandEmpty>No teams found.
-                                            <Link to={`/TeamManagement/CreateTeam?sport=${sports?.find(s => s.sport_id === selectedSport)?.name}${selectedEvents ? `&event-id=${selectedEvents}` : ''}`} className="text-blue-700 underline block mt-2">Create team now.</Link>
+                                            <Link to={adminRoute(`TeamManagement/CreateTeam?sport=${sports?.find(s => s.sport_id === selectedSport)?.name}${selectedEvents ? `&event-id=${selectedEvents}` : ''}`)} className="text-blue-700 underline block mt-2">Create team now.</Link>
                                         </CommandEmpty>
                                         <CommandGroup>
                                             {teamsDisplay()?.map((team) => (

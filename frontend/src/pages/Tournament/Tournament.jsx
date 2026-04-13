@@ -26,6 +26,7 @@ import { TournamentBracketPreview, generateMockBracket } from "@/components/cust
 import { MatchDetailsDialog } from "@/components/custom/MatchDetailsDialog";
 import { EditTournamentDialog } from "@/components/custom/EditTournamentDialog";
 import { TeamRecordDialog } from "@/components/custom/TeamRecordDialog";
+import { adminRoute } from "@/lib/helpers";
 
 export function Tournament() {
     const navigate = useNavigate();
@@ -131,7 +132,7 @@ export function Tournament() {
                 <p className="text-muted-foreground">{tournament.description}</p>
 
                 {tournamentEvent && (
-                    <Link to={`/ManageEvents/${tournament.event_id}`} className="flex items-center gap-2 ">
+                    <Link to={adminRoute(`ManageEvents/${tournament.event_id}`)} className="flex items-center gap-2 ">
                         <p className="text-muted-foreground">
                             Event:
                         </p>
@@ -151,7 +152,7 @@ export function Tournament() {
                 <p className=" mt-4 font-semibold">Teams Competing</p>
                 <div className="flex items-center gap-3 flex-wrap">
                     {tournamentTeams.map(team => (
-                        <Link to={`/ManageTeam/${team.team_id}`} key={team.tournament_team_id} className="flex items-center gap-2 mt-1 py-2 px-4 bg-red-50 text-red-800  border border-red-200 rounded-lg shadow-lg shadow-red-100 text-sm">
+                        <Link to={adminRoute(`ManageTeam/${team.team_id}`)} key={team.tournament_team_id} className="flex items-center gap-2 mt-1 py-2 px-4 bg-red-50 text-red-800  border border-red-200 rounded-lg shadow-lg shadow-red-100 text-sm">
                             <SquareArrowOutUpRight size="16" />
                             <p >
                                 {teams.find(t => t.team_id == team.team_id)?.name}
@@ -269,13 +270,13 @@ export function Tournament() {
                                     </p>
                                 </TableCell>
                                 <TableCell>
-                                    <Link to={`/ManageTeam/${match.team_a_id}`} className="flex items-center gap-2 text-blue-800">
+                                    <Link to={adminRoute(`ManageTeam/${match.team_a_id}`)} className="flex items-center gap-2 text-blue-800">
                                         <SquareArrowOutUpRight size="16" />
                                         {teams.find(t => t.team_id == match.team_a_id)?.short_name}
                                     </Link >
                                 </TableCell>
                                 <TableCell>
-                                    <Link to={`/ManageTeam/${match.team_b_id}`} className="flex items-center gap-2 text-blue-800">
+                                    <Link to={adminRoute(`ManageTeam/${match.team_b_id}`)} className="flex items-center gap-2 text-blue-800">
                                         <SquareArrowOutUpRight size="16" />
                                         {teams.find(t => t.team_id == match.team_b_id)?.short_name}
                                     </Link>

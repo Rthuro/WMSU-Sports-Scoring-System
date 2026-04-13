@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useEventStore } from "@/store/useEventStore";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useState } from "react";
+import { adminRoute } from "@/lib/helpers";
 
 export function ManageTournament() {
     const { tournaments, fetchTournaments } = useTournamentStore();
@@ -41,7 +42,7 @@ export function ManageTournament() {
                 </CardHeader>
                 <CardFooter className="flex-col flex gap-3">
                     <Separator />
-                    <Link to="/ManageTournament/CreateTournament" className="flex items-center justify-between w-full text-red text-sm">
+                    <Link to={adminRoute("ManageTournament/CreateTournament")} className="flex items-center justify-between w-full text-red text-sm">
                         <p>Create Tournament</p>
                         <ArrowRight className="size-4 " />
                     </Link>
@@ -80,7 +81,7 @@ export function ManageTournament() {
         <div className=" dark:*:data-[slot=card]:bg-card grid grid-cols-2 gap-4 *:data-[slot=card]:bg-gradient-to-t md:grid-cols-3">
             {sort_tournaments().length > 0 ? sort_tournaments().map(t => (
                 <Link key={t.tournament_id}
-                    to={`/ManageTournament/Tournament?t-id=${t.tournament_id}`}
+                    to={adminRoute(`ManageTournament/Tournament?t-id=${t.tournament_id}`)}
                     data-slot="card" className="flex items-start justify-between rounded-2xl py-3 px-5 border bg-white border-red-100 shadow-red-50 shadow-lg hover:bg-white/60 hover:shadow-red-100 cursor-pointer">
                     <div className="flex flex-col items-start justify-between ">
                         <p className="text-lg font-bold tabular-nums text-red">

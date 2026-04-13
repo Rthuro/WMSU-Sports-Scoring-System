@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { useSportsStore } from "@/store/useSportsStore";
 import { ImageUpload } from "@/components/custom/ImageUpload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { adminRoute } from "@/lib/helpers";
 
 export function TeamProfile() {
     const [searchParams] = useSearchParams();
@@ -200,7 +201,7 @@ export function TeamProfile() {
                                 <div key={t.tournament_id} className="min-w-[280px] bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all group shrink-0">
                                     <div className="flex justify-between items-start mb-3">
                                         <Badge variant="outline" className="bg-slate-50 text-[10px] text-slate-500 font-bold uppercase truncate max-w-[150px]">{t.event_name || 'Event'}</Badge>
-                                        <Link to={`/ManageTournament/Tournament?t-id=${t.tournament_id}`} className="text-slate-400 group-hover:text-emerald-500 transition-colors">
+                                        <Link to={adminRoute(`ManageTournament/Tournament?t-id=${t.tournament_id}`)} className="text-slate-400 group-hover:text-emerald-500 transition-colors">
                                             <Eye size={16} />
                                         </Link>
                                     </div>
@@ -285,7 +286,7 @@ export function TeamProfile() {
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-1">
-                                                    <Link to={`/PlayerStats?p-id=${p.player_id}`}>
+                                                    <Link to={adminRoute(`PlayerStats?p-id=${p.player_id}`)}>
                                                         <Button size="icon" className="h-8 w-8 text-blue-600 bg-blue-50 hover:bg-blue-100">
                                                             <Eye size={14} />
                                                         </Button>
@@ -382,7 +383,7 @@ export function TeamProfile() {
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    <Link to={`/Sports/${teamProfile.sport_name}/scoring?m-id=${match.match_id}`}>
+                                                    <Link to={adminRoute(`Sports/${teamProfile.sport_name}/scoring?m-id=${match.match_id}`)}>
                                                         <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 bg-blue-50">
                                                             <Eye size={14} />
                                                         </Button>

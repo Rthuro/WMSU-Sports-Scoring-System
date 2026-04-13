@@ -13,8 +13,10 @@ import {
 } from "@/components/ui/sidebar";
 import wmsu_logo from "../../assets/logo/Western_Mindanao_State_University.png"
 import { sidebarData } from "../../data/sidebar-data"
+import { useAuthStore } from "@/store/useAuthStore";
 
 export function AppSidebar(props) {
+  const { user } = useAuthStore();
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -37,7 +39,7 @@ export function AppSidebar(props) {
         <NavSecondary items={sidebarData.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={sidebarData.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );
