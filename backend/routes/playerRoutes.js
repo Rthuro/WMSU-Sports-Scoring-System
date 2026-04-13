@@ -1,6 +1,8 @@
 import express from "express";
 import {
     getPlayers,
+    getPlayerById,
+    getPlayerProfile,
     getPlayersBySport,
     createPlayer,
     updatePlayer,
@@ -11,6 +13,8 @@ import {
 const router = express.Router();
 
 router.get("/", getPlayers);
+router.get("/profile/:id", getPlayerProfile);
+router.get("/:id", getPlayerById);
 router.get("/:sportId", getPlayersBySport);
 router.get("/:firstName/:lastName", checkPlayerExists);
 router.post("/", createPlayer);

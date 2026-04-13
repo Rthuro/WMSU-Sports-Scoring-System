@@ -4,6 +4,13 @@ export async function findAll() {
   return await sql`SELECT * FROM accounts WHERE is_deleted = false ORDER BY created_at DESC`;
 }
 
+export async function findByEmail(email) {
+  const result = await sql`
+    SELECT * FROM accounts WHERE email = ${email} AND is_deleted = false
+  `;
+  return result[0] || null;
+}
+
 export async function create(data) {
   const result = await sql`
     INSERT INTO accounts (first_name, last_name, middle_name, role, email, password_hash)

@@ -16,10 +16,10 @@ export async function createWithParticipants(data) {
 
   try {
     const [match] = await txSql(
-      `INSERT INTO matches (match_id, sport_id, match_name, match_date, start_time, end_time, location, is_team, team_a_id, team_b_id)
+      `INSERT INTO matches (match_id, sport_id, match_name, date, start_time, end_time, location, is_team, team_a_id, team_b_id)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *`,
-      [data.match_id, data.sport_id, data.match_name, data.match_date, data.start_time, data.end_time, data.location, data.is_team, data.team_a_id, data.team_b_id]
+      [data.match_id, data.sport_id, data.match_name, data.date, data.start_time, data.end_time, data.location, data.is_team, data.team_a_id, data.team_b_id]
     );
 
     // Insert participants
@@ -51,7 +51,7 @@ export async function createWithParticipants(data) {
 }
 
 export async function findAll() {
-  return await sql`SELECT * FROM matches ORDER BY match_date DESC`;
+  return await sql`SELECT * FROM matches ORDER BY date DESC`;
 }
 
 export async function findById(matchId) {
@@ -60,13 +60,13 @@ export async function findById(matchId) {
 }
 
 export async function findBySport(sportId) {
-  return await sql`SELECT * FROM matches WHERE sport_id = ${sportId} AND is_deleted = false ORDER BY match_date DESC`;
+  return await sql`SELECT * FROM matches WHERE sport_id = ${sportId} AND is_deleted = false ORDER BY date DESC`;
 }
 
 export async function create(data) {
   const result = await sql`
-    INSERT INTO matches (match_id, sport_id, match_name, match_date, start_time, end_time, location, is_team, team_a_id, team_b_id)
-    VALUES (${data.match_id}, ${data.sport_id}, ${data.match_name}, ${data.match_date}, ${data.start_time}, ${data.end_time}, ${data.location}, ${data.is_team}, ${data.team_a_id}, ${data.team_b_id})
+    INSERT INTO matches (match_id, sport_id, match_name, date, start_time, end_time, location, is_team, team_a_id, team_b_id)
+    VALUES (${data.match_id}, ${data.sport_id}, ${data.match_name}, ${data.date}, ${data.start_time}, ${data.end_time}, ${data.location}, ${data.is_team}, ${data.team_a_id}, ${data.team_b_id})
     RETURNING *
   `;
   return result[0];
@@ -75,7 +75,7 @@ export async function create(data) {
 export async function update(matchId, data) {
   const result = await sql`
     UPDATE matches
-    SET match_name = ${data.match_name}, match_date = ${data.match_date},
+    SET match_name = ${data.match_name}, date = ${data.date},
         start_time = ${data.start_time}, end_time = ${data.end_time},
         location = ${data.location}, is_finished = ${data.is_finished},
         updated_at = CURRENT_TIMESTAMP
