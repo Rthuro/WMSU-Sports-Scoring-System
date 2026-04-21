@@ -40,13 +40,14 @@ export async function findProfileById(playerId) {
   `;
 
   const tournaments = await sql`
-    SELECT tr.*, tt.wins, tt.losses, e.name AS event_name, t.name AS team_name
-    FROM tournament_participants tp
-    JOIN tournaments tr ON tp.tournament_id = tr.tournament_id
-    LEFT JOIN tournament_tally tt ON tt.tournament_id = tr.tournament_id AND tt.team_id = tp.team_id
+    SELECT tr.*, tt.wins, tt.losses, e.name AS event_name, t.name AS team_name, s.name AS sport_name
+    FROM tournament_tally tt
+    JOIN tournaments tr ON tt.tournament_id = tr.tournament_id
     LEFT JOIN events e ON tr.event_id = e.event_id
-    LEFT JOIN teams t ON tp.team_id = t.team_id
-    WHERE tp.player_id = ${playerId}
+    LEFT JOIN sports s ON tr.sport_id = s.sport_id
+    LEFT JOIN teams t ON tt.team_id = t.team_id
+    LEFT JOIN player_teams pt ON pt.team_id = t.team_id AND pt.player_id = ${playerId}
+    WHERE pt.player_id = ${playerId}
   `;
 
   const matchParticipations = await sql`

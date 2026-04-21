@@ -286,14 +286,11 @@ export function TeamProfile() {
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-1">
-                                                    <Link to={adminRoute(`PlayerStats?p-id=${p.player_id}`)}>
+                                                    <Link to={adminRoute(`Player/?id=${p.player_id}`)}>
                                                         <Button size="icon" className="h-8 w-8 text-blue-600 bg-blue-50 hover:bg-blue-100">
                                                             <Eye size={14} />
                                                         </Button>
                                                     </Link>
-                                                    <Button variant="outline" size="icon" className="h-8 w-8 text-slate-900 bg-slate-50 hover:bg-slate-100">
-                                                        <Edit2 size={14} />
-                                                    </Button>
                                                 </div>
                                             </TableCell>
                                         </TableRow>

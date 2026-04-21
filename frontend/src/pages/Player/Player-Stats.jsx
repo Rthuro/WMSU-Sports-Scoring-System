@@ -4,7 +4,7 @@ import { useSportsStore } from "@/store/useSportsStore"
 import { useEffect, useState } from "react"
 import { usePlayerStore, usePlayerStatsStore } from "@/store/usePlayerStore"
 import { Input } from "@/components/ui/input"
-import { capitalizeFirstLetter } from "@/lib/helpers"
+import { adminRoute, capitalizeFirstLetter } from "@/lib/helpers"
 import { useMatchStore } from "@/store/useMatchStore"
 import { useTeamPlayersStore } from "@/store/useTeamStore"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Eye, ChevronDown } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Link } from "react-router-dom"
 
 export function PlayerStats() {
     const { sports, stats } = useSportsStore();
@@ -165,9 +166,9 @@ export function PlayerStats() {
                                     </TableCell>
                                 ))}
                                 <TableCell>
-                                    <Button variant="outline" size="icon">
+                                    <Link to={adminRoute(`Player?id=${player.player_id}`)} className="cursor-pointer">
                                         <Eye className="h-4 w-4" />
-                                    </Button>
+                                    </Link>
                                 </TableCell>
                             </TableRow>
                         )) : (

@@ -37,6 +37,7 @@ export const createMatch = async (req, res, next) => {
         const match = await matchRepo.createWithParticipants(req.body);
         res.status(201).json({ success: true, data: match });
     } catch (error) {
+        console.log(error);
         next(error);
     }
 };

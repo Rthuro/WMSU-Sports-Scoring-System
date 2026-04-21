@@ -11,11 +11,21 @@ export const useMatchStore = create((set, get) => ({
     matches: [],
     matchPoints: [],
     matchParticipants: [],
+    matchBySport: [],
 
     fetchMatches: async () => {
         try {
             const res = await axios.get(`${BASE_URL}/api/match`);
             set({ matches: res.data.data });
+        } catch (error) {
+            set({ error });
+        }
+    },
+
+    fetchMatchBySports: async (sportId) => {
+        try {
+            const res = await axios.get(`${BASE_URL}/api/match/sport/${sportId}`);
+            set({ matchBySport: res.data.data });
         } catch (error) {
             set({ error });
         }
@@ -40,16 +50,18 @@ export const useMatchStore = create((set, get) => ({
     },
 
     formData: {
-          match_id: "",
-          sport_id: null,
-          match_name: "",
-          match_date: "",
-          start_time: null,
-          end_time: null,
-          location: "",
-          is_team: true,
-          team_a_id: null,
-          team_b_id: null
+        match_id: "",
+        sport_id: null,
+        match_name: "",
+        date: null,
+        start_time: null,
+        end_time: null,
+        location: "",
+        is_team: true,
+        team_a_id: null,
+        team_b_id: null,
+        player_a_id: null,
+        player_b_id: null
     },
 
     setFormData: (formData) => set({ formData }),
@@ -58,13 +70,15 @@ export const useMatchStore = create((set, get) => ({
             match_id: "",
             sport_id: null,
             match_name: "",
-            match_date: "",
+            date: null,
             start_time: null,
             end_time: null,
             location: "",
             is_team: true,
             team_a_id: null,
-            team_b_id: null
+            team_b_id: null,
+            player_a_id: null,
+            player_b_id: null
         }
     }),
 
@@ -74,16 +88,16 @@ export const useMatchStore = create((set, get) => ({
             const formData = get().formData;
             const id = matchId();
             formData.match_id = id;
-            
+
             // Single POST — backend handles participant creation in a transaction
             const res = await axios.post(`${BASE_URL}/api/match`, formData);
             set((state) => ({
                 matches: [...state.matches, res.data.data]
             }));
-            
+
             toast.success("Match added successfully");
             get().resetFormData();
-            return res.data.data.match_id;
+            return res.data.data;
         } catch (error) {
             set({ error, loading: false });
             if (error.response?.data?.errors) {
@@ -130,7 +144,7 @@ export const useMatchPointsStore = create((set, get) => ({
                 allMatchPoints: [...state.allMatchPoints, res.data.data]
             }));
 
-            if(get().matchPoints[0]?.match_id === matchPoint.match_id) {
+            if (get().matchPoints[0]?.match_id === matchPoint.match_id) {
                 set((state) => ({
                     matchPoints: [...state.matchPoints, res.data.data]
                 }));
@@ -147,14 +161,14 @@ export const useMatchPointsStore = create((set, get) => ({
             set((state) => ({
                 allMatchPoints: [
                     ...state.allMatchPoints.filter(mp => mp.entry_id !== matchPoint.entry_id),
-                    res.data.data, 
+                    res.data.data,
                 ]
             }));
 
-            if(get().matchPoints[0]?.match_id === matchPoint.match_id) {
+            if (get().matchPoints[0]?.match_id === matchPoint.match_id) {
                 set((state) => ({
                     matchPoints: [...state.allMatchPoints.filter(mp => mp.entry_id !== matchPoint.entry_id),
-                    res.data.data, ]
+                    res.data.data,]
                 }));
             }
             toast.success("Match point updated successfully");
@@ -163,12 +177,14 @@ export const useMatchPointsStore = create((set, get) => ({
             toast.error("Failed to update match point");
         }
     },
-    resetMatchPoints: () => set({ matchPointsFormData: {
-        match_id: "",
-        team_id: null,
-        player_id: null,
-        set_number: 1,
-        value: 0,
-        time: null
-    } }),
+    resetMatchPoints: () => set({
+        matchPointsFormData: {
+            match_id: "",
+            team_id: null,
+            player_id: null,
+            set_number: 1,
+            value: 0,
+            time: null
+        }
+    }),
 }));

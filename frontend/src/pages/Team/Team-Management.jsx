@@ -157,7 +157,7 @@ export function TeamManagement() {
                                         </TableCell>
                                         <TableCell className="flex gap-2">
                                             <Button variant="outline" size="sm"
-                                                onClick={() => navigate(`/ManageTeam?type=${team.event_id ? 'tournament' : 'regular'}&id=${team.team_id}`)}
+                                                onClick={() => navigate(adminRoute(`ManageTeam?type=${team.event_id ? 'tournament' : 'regular'}&id=${team.team_id}`))}
                                             >
                                                 <Eye />
                                             </Button>

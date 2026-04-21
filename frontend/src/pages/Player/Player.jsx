@@ -20,6 +20,7 @@ import { ImageUpload } from "@/components/custom/ImageUpload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDepartmentStore } from "@/store/useDepartmentStore";
+import toast from "react-hot-toast";
 
 export function Player() {
     const [searchParams] = useSearchParams();
@@ -64,13 +65,23 @@ export function Player() {
         }
     }, [playerProfile]);
 
-    const handleEditSubmit = async (e) => {
+    const handleEditSubmit = (e) => {
         e.preventDefault();
-        const success = await editPlayer(id, editFormData);
-        if (success) {
-            setIsEditDialogOpen(false);
-            fetchPlayerProfile(id);
-        }
+        toast.promise(
+            editPlayer(id, editFormData),
+            {
+                loading: "Updating player...",
+                success: () => {
+                    setIsEditDialogOpen(false);
+                    fetchPlayerProfile(id);
+                    return "Player updated successfully!";
+                },
+                error: (error) => {
+                    setIsEditDialogOpen(false);
+                    return error.message;
+                }
+            }
+        );
     };
 
     const handleDeletePlayer = async () => {
@@ -110,14 +121,14 @@ export function Player() {
                                 Edit Information
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
+                        <DialogContent className="max-w-[70vw]">
                             <DialogHeader>
                                 <DialogTitle>Edit Player Information</DialogTitle>
                                 <DialogDescription>
                                     Update the player profile details here. Click save when you are done.
                                 </DialogDescription>
                             </DialogHeader>
-                            <form onSubmit={handleEditSubmit} className="grid gap-4 py-4">
+                            <form onSubmit={handleEditSubmit} className="grid gap-4 py-4 -mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="grid gap-2">
                                         <Label htmlFor="first_name">First Name</Label>
@@ -166,8 +177,8 @@ export function Player() {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectGroup>
-                                                    <SelectItem value="Male">Male</SelectItem>
-                                                    <SelectItem value="Female">Female</SelectItem>
+                                                    <SelectItem value="male">Male</SelectItem>
+                                                    <SelectItem value="female">Female</SelectItem>
                                                 </SelectGroup>
                                             </SelectContent>
                                         </Select>
@@ -238,7 +249,7 @@ export function Player() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-6 left-8 flex items-end gap-4">
                         <Avatar className="w-20 h-20 border-4 border-white shadow-lg">
-                            <AvatarImage src={playerProfile.photo} alt={playerProfile.first_name} />
+                            <AvatarImage src={playerProfile.photo} alt={playerProfile.first_name} className="object-cover" />
                             <AvatarFallback className="text-2xl bg-red text-white">
                                 {playerProfile.first_name?.[0]}{playerProfile.last_name?.[0]}
                             </AvatarFallback>

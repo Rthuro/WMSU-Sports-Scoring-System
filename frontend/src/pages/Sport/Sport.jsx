@@ -30,7 +30,7 @@ export function Sport() {
 
     const { tournaments, fetchTournaments } = useTournamentStore();
     const { events } = useEventStore();
-    const { matches, fetchMatches } = useMatchStore();
+    const { matchBySport, fetchMatchBySports } = useMatchStore();
     const { sports, fetchSports } = useSportsStore();
     const { players, fetchPlayersBySport } = usePlayerStore();
     const { teamsBySport, fetchTeamsBySport } = useTeamStore();
@@ -39,9 +39,8 @@ export function Sport() {
     useEffect(() => {
         fetchSports();
         fetchTournaments();
-        fetchMatches();
         fetchTournamentMatch();
-    }, [fetchTournaments, fetchMatches, fetchTournamentMatch, fetchSports]);
+    }, [fetchTournaments, fetchTournamentMatch, fetchSports]);
 
     const sportsData = sports.find(s => s.name.toLowerCase() === sport.toLowerCase());
 
@@ -49,13 +48,14 @@ export function Sport() {
         if (sportsData) {
             fetchTeamsBySport(sportsData.sport_id);
             fetchPlayersBySport(sportsData.sport_id);
+            fetchMatchBySports(sportsData?.sport_id);
         }
-    }, [sportsData, fetchTeamsBySport, fetchPlayersBySport]);
+    }, [sportsData, fetchTeamsBySport, fetchMatchBySports, fetchPlayersBySport]);
 
-    const matchList = matches?.filter(match => match?.sport_id == sportsData?.sport_id) || [];
     const tournamentMatchList = tournamentMatch?.filter(t => t.sport_id == sportsData?.sport_id) || [];
     const sportTournaments = tournaments?.filter(t => t.sport_id == sportsData?.sport_id) || [];
 
+    console.log(matchBySport)
 
     return <>
         <PageSync page="Sport" />
@@ -156,8 +156,8 @@ export function Sport() {
                     <TableHeader className="bg-muted">
                         <TableRow>
                             <TableHead> Match name</TableHead>
-                            <TableHead> Team A</TableHead>
-                            <TableHead> Team B</TableHead>
+                            <TableHead> Type </TableHead>
+                            <TableHead> Participants</TableHead>
                             <TableHead> Date created </TableHead>
                             <TableHead> Start time </TableHead>
                             <TableHead> End time </TableHead>
@@ -165,31 +165,49 @@ export function Sport() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {matchList?.map((match, idx) => (
+                        {matchBySport?.map((match, idx) => (
                             <TableRow key={idx}>
                                 <TableCell >
                                     <p className="text-wrap  max-w-[240px]">
-                                        {match.match_name}
+                                        {match.match_name || "--"}
                                     </p>
                                 </TableCell>
-                                <TableCell>
-                                    <Link to={adminRoute(`ManageTeam/${match.team_a_id}`)} className="flex items-center gap-2 text-blue-800">
-                                        <SquareArrowOutUpRight size="16" />
-                                        {teamsBySport.find(t => t.team_id == match.team_a_id)?.short_name}
-                                    </Link >
+                                <TableCell >
+                                    {match.is_team ? "Team" : "Individual"}
                                 </TableCell>
                                 <TableCell>
-                                    <Link to={adminRoute(`ManageTeam/${match.team_b_id}`)} className="flex items-center gap-2 text-blue-800">
-                                        <SquareArrowOutUpRight size="16" />
-                                        {teamsBySport.find(t => t.team_id == match.team_b_id)?.short_name}
-                                    </Link>
+                                    {match.is_team ? (
+                                        <div className="flex items-center gap-1">
+                                            <Link to={adminRoute(`ManageTeam?type=regular&id=${match.team_a_id}`)} className="flex items-center gap-2 text-blue-800">
+                                                <SquareArrowOutUpRight size="16" />
+                                                {match.team_a}
+                                            </Link >
+                                            <p>vs</p>
+                                            <Link to={adminRoute(`ManageTeam?type=regular&id=${match.team_b_id}`)} className="flex items-center gap-2 text-blue-800">
+                                                <SquareArrowOutUpRight size="16" />
+                                                {match.team_b}
+                                            </Link >
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-1">
+                                            <Link to={adminRoute(`Player?id=${match.player_a_id}`)} className="flex items-center gap-2 text-blue-800">
+                                                <SquareArrowOutUpRight size="16" />
+                                                {match.player_a}
+                                            </Link >
+                                            <p>vs</p>
+                                            <Link to={adminRoute(`Player?id=${match.player_b_id}`)} className="flex items-center gap-2 text-blue-800">
+                                                <SquareArrowOutUpRight size="16" />
+                                                {match.player_b}
+                                            </Link >
+                                        </div>
+                                    )}
                                 </TableCell>
                                 <TableCell>{formatDateToString(match.date) || "--"}</TableCell>
                                 <TableCell>{formatTime(match.start_time) || "--"}</TableCell>
                                 <TableCell>{formatTime(match.end_time) || "--"}</TableCell>
                                 <TableCell className="flex gap-2 my-3">
                                     <Button variant="outline" size="sm"
-                                        onClick={() => navigate(`/Sports/${sport}/scoring?m-id=${match.match_id}`)}
+                                        onClick={() => navigate(adminRoute(`Sports/${sport}/scoring?m-id=${match.match_id}`))}
                                     >
                                         <Eye />
                                     </Button>
@@ -204,7 +222,7 @@ export function Sport() {
                             </TableRow>
                         ))}
 
-                        {matchList?.length < 1 && (
+                        {matchBySport?.length < 1 && (
                             <TableRow >
                                 <TableCell colSpan={7} className="text-center">No match created</TableCell>
                             </TableRow>

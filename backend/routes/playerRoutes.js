@@ -6,7 +6,7 @@ import {
     getPlayersBySport,
     createPlayer,
     updatePlayer,
-    deletePlayer,   
+    deletePlayer,
     checkPlayerExists
 } from "../controllers/playerController.js";
 
@@ -15,7 +15,7 @@ const router = express.Router();
 router.get("/", getPlayers);
 router.get("/profile/:id", getPlayerProfile);
 router.get("/:id", getPlayerById);
-router.get("/:sportId", getPlayersBySport);
+router.get("/sport/:sportId", getPlayersBySport);
 router.get("/:firstName/:lastName", checkPlayerExists);
 router.post("/", createPlayer);
 router.put("/:id", updatePlayer);

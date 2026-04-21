@@ -66,7 +66,7 @@ export const usePlayerStore = create((set, get) => ({
     fetchPlayersBySport: async (sportId) => {
         set({ loading: true, error: null });
         try {
-            const res = await axios.get(`${BASE_URL}/api/players/${sportId}`);
+            const res = await axios.get(`${BASE_URL}/api/players/sport/${sportId}`);
             set({ players: res.data.data, loading: false });
         } catch (error) {
             set({ error, loading: false });
