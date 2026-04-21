@@ -24,10 +24,14 @@ import { Login } from "./pages/Public/Login"
 import { Signup } from "./pages/Public/Signup"
 import { PublicLayout } from "./PublicLayout";
 import { useAuthStore } from "./store/useAuthStore";
+import { PublicHome } from "./pages/Public/Home";
+import { PublicSports } from "./pages/Public/Sports";
+import { PublicEvents } from "./pages/Public/Events";
+import { PublicDepartments } from "./pages/Public/Departments";
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuthStore();
-  return isAuthenticated ? children : <Navigate to="/Login" replace />;
+  return isAuthenticated ? children : <Navigate to="/" replace />;
 }
 
 function PublicRoute({ children }) {
@@ -63,7 +67,11 @@ export default function App() {
       />
       <Router>
         <Routes>
-          <Route path="/" element={<PublicLayout />}>
+          <Route element={<PublicLayout />}>
+            <Route path='/' element={<PublicHome />}></Route>
+            <Route path='/Sports' element={<PublicSports />}></Route>
+            <Route path='/Events' element={<PublicEvents />}></Route>
+            <Route path='/Departments' element={<PublicDepartments />}></Route>
             <Route path='/Signup' element={<PublicRoute><Signup /></PublicRoute>}></Route>
             <Route path='/Login' element={<PublicRoute><Login /></PublicRoute>}></Route>
           </Route>

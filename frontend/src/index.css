@@ -15,7 +15,26 @@
    --color-red: #4F0003;
    --color-orange: #FEAE01;
    --color-darkred: #800000;
+   --color-custom-primary: #FEAE01;
+   --color-custom-secondary: #4F0003;
+   --animate-loopScroll: loop-scroll 80s linear infinite;
+
+   @keyframes loop-scroll {
+      0% {
+         transform: translateX(0%);
+      }
+
+      100% {
+         transform: translateX(calc(-150%));
+      }
+
+   }
 }
+
+html {
+   scroll-behavior: smooth;
+}
+
 
 @theme inline {
    --radius-sm: calc(var(--radius) - 4px);
