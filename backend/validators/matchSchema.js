@@ -17,8 +17,8 @@ export const createMatchSchema = z.object({
   is_team: z.boolean().default(true),
   team_a_id: z.number().int().positive().optional().nullable(),
   team_b_id: z.number().int().positive().optional().nullable(),
-  player_a_id: z.string().uuid().optional().nullable(),
-  player_b_id: z.string().uuid().optional().nullable(),
+  player_a_id: z.number().int().positive().optional().nullable(),
+  player_b_id: z.number().int().positive().optional().nullable(),
 
   // Nested participants (optional — for batch creation)
   participants: z.array(participantSchema).optional().default([]),
@@ -34,8 +34,8 @@ export const updateMatchSchema = z.object({
   is_finished: z.boolean().optional(),
   team_a_id: z.number().int().positive().optional().nullable(),
   team_b_id: z.number().int().positive().optional().nullable(),
-  player_a_id: z.string().uuid().optional().nullable(),
-  player_b_id: z.string().uuid().optional().nullable(),
+  player_a_id: z.number().int().positive().optional().nullable(),
+  player_b_id: z.number().int().positive().optional().nullable(),
 }).partial();
 
 // ── Match Points ─────────────────────────────────────

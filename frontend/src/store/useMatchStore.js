@@ -2,6 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 const matchId = () => crypto.randomUUID?.();
+import { useSportsStore } from "./useSportsStore";
 
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000" : import.meta.env.VITE_API_URL;
@@ -89,10 +90,34 @@ export const useMatchStore = create((set, get) => ({
             const id = matchId();
             formData.match_id = id;
 
-            // Single POST — backend handles participant creation in a transaction
+            // Fetch sport details to get default_sets
+            await useSportsStore.getState().fetchSportById(formData.sport_id);
+            const sport = useSportsStore.getState().sport;
+            const def_set = sport?.default_sets || 1;
+
             const res = await axios.post(`${BASE_URL}/api/match`, formData);
+            const createdMatch = res.data.data;
+
+            // Initialize match points for each set
+            const initial_match_point = async () => {
+                for (let i = 1; i <= def_set; i++) {
+                    await axios.post(`${BASE_URL}/api/match-points`, {
+                        match_id: createdMatch.match_id,
+                        team_a_id: createdMatch.team_a_id,
+                        team_b_id: createdMatch.team_b_id,
+                        player_a_id: createdMatch.player_a_id,
+                        player_b_id: createdMatch.player_b_id,
+                        set_number: i,
+                        a_score: 0,
+                        b_score: 0,
+                    });
+                }
+            }
+
+            await initial_match_point();
+
             set((state) => ({
-                matches: [...state.matches, res.data.data]
+                matches: [...state.matches, createdMatch]
             }));
 
             toast.success("Match added successfully");
@@ -103,8 +128,47 @@ export const useMatchStore = create((set, get) => ({
             if (error.response?.data?.errors) {
                 toast.error(error.response.data.errors[0]?.message || "Validation failed");
             } else {
-                toast.error("Failed to add match");
+                toast.error(error.response?.data?.message || "Failed to add match");
             }
+            return null;
+        }
+    },
+
+    updateMatch: async (matchId, data) => {
+        try {
+            const res = await axios.put(`${BASE_URL}/api/match/${matchId}`, data);
+            set((state) => ({
+                matches: state.matches.map((m) =>
+                    m.match_id === matchId ? { ...m, ...res.data.data } : m
+                )
+            }));
+            toast.success("Match updated successfully");
+            return res.data.data;
+        } catch (error) {
+            if (error.response?.data?.errors) {
+                toast.error(error.response.data.errors[0]?.message || "Validation failed");
+            } else {
+                toast.error(error.response?.data?.message || "Failed to update match");
+            }
+            return null;
+        }
+    },
+
+    deleteMatch: async (matchId) => {
+        try {
+            const res = await axios.delete(`${BASE_URL}/api/match/permanent/${matchId}`);
+            set((state) => ({
+                matches: state.matches.filter((m) => m.match_id !== matchId)
+            }));
+            toast.success("Match deleted successfully");
+            return res.data.data;
+        } catch (error) {
+            if (error.response?.data?.errors) {
+                toast.error(error.response.data.errors[0]?.message || "Validation failed");
+            } else {
+                toast.error(error.response?.data?.message || "Failed to delete match");
+            }
+            return null;
         }
     },
 }));
@@ -128,7 +192,6 @@ export const useMatchPointsStore = create((set, get) => ({
             set({ error });
         }
     },
-
     fetchMatchPoints: async (match_id) => {
         try {
             const res = await axios.get(`${BASE_URL}/api/match-points/match/${match_id}`);
@@ -167,7 +230,7 @@ export const useMatchPointsStore = create((set, get) => ({
 
             if (get().matchPoints[0]?.match_id === matchPoint.match_id) {
                 set((state) => ({
-                    matchPoints: [...state.allMatchPoints.filter(mp => mp.entry_id !== matchPoint.entry_id),
+                    matchPoints: [...state.matchPoints.filter(mp => mp.entry_id !== matchPoint.entry_id),
                     res.data.data,]
                 }));
             }

@@ -54,9 +54,21 @@ export const updateMatch = async (req, res, next) => {
     }
 };
 
-export const deleteMatch = async (req, res, next) => {
+export const softDeleteMatch = async (req, res, next) => {
     try {
         const match = await matchRepo.softDelete(req.params.match_id);
+        if (!match) {
+            throw new AppError("Match not found", 404);
+        }
+        res.status(200).json({ success: true, data: match });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const deleteMatch = async (req, res, next) => {
+    try {
+        const match = await matchRepo.deleteMatch(req.params.match_id);
         if (!match) {
             throw new AppError("Match not found", 404);
         }

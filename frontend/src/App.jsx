@@ -28,6 +28,7 @@ import { PublicHome } from "./pages/Public/Home";
 import { PublicSports } from "./pages/Public/Sports";
 import { PublicEvents } from "./pages/Public/Events";
 import { PublicDepartments } from "./pages/Public/Departments";
+import { ManageMatches } from "./pages/Match/Manage-Matches";
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuthStore();
@@ -84,6 +85,7 @@ export default function App() {
             <Route path='/Admin/Sports/:sport/AddPlayer' element={<AddPlayer />}></Route>
             <Route path='/Admin/Sports/AddPlayer' element={<AddPlayer />}></Route>
             <Route path='/Admin/Sports/:sport/scoring' element={<SportScoring />}></Route>
+            <Route path='/Admin/ManageMatches' element={<ManageMatches />}></Route>
             <Route path='/Admin/ManageEvents' element={<ManageEvents />}></Route>
             <Route path='/Admin/ManageEvents/:eventId' element={<Event />}></Route>
             <Route path='/Admin/ManageTournament' element={<ManageTournament />}></Route>

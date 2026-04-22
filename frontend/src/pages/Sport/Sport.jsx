@@ -255,69 +255,6 @@ export function Sport() {
                 <p className="text-muted-foreground mx-auto col-span-2 md:col-span-3">No tournaments available for this sport.</p>
             )}
         </div>
-        <div className="flex flex-col gap-3">
-            <p className=" text-xl font-semibold ">Match List</p>
-            <div className="border overflow-hidden rounded-lg">
-                <Table >
-                    <TableHeader className="bg-muted">
-                        <TableRow>
-                            <TableHead> Match name</TableHead>
-                            <TableHead> Team A</TableHead>
-                            <TableHead> Team B</TableHead>
-                            <TableHead> Date created </TableHead>
-                            <TableHead> Start time </TableHead>
-                            <TableHead> End time </TableHead>
-                            <TableHead>Actions </TableHead>
 
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {tournamentMatchList?.map((match, idx) => (
-                            <TableRow key={idx}>
-                                <TableCell >
-                                    <p className="text-wrap  max-w-[240px]">
-                                        {match.match_name}
-                                    </p>
-                                </TableCell>
-                                <TableCell>
-                                    <Link to={adminRoute(`ManageTeam/${match.team_a_id}`)} className="flex items-center gap-2 text-blue-800">
-                                        <SquareArrowOutUpRight size="16" />
-                                        {teamsBySport.find(t => t.team_id == match.team_a_id)?.short_name}
-                                    </Link >
-                                </TableCell>
-                                <TableCell>
-                                    <Link to={adminRoute(`ManageTeam/${match.team_b_id}`)} className="flex items-center gap-2 text-blue-800">
-                                        <SquareArrowOutUpRight size="16" />
-                                        {teamsBySport.find(t => t.team_id == match.team_b_id)?.short_name}
-                                    </Link>
-                                </TableCell>
-                                <TableCell>{formatDateToString(match.date) || "--"}</TableCell>
-                                <TableCell className="flex gap-2 my-3">
-                                    <Button variant="outline" size="sm"
-                                        onClick={() => navigate(`/Sports/${sport}/scoring?tm-id=${match.tournament_id}`)}
-                                    >
-                                        <Eye />
-                                    </Button>
-                                    <Button variant="outline" size="sm" className="mr-2" >
-                                        <Edit3 className=" h-4 w-4" />
-                                    </Button>
-                                    {/* <Link className="text-red-600 hover:underline" 
-                                    to={`/Sports/${match.sportName}/scoring?tm-id=${match.tournamentId}&m-id=${match.matchId}`}>
-                                        view
-                                    </Link> */}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-
-                        {tournamentMatchList?.length < 1 && (
-                            <TableRow >
-                                <TableCell colSpan={7} className="text-center">No match created</TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-
-        </div>
     </>
 }

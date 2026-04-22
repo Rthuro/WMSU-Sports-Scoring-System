@@ -38,6 +38,29 @@ export const useAuthStore = create(
         }
       },
 
+      googleLogin: async (firebaseToken) => {
+        set({ loading: true, error: null });
+        try {
+          const res = await axios.post(`${BASE_URL}/api/accounts/google`, {
+            token: firebaseToken
+          });
+          const { token: jwtToken, user } = res.data.data;
+          set({
+            user,
+            token: jwtToken,
+            isAuthenticated: true,
+            loading: false,
+          });
+          toast.success("Login successful!");
+          return true;
+        } catch (err) {
+          const message = err.response?.data?.message || "Google login failed";
+          set({ error: message, loading: false });
+          toast.error(message);
+          return false;
+        }
+      },
+
       signup: async (data) => {
         set({ loading: true, error: null });
         try {
@@ -53,6 +76,29 @@ export const useAuthStore = create(
           return true;
         } catch (error) {
           const message = error.response?.data?.message || "Signup failed";
+          set({ error: message, loading: false });
+          toast.error(message);
+          return false;
+        }
+      },
+
+      googleSignUp: async (firebaseToken) => {
+        set({ loading: true, error: null });
+        try {
+          const res = await axios.post(`${BASE_URL}/api/accounts/google`, {
+            token: firebaseToken
+          });
+          const { token: jwtToken, user } = res.data.data;
+          set({
+            user,
+            token: jwtToken,
+            isAuthenticated: true,
+            loading: false,
+          });
+          toast.success("Account created successfully!");
+          return true;
+        } catch (err) {
+          const message = err.response?.data?.message || "Google sign-up failed";
           set({ error: message, loading: false });
           toast.error(message);
           return false;

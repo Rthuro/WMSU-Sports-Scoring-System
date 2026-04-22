@@ -124,37 +124,21 @@ export function MatchDetails() {
   const handleAddMatch = async (e) => {
     e.preventDefault();
 
-    setFormData({
+    // Set sport_id and is_team synchronously before addMatch reads formData
+    const updatedFormData = {
       ...formData,
       sport_id: sportData?.sport_id || null,
       is_team: is_team,
-    });
+    };
+    setFormData(updatedFormData);
 
-
-    // const res = await addMatch(e);
-
-    // console.log("res", res);
-
-    // if (res.success) {
-    //   toast.success(res.message);
-    //   // navigate(adminRoute(`Sports/${sport}/scoring?m-id=${res.match_id}`));
-    // } else {
-    //   toast.error(res.message);
-    // }
-
-    toast.promise(
-      addMatch(e),
-      {
-        loading: "Adding match...",
-        success: (res) => {
-          // navigate(adminRoute(`Sports/${sport}/scoring?m-id=${res.match_id}`));
-          return "Match added successfully"
-        },
-        error: (error) => error.message
-      }
-    )
+    // addMatch handles its own toasts internally
+    const result = await addMatch(e);
+    if (result) {
+      navigate(adminRoute(`Sports/${sport}/scoring?m-id=${result.match_id}`));
+    }
   }
-  console.log("formData", formData);
+  // console.log("formData", formData);
 
 
 

@@ -2,6 +2,7 @@ import * as accountRepo from "../repositories/accountRepo.js";
 import { AppError } from "../middleware/errorHandler.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import admin from "../config/firebase.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
 
@@ -90,6 +91,73 @@ export const login = async (req, res, next) => {
             data: { token, user: userData }
         });
     } catch (error) {
+        next(error);
+    }
+};
+
+export const googleAuth = async (req, res, next) => {
+    try {
+        const { token } = req.body;
+
+        if (!token) {
+            throw new AppError("Firebase token is required", 400);
+        }
+
+        // Verify the Firebase ID token
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        const { email, name, uid } = decodedToken;
+
+        if (!email) {
+            throw new AppError("Email not available from Google account", 400);
+        }
+
+        // Check if user already exists
+        let account = await accountRepo.findByEmail(email);
+
+        if (!account) {
+            // Create a new account for Google users
+            const nameParts = (name || "").split(" ");
+            const firstName = nameParts[0] || "";
+            const lastName = nameParts.slice(1).join(" ") || "";
+
+            // Generate a random password hash for Google users (they won't use password login)
+            const randomPassword = await bcrypt.hash(uid + Date.now(), 10);
+
+            account = await accountRepo.create({
+                firstName,
+                lastName,
+                middleName: "",
+                email,
+                passwordHash: randomPassword,
+                role: "admin"
+            });
+        }
+
+        const jwtToken = jwt.sign(
+            { accountId: account.account_id, email: account.email, role: account.role },
+            JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        const userData = {
+            account_id: account.account_id,
+            first_name: account.first_name,
+            last_name: account.last_name,
+            email: account.email,
+            role: account.role
+        };
+
+        res.status(200).json({
+            success: true,
+            data: { token: jwtToken, user: userData }
+        });
+    } catch (error) {
+        if (error.code === "auth/id-token-expired") {
+            return next(new AppError("Google token has expired", 401));
+        }
+        if (error.code === "auth/argument-error" || error.code === "auth/id-token-revoked") {
+            return next(new AppError("Invalid Google token", 401));
+        }
         next(error);
     }
 };

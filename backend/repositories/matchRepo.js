@@ -91,7 +91,7 @@ export async function update(matchId, data) {
         team_a_id = ${data.team_a_id}, team_b_id = ${data.team_b_id},
         player_a_id = ${data.player_a_id}, player_b_id = ${data.player_b_id},
         updated_at = CURRENT_TIMESTAMP
-    WHERE match_id = ${matchId} AND is_deleted = false
+    WHERE match_id = ${matchId}
     RETURNING *
   `;
   return result[0] || null;
@@ -103,5 +103,12 @@ export async function softDelete(matchId) {
     WHERE match_id = ${matchId}
     RETURNING *
   `;
+  return result[0] || null;
+}
+
+export async function deleteMatch(matchId) {
+  const result = await sql`
+    DELETE FROM matches WHERE match_id = ${matchId}
+    RETURNING *`;
   return result[0] || null;
 }
