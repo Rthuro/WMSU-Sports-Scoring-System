@@ -15,6 +15,7 @@ import { usePlayerStore } from "@/store/usePlayerStore";
 import { useEventStore } from "@/store/useEventStore";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { adminRoute } from "@/lib/helpers";
 
 export function TeamManagement() {
     const navigate = useNavigate();
@@ -52,7 +53,7 @@ export function TeamManagement() {
         <section className="flex flex-col gap-6 ">
             <PageSync page="Team Management" />
             <div className=" dark:*:data-[slot=card]:bg-card grid grid-cols-2 gap-3  @xl/main:grid-cols-2 @5xl/main:grid-cols-3 ">
-                <Link to={`/TeamManagement/CreateTeam`} >
+                <Link to={adminRoute(`TeamManagement/CreateTeam`)} >
                     <Card className="@container/card bg-white shadow-md border border-red-100 shadow-red-50 hover:shadow-lg cursor-pointer">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-3 tabular-nums ">
@@ -76,7 +77,7 @@ export function TeamManagement() {
                         </CardFooter>
                     </Card>
                 </Link>
-                <Link to={`/Sports/AddPlayer`} >
+                <Link to={adminRoute(`Sports/AddPlayer`)} >
                     <Card className="@container/card bg-white shadow-md border border-red-100 shadow-red-50  cursor-pointer">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-3 tabular-nums ">
@@ -156,7 +157,7 @@ export function TeamManagement() {
                                         </TableCell>
                                         <TableCell className="flex gap-2">
                                             <Button variant="outline" size="sm"
-                                                onClick={() => navigate(`/ManageTeam?type=${team.event_id ? 'tournament' : 'regular'}&id=${team.team_id}`)}
+                                                onClick={() => navigate(adminRoute(`ManageTeam?type=${team.event_id ? 'tournament' : 'regular'}&id=${team.team_id}`))}
                                             >
                                                 <Eye />
                                             </Button>

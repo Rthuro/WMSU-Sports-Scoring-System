@@ -1,8 +1,8 @@
 
 export function capitalizeFirstLetter(str) {
-        if (!str) return "";
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
 export function formatDateNumber(date) {
     if (!date) return "";
@@ -22,13 +22,35 @@ export function formatDateToString(dateString) {
     return `${monthName} ${day}, ${year}`;
 }
 
+export function formatDateForInput(dateString) {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+export function formatTimeForInput(dateString) {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+}
+
+export function combineDateAndTime(dateString, timeString) {
+    if (!dateString || !timeString) return null;
+    return `${dateString}T${timeString}:00`;
+}
+
 export function formatTime(dateString) {
     if (!dateString) return "";
     const options = { hour: '2-digit', minute: '2-digit', hour12: true };
     return new Date(dateString).toLocaleTimeString(undefined, options);
 }
 
-export function getTimeStringForDB (ms) {
+export function getTimeStringForDB(ms) {
     const minutes = String(Math.floor((ms % 3600000) / 60000)).padStart(2, "0");
     const seconds = String(Math.floor((ms % 60000) / 1000)).padStart(2, "0");
     const milliseconds = String(ms % 1000).padStart(3, "0");
@@ -38,7 +60,7 @@ export function getTimeStringForDB (ms) {
 
 export function getTimeInSeconds(timeString) {
     if (!timeString) return 0;
-    
+
     // Supports formats like "HH:MM:SS.mmm"
     const [hhmmss, ms = "0"] = timeString.split(".");
     const [hours, minutes, seconds] = hhmmss.split(":").map(Number);
@@ -49,4 +71,8 @@ export function getTimeInSeconds(timeString) {
         (seconds || 0) * 1000 +
         parseInt(ms.padEnd(3, "0"), 10)
     );
+}
+
+export function adminRoute(route) {
+    return `/Admin/${route}`;
 }

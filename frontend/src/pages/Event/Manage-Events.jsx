@@ -14,7 +14,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { formatDateNumber } from "@/lib/helpers";
 import sample_bg from "../../assets/sample.jpg";
 import { ImageUpload } from "@/components/custom/ImageUpload";
-
+import { adminRoute } from "@/lib/helpers";
 
 export function ManageEvents() {
     const today = new Date().toISOString().split("T")[0];
@@ -129,7 +129,7 @@ export function ManageEvents() {
             <div className="grid grid-cols-3 gap-4">
                 {events.length > 0 ? (
                     events.map((event) => (
-                        <Link to={`/ManageEvents/${event.event_id}`} key={event.event_id}>
+                        <Link to={adminRoute(`ManageEvents/${event.event_id}`)} key={event.event_id}>
                             <Card className="bg-white shadow border border-gray-100 hover:shadow-lg py-3">
                                 <CardHeader className="px-3">
                                     <CardTitle className="flex flex-col gap-2">

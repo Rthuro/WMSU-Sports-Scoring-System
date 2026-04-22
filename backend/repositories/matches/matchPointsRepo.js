@@ -5,7 +5,7 @@ export async function findAll() {
 }
 
 export async function findByMatch(matchId) {
-  return await sql`SELECT * FROM match_points WHERE match_id = ${matchId} ORDER BY set_number DESC, time DESC`;
+  return await sql`SELECT * FROM match_points WHERE match_id = ${matchId} ORDER BY set_number DESC`;
 }
 
 export async function create(data) {

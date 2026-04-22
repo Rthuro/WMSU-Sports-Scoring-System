@@ -7,22 +7,24 @@ import {
   IconListDetails,
   IconSettings,
   IconUsers,
+  IconBrandAsana
 } from "@tabler/icons-react";
 import avatar from "../assets/avatar/avatar.jpeg"
 
 export const sidebarData = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: avatar,
-  },
   navMain: [
     {
       title: "Home",
       url: "#",
       icon: IconDashboard,
-      link: ""
-    }, 
+      link: "Dashboard"
+    },
+    {
+      title: "Manage Matches",
+      url: "#",
+      icon: IconBrandAsana,
+      link: "ManageMatches"
+    },
     {
       title: "Manage Events",
       url: "#",
@@ -33,7 +35,7 @@ export const sidebarData = {
       title: "Manage Tournament",
       url: "#",
       icon: IconListDetails,
-      link:"ManageTournament"
+      link: "ManageTournament"
     },
     {
       title: "Sports",
@@ -51,7 +53,7 @@ export const sidebarData = {
       title: "Team Management",
       url: "#",
       icon: IconUsers,
-      link:"TeamManagement"
+      link: "TeamManagement"
     },
   ],
 
@@ -60,7 +62,7 @@ export const sidebarData = {
       title: "Settings",
       url: "#",
       icon: IconSettings,
-      link:"Settings"
+      link: "Settings"
     },
     {
       title: "Get Help",

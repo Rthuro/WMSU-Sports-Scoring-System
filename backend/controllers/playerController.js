@@ -10,6 +10,30 @@ export const getPlayers = async (req, res, next) => {
     }
 };
 
+export const getPlayerById = async (req, res, next) => {
+    try {
+        const player = await playerRepo.findById(req.params.id);
+        if (!player) {
+            throw new AppError("Player not found", 404);
+        }
+        res.status(200).json({ success: true, data: player });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getPlayerProfile = async (req, res, next) => {
+    try {
+        const profile = await playerRepo.findProfileById(req.params.id);
+        if (!profile) {
+            throw new AppError("Player profile not found", 404);
+        }
+        res.status(200).json({ success: true, data: profile });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const getPlayersBySport = async (req, res, next) => {
     try {
         const players = await playerRepo.findBySport(req.params.sportId);

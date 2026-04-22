@@ -6,8 +6,10 @@ const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000
 
 export const usePlayerStore = create((set, get) => ({
     players: [],
+    playerProfile: null,
     loading: false,
     error: null,
+    profileLoading: false,
 
     formData: {
         sport_id: "",
@@ -41,10 +43,30 @@ export const usePlayerStore = create((set, get) => ({
         }
     },
 
+    fetchPlayerProfile: async (id) => {
+        set({ profileLoading: true, error: null, playerProfile: null });
+        try {
+            const res = await axios.get(`${BASE_URL}/api/players/profile/${id}`);
+            set({ playerProfile: res.data.data, profileLoading: false });
+        } catch (error) {
+            set({ error, profileLoading: false });
+        }
+    },
+
+    fetchPlayerById: async (id) => {
+        set({ loading: true, error: null });
+        try {
+            const res = await axios.get(`${BASE_URL}/api/players/${id}`);
+            set({ players: res.data.data, loading: false });
+        } catch (error) {
+            set({ error, loading: false });
+        }
+    },
+
     fetchPlayersBySport: async (sportId) => {
         set({ loading: true, error: null });
         try {
-            const res = await axios.get(`${BASE_URL}/api/players/${sportId}`);
+            const res = await axios.get(`${BASE_URL}/api/players/sport/${sportId}`);
             set({ players: res.data.data, loading: false });
         } catch (error) {
             set({ error, loading: false });
@@ -72,29 +94,36 @@ export const usePlayerStore = create((set, get) => ({
         }
     },
 
-    editPlayer: async (id) => {
+    editPlayer: async (id, data) => {
         set({ loading: true, error: null });
         try {
-            const playerData = get().formData;
-            await axios.put(`${BASE_URL}/api/players/${id}`, playerData);
+            const res = await axios.put(`${BASE_URL}/api/players/${id}`, data);
             toast.success("Player updated successfully");
-            
+            set((state) => ({
+                playerProfile: state.playerProfile?.player_id === id
+                    ? { ...state.playerProfile, ...res.data.data }
+                    : state.playerProfile,
+                players: state.players.map((p) => p.player_id === id ? { ...p, ...res.data.data } : p),
+                loading: false
+            }));
+            return true;
         } catch (error) {
+            toast.error("Failed to update player");
             set({ error, loading: false });
+            return false;
         }
     },
 
-    removePlayer: async (e, id) => {
-        e.preventDefault();
+    removePlayer: async (id) => {
         set({ loading: true, error: null });
         try {
             await axios.delete(`${BASE_URL}/api/players/${id}`);
             set((state) => ({
-                players: state.players.filter((p) => p.id !== id),
+                players: state.players.filter((p) => p.player_id !== id),
+                playerProfile: null,
                 loading: false
             }));
             toast.success("Player deleted successfully");
-            get().fetchPlayers();
             return true;
         } catch (error) {
             toast.error("Failed to delete player");

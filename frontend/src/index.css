@@ -1,18 +1,40 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 @font-face {
-  font-family: Freshman;
-  src: url("/Freshman.ttf") format("truetype");
+   font-family: Freshman;
+   src: url("/Freshman.ttf") format("truetype");
 }
+
 @theme {
    --font-freshman: "Freshman", serif;
    --color-red: #4F0003;
    --color-orange: #FEAE01;
+   --color-darkred: #800000;
+   --color-custom-primary: #FEAE01;
+   --color-custom-secondary: #4F0003;
+   --animate-loopScroll: loop-scroll 80s linear infinite;
+
+   @keyframes loop-scroll {
+      0% {
+         transform: translateX(0%);
+      }
+
+      100% {
+         transform: translateX(calc(-150%));
+      }
+
+   }
 }
+
+html {
+   scroll-behavior: smooth;
+}
+
 
 @theme inline {
    --radius-sm: calc(var(--radius) - 4px);
@@ -53,7 +75,7 @@
 }
 
 :root {
-     font-family: "Inter", sans-serif;
+   font-family: "Inter", "Montserrat", sans-serif;
    --radius: 0.625rem;
    --background: oklch(1 0 0);
    --foreground: oklch(0.145 0 0);
@@ -61,7 +83,8 @@
    --card-foreground: oklch(0.145 0 0);
    --popover: oklch(1 0 0);
    --popover-foreground: oklch(0.145 0 0);
-   --primary: oklch(0.205 0 0);
+   /* --primary: oklch(0.205 0 0); */
+   --primary: #800000;
    --primary-foreground: oklch(0.985 0 0);
    --secondary: oklch(0.97 0 0);
    --secondary-foreground: oklch(0.205 0 0);
@@ -123,10 +146,11 @@
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+   * {
+      @apply border-border outline-ring/50;
    }
-  body {
-    @apply bg-background text-foreground;
+
+   body {
+      @apply bg-background text-foreground;
    }
 }
