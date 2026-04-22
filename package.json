@@ -1,10 +1,6 @@
 {
   "name": "wmsu-sports-event-scoring-system",
   "private": true,
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
@@ -123,8 +119,8 @@
     "xtend": "^4.0.2"
   },
   "scripts": {
-    "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
-    "install-all": "npm install"
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "install-all": "npm install --prefix backend && npm install --prefix frontend"
   },
   "repository": {
     "type": "git",
