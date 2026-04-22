@@ -19,6 +19,7 @@ import { useSportsStore } from "@/store/useSportsStore";
 import { ImageUpload } from "@/components/custom/ImageUpload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { adminRoute } from "@/lib/helpers";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from "@/components/ui/sheet";
 
 export function TeamProfile() {
     const [searchParams] = useSearchParams();
@@ -102,21 +103,21 @@ export function TeamProfile() {
                     </div>
 
                     <div className="absolute top-6 right-8">
-                        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                            <DialogTrigger asChild>
+                        <Sheet open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                            <SheetTrigger asChild>
                                 <Button variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-md">
                                     <Edit2 size={16} />
                                     Edit Information
                                 </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                                <DialogHeader>
-                                    <DialogTitle>Edit Team Information</DialogTitle>
-                                    <DialogDescription>
+                            </SheetTrigger>
+                            <SheetContent side="right" className="overflow-y-auto" >
+                                <SheetHeader>
+                                    <SheetTitle>Edit Team Information</SheetTitle>
+                                    <SheetDescription>
                                         Update the team profile details here. Click save when you're done.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <form onSubmit={handleEditSubmit} className="grid gap-4 py-4">
+                                    </SheetDescription>
+                                </SheetHeader>
+                                <form onSubmit={handleEditSubmit} className="grid gap-3 py-4 px-4">
                                     <div className="grid gap-2">
                                         <Label htmlFor="name">Team Name</Label>
                                         <Input
@@ -144,12 +145,12 @@ export function TeamProfile() {
                                         />
                                     </div>
                                 </form>
-                                <DialogFooter>
+                                <SheetFooter>
                                     <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
                                     <Button type="submit" onClick={handleEditSubmit} className="bg-red text-white hover:bg-red/90">Save Changes</Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
+                                </SheetFooter>
+                            </SheetContent>
+                        </Sheet>
                     </div>
                 </div>
                 <div className="px-8 py-6 flex flex-col gap-4">
