@@ -60,12 +60,14 @@ export function ManageMatches() {
 
         const result = await updateMatch(matchInfo.match_id, payload);
         if (result) {
-            setOpen(false);
+
             fetchMatches();
             fetchSports();
             fetchTeams();
             fetchPlayers();
         }
+        setOpen(false);
+        setOpenDialog(false);
         setLoading(false);
     };
 

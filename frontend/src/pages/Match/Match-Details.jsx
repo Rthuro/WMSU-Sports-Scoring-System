@@ -29,6 +29,7 @@ export function MatchDetails() {
   const { sports, fetchSports } = useSportsStore();
   const { players, fetchPlayersBySport } = usePlayerStore();
   const { teamsBySport, fetchTeamsBySport } = useTeamStore();
+  const [loader, setLoader] = useState(false);
 
   const [is_team, setIsTeam] = useState(true);
 
@@ -132,11 +133,13 @@ export function MatchDetails() {
     };
     setFormData(updatedFormData);
 
-    // addMatch handles its own toasts internally
+    setLoader(true);
     const result = await addMatch(e);
     if (result) {
       navigate(adminRoute(`Sports/${sport}/scoring?m-id=${result.match_id}`));
+      setLoader(false);
     }
+    setLoader(false);
   }
   // console.log("formData", formData);
 
@@ -148,7 +151,7 @@ export function MatchDetails() {
       <button onClick={() => navigate(-1)} className="cursor-pointer" >
         <ArrowLeft />
       </button>
-      <Button type="submit" form="createMatch" >Start Scoring</Button>
+      <Button type="submit" form="createMatch" disabled={loader} >{loader ? "Creating match..." : "Start Scoring"}</Button>
     </div>
     <div className='flex flex-col gap-3 border rounded-xl px-6 py-4 mx-auto max-w-[425px]'>
       <div className='flex flex-col gap-1'>
