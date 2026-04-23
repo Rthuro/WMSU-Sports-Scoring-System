@@ -108,7 +108,7 @@ export function PublicEvents() {
 
             <main className="w-full flex flex-col space-y-6">
                 <section className="flex flex-col space-y-3">
-                    <p className="w-fit font-freshman tracking-wider pb-2 border-b-4 border-primary text-secondary">WEDNESDAY 4 NOVEMBER 2025</p>
+                    <p className="w-fit font-freshman tracking-wider pb-2 border-b-4 border-primary text-custom-secondary">WEDNESDAY 4 NOVEMBER 2025</p>
 
                     {day_4.map(event => (
                         <div className="flex flex-col md:flex-row items-center justify-between border border-zinc-200 rounded-md md:rounded-2xl p-3 gap-3 md:gap-0">
@@ -131,21 +131,21 @@ export function PublicEvents() {
 
                             <div className=" flex flex-col items-center md:items-start justify-center space-y-2 w-full md:w-[30%]">
                                 <div className="flex items-center gap-2">
-                                    <p className="text-xs bg-amber-300 py-0.5 px-2 font-medium text-secondary w-fit  ">{event.status}</p>
-                                    <p className="font-semibold text-secondary text-lg">{events.find(e => e.event_id == event.event_id).event_name}</p>
+                                    <p className="text-xs bg-amber-300 py-0.5 px-2 font-medium text-custom-secondary w-fit  ">{event.status}</p>
+                                    <p className="font-semibold text-custom-secondary text-lg">{events.find(e => e.event_id == event.event_id).event_name}</p>
                                 </div>
 
                                 <p className="flex text-sm items-center">{event.start_time} - {event.end_time} </p>
                                 <p className="text-sm flex items-center "><Dot /> {event.location}</p>
                             </div>
 
-                            <Button className="bg-primary text-secondary w-[200px] md:w-fit">View</Button>
+                            <Button className="bg-custom-primary text-custom-secondary w-[200px] md:w-fit">View</Button>
                         </div>
                     ))}
                 </section>
 
                 <section className="flex flex-col space-y-3">
-                    <p className="w-fit font-freshman tracking-wider pb-2 border-b-4 border-primary text-secondary">THURSDAY 5 NOVEMBER 2025</p>
+                    <p className="w-fit font-freshman tracking-wider pb-2 border-b-4 border-primary text-custom-secondary">THURSDAY 5 NOVEMBER 2025</p>
 
                     {day_5.map(event => (
                         <div className="flex flex-col md:flex-row items-center justify-between border border-zinc-200 rounded-2xl p-3 gap-3 md:gap-0">
@@ -168,15 +168,15 @@ export function PublicEvents() {
 
                             <div className=" flex flex-col items-center md:items-start justify-center space-y-2 w-full md:w-[30%]">
                                 <div className="flex items-center gap-2">
-                                    <p className="text-xs bg-amber-300 py-0.5 px-2 font-medium text-secondary w-fit  ">{event.status}</p>
-                                    <p className="font-semibold text-secondary text-lg">{events.find(e => e.event_id == event.event_id).event_name}</p>
+                                    <p className="text-xs bg-amber-300 py-0.5 px-2 font-medium text-custom-secondary w-fit  ">{event.status}</p>
+                                    <p className="font-semibold text-custom-secondary text-lg">{events.find(e => e.event_id == event.event_id).event_name}</p>
                                 </div>
 
                                 <p className="flex text-sm items-center">{event.start_time} - {event.end_time} </p>
                                 <p className="text-sm flex items-center "><Dot /> {event.location}</p>
                             </div>
 
-                            <Button className="bg-primary text-secondary w-[200px] md:w-fit">View</Button>
+                            <Button className="bg-custom-primary text-custom-secondary w-[200px] md:w-fit">View</Button>
                         </div>
                     ))}
                 </section>
