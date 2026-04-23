@@ -11,8 +11,8 @@ import {
 const router = express.Router();
 
 router.get("/", getPlayerTeams);
-router.get("/:teamId", getPlayerTeamsByTeam);
-router.get("/:playerId/:teamId", checkPlayerTeamExists);
+router.get("/by-team/:teamId", getPlayerTeamsByTeam);
+router.get("/check/:playerId/:teamId", checkPlayerTeamExists);
 router.post("/", createPlayerTeam);
 router.put("/:id", updatePlayerTeam);
 router.delete("/:id", deletePlayerTeam);
