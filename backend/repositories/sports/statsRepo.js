@@ -10,14 +10,14 @@ export async function findBySport(sportId) {
 
 export async function create(data) {
   const result = await sql`
-    INSERT INTO stats (sport_id, stats_name, is_player_stat) VALUES (${data.sportId}, ${data.stats_name}, ${data.is_player_stat}) RETURNING *
+    INSERT INTO stats (sport_id, stats_name, is_player_stat) VALUES (${data.sport_id}, ${data.stats_name}, ${data.is_player_stat}) RETURNING *
   `;
   return result[0];
 }
 
 export async function update(id, data) {
   const result = await sql`
-    UPDATE stats SET stats_name = ${data.stats_name}, is_player_stat = ${data.is_player_stat} WHERE stats_id = ${id} RETURNING *
+    UPDATE stats SET stats_name = COALESCE(${data.stats_name}, stats_name) WHERE stats_id = ${id} RETURNING *
   `;
   return result[0] || null;
 }

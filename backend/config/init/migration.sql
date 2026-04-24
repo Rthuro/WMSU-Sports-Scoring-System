@@ -38,6 +38,12 @@ CREATE INDEX IF NOT EXISTS idx_player_penalties_match_id ON player_penalties(mat
 CREATE INDEX IF NOT EXISTS idx_player_stats_player_id ON player_stats(player_id);
 CREATE INDEX IF NOT EXISTS idx_player_stats_match_id ON player_stats(match_id);
 
+-- Add team_id to player_stats and player_penalties for team-scoped filtering
+ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS team_id INT REFERENCES teams(team_id) ON DELETE SET NULL;
+ALTER TABLE player_penalties ADD COLUMN IF NOT EXISTS team_id INT REFERENCES teams(team_id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_player_stats_team_id ON player_stats(team_id);
+CREATE INDEX IF NOT EXISTS idx_player_penalties_team_id ON player_penalties(team_id);
+
 -- Teams
 CREATE INDEX IF NOT EXISTS idx_teams_sport_id ON teams(sport_id);
 CREATE INDEX IF NOT EXISTS idx_teams_event_id ON teams(event_id);

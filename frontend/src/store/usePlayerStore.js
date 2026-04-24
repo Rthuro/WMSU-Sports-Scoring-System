@@ -238,3 +238,97 @@ export const usePlayerStatsStore = create((set, get) => ({
         }
     }
 }));
+
+export const usePlayerPenaltyStore = create((set, get) => ({
+    playerPenalties: [],
+    playerPenaltiesByMatch: [],
+    playerPenaltiesByMatchAndPlayer: [],
+    playerPenaltiesByPlayer: [],
+
+    fetchPlayerPenalties: async () => {
+        try {
+            const res = await axios.get(`${BASE_URL}/api/player-penalties`);
+            set({ playerPenalties: res.data.data });
+        } catch (error) {
+            set({ error, loading: false });
+        }
+    },
+
+    fetchPlayerPenaltiesByMatch: async (match_id) => {
+        try {
+            const res = await axios.get(`${BASE_URL}/api/player-penalties/match/${match_id}`);
+            set({ playerPenaltiesByMatch: res.data.data });
+        } catch (error) {
+            set({ error, loading: false });
+        }
+    },
+
+    fetchPlayerPenaltiesByPlayer: async (player_id) => {
+        try {
+            const res = await axios.get(`${BASE_URL}/api/player-penalties/player/${player_id}`);
+            set({ playerPenaltiesByPlayer: res.data.data });
+            return res.data.data;
+        } catch (error) {
+            set({ error, loading: false });
+        }
+    },
+
+    fetchPlayerPenaltiesByMatchAndPlayer: async (match_id, player_id) => {
+        try {
+            const res = await axios.get(`${BASE_URL}/api/player-penalties/match/${match_id}/player/${player_id}`);
+            set({ playerPenaltiesByMatchAndPlayer: res.data.data });
+            return res.data.data;
+        } catch (error) {
+            set({ error, loading: false });
+        }
+    },
+
+    addPlayerPenalties: async (data) => {
+        try {
+            const res = await axios.post(`${BASE_URL}/api/player-penalties`, data);
+            set((state) => ({
+                playerPenaltiesByMatchAndPlayer: [...state.playerPenaltiesByMatchAndPlayer, res.data.data]
+            }));
+            toast.success("Player penalties added successfully");
+            return true;
+        } catch (error) {
+            toast.error("Failed to add player penalties");
+            set({ error, loading: false });
+            return false;
+        }
+    },
+
+    updatePlayerPenalties: async (entry_id, data) => {
+        set({ loading: true, error: null });
+        try {
+            const res = await axios.put(`${BASE_URL}/api/player-penalties/${entry_id}`, data);
+            toast.success("Player penalties updated successfully");
+            set((state) => ({
+                playerPenaltiesByMatchAndPlayer: state.playerPenaltiesByMatchAndPlayer.map((p) => p.entry_id === entry_id ? { ...p, ...res.data.data } : p),
+                loading: false
+            }));
+            return true;
+        } catch (error) {
+            toast.error("Failed to update player penalties");
+            set({ error, loading: false });
+            return false;
+        }
+    },
+
+    deletePlayerPenalties: async (entry_id) => {
+        set({ loading: true, error: null });
+        try {
+            await axios.delete(`${BASE_URL}/api/player-penalties/${entry_id}`);
+            set((state) => ({
+                playerPenaltiesByMatchAndPlayer: state.playerPenaltiesByMatchAndPlayer.filter((p) => p.entry_id !== entry_id),
+                loading: false
+            }));
+            toast.success("Player penalties deleted successfully");
+            return true;
+        } catch (error) {
+            toast.error("Failed to delete player penalties");
+            set({ error, loading: false });
+            return false;
+        }
+    }
+}));
