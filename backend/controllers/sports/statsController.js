@@ -15,6 +15,14 @@ export const createStat = async (req, res, next) => {
     } catch (error) { next(error); }
 };
 
+export const getSportStatsBySportId = async (req, res, next) => {
+    try {
+        const stat = await statsRepo.findBySport(req.params.sport_id);
+        if (!stat) throw new AppError("Stat not found", 404);
+        res.status(200).json({ success: true, data: stat });
+    } catch (error) { next(error); }
+}
+
 export const updateStat = async (req, res, next) => {
     try {
         const stat = await statsRepo.update(req.params.id, req.body);
