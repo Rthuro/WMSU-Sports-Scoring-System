@@ -7,6 +7,13 @@ export const getPlayerStats = async (req, res, next) => {
     } catch (error) { next(error); }
 };
 
+export const getMultiplePlayerStats = async (req, res, next) => {
+    try {
+        const stats = await playerStatsRepo.findMultiple(req.params.player_ids);
+        res.status(200).json({ success: true, data: stats });
+    } catch (error) { next(error); }
+};
+
 export const getPlayerStatsByMatch = async (req, res, next) => {
     try {
         const stats = await playerStatsRepo.findByMatch(req.params.match_id);

@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 const matchId = () => crypto.randomUUID?.();
 import { useSportsStore } from "./useSportsStore";
-
+import { combineDateAndTime } from "@/lib/helpers";
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000" : import.meta.env.VITE_API_URL;
 
@@ -95,7 +95,13 @@ export const useMatchStore = create((set, get) => ({
             const sport = useSportsStore.getState().sport;
             const def_set = sport?.default_sets || 1;
 
-            const res = await axios.post(`${BASE_URL}/api/match`, formData);
+            const payload = {
+                ...formData,
+                start_time: combineDateAndTime(formData.date, formData.start_time),
+                end_time: combineDateAndTime(formData.date, formData.end_time)
+            };
+
+            const res = await axios.post(`${BASE_URL}/api/match`, payload);
             const createdMatch = res.data.data;
 
             // Initialize match points for each set

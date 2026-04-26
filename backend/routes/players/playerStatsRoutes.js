@@ -6,12 +6,14 @@ import {
     getPlayerStatsByMatchAndPlayer,
     createPlayerStats,
     updatePlayerStats,
-    deletePlayerStats
+    deletePlayerStats,
+    getMultiplePlayerStats
 } from "../../controllers/players/playerStatsController.js";
 
 const router = express.Router();
 
 router.get("/", getPlayerStats);
+router.get("/multiple/:player_ids", getMultiplePlayerStats);
 router.get("/match/:match_id", getPlayerStatsByMatch);
 router.get("/player/:player_id", getPlayerStatsByPlayer);
 router.get("/match/:match_id/player/:player_id", getPlayerStatsByMatchAndPlayer);

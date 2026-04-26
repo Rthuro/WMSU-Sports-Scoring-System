@@ -179,6 +179,15 @@ export const usePlayerStatsStore = create((set, get) => ({
         }
     },
 
+    fetchMultiplePlayerStats: async (player_ids) => {
+        try {
+            const res = await axios.get(`${BASE_URL}/api/player-stats/multiple/${player_ids}`);
+            return res.data.data;
+        } catch (error) {
+            set({ error, loading: false });
+        }
+    },
+
     fetchPlayerStatsByMatchAndPlayer: async (match_id, player_id) => {
         try {
             const res = await axios.get(`${BASE_URL}/api/player-stats/match/${match_id}/player/${player_id}`);

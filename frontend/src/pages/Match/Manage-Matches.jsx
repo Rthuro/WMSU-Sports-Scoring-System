@@ -74,7 +74,7 @@ export function ManageMatches() {
     // console.log("all match", matches)
     return (
         <div>
-            <PageSync page="Manage All Matches" />
+            <PageSync page="Manage Matches" />
             <div className="flex flex-col gap-3">
                 <div className="flex justify-between items-center">
                     <p className=" text-xl font-semibold ">Match List</p>

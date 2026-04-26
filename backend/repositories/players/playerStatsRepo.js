@@ -4,6 +4,21 @@ export async function findAll() {
   return await sql`SELECT * FROM player_stats`;
 }
 
+export async function findMultiple(playerIdsString) {
+  const playerIds = playerIdsString.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
+
+  if (playerIds.length === 0) return [];
+
+  return await sql`SELECT ps.*, CONCAT(p.first_name, ' ', p.last_name) AS player_name, s.*,t.name as team_name
+  FROM player_stats ps
+  JOIN stats s ON ps.stats_id = s.stats_id
+  JOIN players p ON ps.player_id = p.player_id
+  JOIN teams t ON ps.team_id = t.team_id
+  WHERE ps.player_id = ANY(${playerIds})`;
+}
+
+
+
 export async function findByMatch(matchId) {
   return await sql`SELECT ps.*, CONCAT(p.first_name, ' ', p.last_name) AS player_name, s.*
   FROM player_stats ps

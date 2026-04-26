@@ -43,7 +43,16 @@ export const createSport = async (req, res, next) => {
 
 export const updateSport = async (req, res, next) => {
     try {
-        const sport = await sportRepo.update(req.params.id, req.body);
+        const hasSubResources = req.body.set_rules?.length || req.body.scoring_points?.length ||
+            req.body.penalties?.length || req.body.stats?.length || req.body.positions?.length;
+
+        let sport;
+        if (hasSubResources) {
+            sport = await sportRepo.updateWithSubResources(req.params.id, req.body);
+        } else {
+            sport = await sportRepo.update(req.params.id, req.body);
+        }
+
         if (!sport) {
             throw new AppError("Sport not found", 404);
         }

@@ -298,5 +298,25 @@ export const useSportsStore = create((set, get) => ({
         }
     },
 
+    updateSportDetails: async (sportId, formData) => {
+        try {
+            const res = await axios.put(`${BASE_URL}/api/sports/${sportId}`, formData);
+            set((state) => ({
+                sports: state.sports.map((s) => s.sport_id === sportId ? res.data.data : s),
+                sport: res.data.data
+            }));
+            toast.success("Sport updated successfully");
+            return true;
+        } catch (error) {
+            console.log("Error updating sport", error);
+            if (error.response?.data?.errors) {
+                toast.error(error.response.data.errors[0]?.message || "Validation failed");
+            } else {
+                toast.error("Something went wrong");
+            }
+            return false;
+        }
+    },
+
 
 }));

@@ -4,6 +4,7 @@ import { Home } from "./pages/Home"
 import { Sports } from "./pages/Sport/Sports";
 import { Sport } from "./pages/Sport/Sport";
 import { CreateSport } from "./pages/Sport/Create-Sport";
+import { EditSport } from "./pages/Sport/Edit-Sport";
 import { AddPlayer } from "./pages/Player/Add-Player";
 import { ManageEvents } from "./pages/Event/Manage-Events";
 import { Event } from "./pages/Event/Event";
@@ -81,6 +82,7 @@ export default function App() {
             <Route path='/Admin/Dashboard' element={<Home />}></Route>
             <Route path='/Admin/Sports' element={<Sports />}></Route>
             <Route path='/Admin/Sports/CreateSport' element={<CreateSport />}></Route>
+            <Route path='/Admin/Sports/EditSport' element={<EditSport />}></Route>
             <Route path='/Admin/Sports/:sport' element={<Sport />}></Route>
             <Route path='/Admin/Sports/:sport/AddPlayer' element={<AddPlayer />}></Route>
             <Route path='/Admin/Sports/AddPlayer' element={<AddPlayer />}></Route>

@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useTournamentTallyStore } from "@/store/useTournamentStore2";
 import { EditMatchSheet } from "@/components/custom/EditMatchSheet";
 import { ScoreboardPlayerTable } from "@/components/custom/ScoreboardPlayerTable";
+import { EditableValueInput } from "@/components/custom/EditableValueInput";
 
 function useSaveMatchPoint() {
     const { addMatchPoint, updateMatchPoint } = useMatchPointsStore();
@@ -196,7 +197,7 @@ export function SportScoring() {
     const [minusPenaltyA, changeMinusPenaltyA] = useState(0);
     const [minusPenaltyB, changeMinusPenaltyB] = useState(0);
 
-    console.log("match points", matchPoints)
+    // console.log("match points", matchPoints)
     const computeWins = () => {
         let winsA = 0, winsB = 0;
         matchPoints?.forEach((mp) => {
@@ -331,7 +332,8 @@ export function SportScoring() {
         date: "",
         location: "",
         start_time: "",
-        end_time: ""
+        end_time: "",
+        winner: null
     });
 
     const [loading, setLoading] = useState(false);
@@ -342,7 +344,8 @@ export function SportScoring() {
                 date: formatDateForInput(matchInformation.date) || "",
                 location: matchInformation.location || "",
                 start_time: formatTimeForInput(matchInformation.start_time) || "",
-                end_time: formatTimeForInput(matchInformation.end_time) || ""
+                end_time: formatTimeForInput(matchInformation.end_time) || "",
+                winner: matchInformation.winner || null
             });
         }
     }, [matchInformation, sheetOpen]);
@@ -430,13 +433,13 @@ export function SportScoring() {
     return <>
         {/* Winner Modal */}
         <Dialog open={showWinnerModal} onOpenChange={setShowWinnerModal}>
-            <DialogContent>
+            <DialogContent className="max-w-[400px] p-6">
                 <DialogHeader>
-                    <DialogTitle>Match Winner!</DialogTitle>
+                    <DialogTitle className="text-center text-2xl">Match Winner!</DialogTitle>
                 </DialogHeader>
                 <div className="text-center py-4">
-                    <p className="text-xl font-bold">{winnerName}</p>
-                    <p className="mt-2">is the winner of this match!</p>
+                    <p className="text-3xl font-bold text-green-700">{winnerName}</p>
+                    <p className="mt-2 text-lg">is the winner of this match!</p>
                 </div>
                 <DialogFooter className="grid grid-cols-2 gap-4">
                     <Button onClick={() => setShowWinnerModal(false)}>Close</Button>
@@ -625,14 +628,15 @@ export function SportScoring() {
                         penalties={penalties}
                         teamScore={matchPointsData.team_a_score}
                         matchPointsData={matchPointsData}
-                        setMatchPointsData={setMatchPointsData}
+                        handleTableScoreChange={handleTableScoreChange}
                         minusPenalty={minusPenaltyA}
                         changeMinusPenalty={changeMinusPenaltyA}
                         regularPenalty={regularPenaltyA}
                         changeRegularPenalty={changeRegularPenaltyA}
                         resetScoringState={resetScoringState}
-                        maxScore={sportData?.max_score}
-                        team="team_a_score"
+                        sportData={sportData}
+
+                        team_type="a"
                     />
                 </div>
 
@@ -642,6 +646,7 @@ export function SportScoring() {
                         className="text-xs md:text-sm lg:text-md py-2 lg:py-5 cursor-pointer"
                         variant="outline"
                         onClick={() => {
+                            handleTableScoreChange(matchPointsData.set_number, "a", 0);
                             setMatchPointsData((prev) => ({ ...prev, team_a_score: 0 }));
                             changeRegularPenaltyA(0);
                             changeMinusPenaltyA(0);
@@ -660,6 +665,7 @@ export function SportScoring() {
                         className="text-xs md:text-sm lg:text-md py-2 lg:py-5 cursor-pointer"
                         variant="outline"
                         onClick={() => {
+                            handleTableScoreChange(matchPointsData.set_number, "b", 0);
                             setMatchPointsData((prev) => ({ ...prev, team_b_score: 0 }));
                             changeRegularPenaltyB(0);
                             changeMinusPenaltyB(0);
@@ -675,14 +681,14 @@ export function SportScoring() {
                     penalties={penalties}
                     teamScore={matchPointsData.team_b_score}
                     matchPointsData={matchPointsData}
-                    setMatchPointsData={setMatchPointsData}
+                    handleTableScoreChange={handleTableScoreChange}
                     minusPenalty={minusPenaltyB}
                     changeMinusPenalty={changeMinusPenaltyB}
                     regularPenalty={regularPenaltyB}
                     changeRegularPenalty={changeRegularPenaltyB}
                     resetScoringState={resetScoringState}
-                    maxScore={sportData?.max_score}
-                    team="team_b_score"
+                    sportData={sportData}
+                    team_type="b"
                 />
             </div>
         </main>
@@ -690,10 +696,7 @@ export function SportScoring() {
         <Separator />
 
         {/* ── Table ──────────────────────────────── */}
-        <Button className="flex self-end gap-2" variant="outline">
-            <SquarePen />
-            Edit Scores
-        </Button>
+
         {matchInformation && (
             <div className="border overflow-hidden rounded-lg">
                 <Table>
@@ -713,21 +716,17 @@ export function SportScoring() {
                             >
                                 <TableCell className="font-medium">{row.set_number}</TableCell>
                                 <TableCell>
-                                    <Input
-                                        type="number"
-                                        min="0"
+                                    <EditableValueInput
                                         className="w-20 h-8"
                                         value={row.isActive ? matchPointsData.team_a_score : row.a_score}
-                                        onChange={(e) => handleTableScoreChange(row.set_number, "a", e.target.value)}
+                                        onSave={(val) => handleTableScoreChange(row.set_number, "a", val)}
                                     />
                                 </TableCell>
                                 <TableCell>
-                                    <Input
-                                        type="number"
-                                        min="0"
+                                    <EditableValueInput
                                         className="w-20 h-8"
                                         value={row.isActive ? matchPointsData.team_b_score : row.b_score}
-                                        onChange={(e) => handleTableScoreChange(row.set_number, "b", e.target.value)}
+                                        onSave={(val) => handleTableScoreChange(row.set_number, "b", val)}
                                     />
                                 </TableCell>
                                 <TableCell>
