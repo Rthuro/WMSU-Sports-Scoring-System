@@ -29,6 +29,7 @@ export async function initPlayerPenaltiesTable() {
         entry_id SERIAL PRIMARY KEY,
         player_id INT REFERENCES players(player_id) ON DELETE CASCADE,
         match_id TEXT REFERENCES matches(match_id) ON DELETE CASCADE,
+        team_id INT REFERENCES teams(team_id) ON DELETE CASCADE,
         penalty_id INT REFERENCES penalty_types(penalty_id) ON DELETE SET NULL,
         set_number INT,
         value INT,
@@ -49,6 +50,7 @@ export async function initPlayerStatsTable() {
       CREATE TABLE IF NOT EXISTS player_stats (
         entry_id SERIAL PRIMARY KEY,
         player_id INT REFERENCES players(player_id) ON DELETE CASCADE,
+        team_id INT REFERENCES teams(team_id) ON DELETE CASCADE,
         match_id TEXT REFERENCES matches(match_id) ON DELETE CASCADE,
         stats_id INT REFERENCES stats(stats_id) ON DELETE SET NULL,
         set_number INT,

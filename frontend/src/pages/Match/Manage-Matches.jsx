@@ -60,19 +60,21 @@ export function ManageMatches() {
 
         const result = await updateMatch(matchInfo.match_id, payload);
         if (result) {
-            setOpen(false);
+
             fetchMatches();
             fetchSports();
             fetchTeams();
             fetchPlayers();
         }
+        setOpen(false);
+        setOpenDialog(false);
         setLoading(false);
     };
 
     // console.log("all match", matches)
     return (
         <div>
-            <PageSync page="Manage All Matches" />
+            <PageSync page="Manage Matches" />
             <div className="flex flex-col gap-3">
                 <div className="flex justify-between items-center">
                     <p className=" text-xl font-semibold ">Match List</p>

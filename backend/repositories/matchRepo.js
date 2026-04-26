@@ -85,11 +85,16 @@ export async function create(data) {
 export async function update(matchId, data) {
   const result = await sql`
     UPDATE matches
-    SET match_name = ${data.match_name}, date = ${data.date},
-        start_time = ${data.start_time}, end_time = ${data.end_time},
-        location = ${data.location}, is_finished = ${data.is_finished},
-        team_a_id = ${data.team_a_id}, team_b_id = ${data.team_b_id},
-        player_a_id = ${data.player_a_id}, player_b_id = ${data.player_b_id},
+    SET match_name = COALESCE(${data.match_name ?? null}, match_name),
+        date = COALESCE(${data.date ?? null}, date),
+        start_time = COALESCE(${data.start_time ?? null}, start_time),
+        end_time = COALESCE(${data.end_time ?? null}, end_time),
+        location = COALESCE(${data.location ?? null}, location),
+        is_finished = COALESCE(${data.is_finished ?? null}, is_finished),
+        team_a_id = COALESCE(${data.team_a_id ?? null}, team_a_id),
+        team_b_id = COALESCE(${data.team_b_id ?? null}, team_b_id),
+        player_a_id = COALESCE(${data.player_a_id ?? null}, player_a_id),
+        player_b_id = COALESCE(${data.player_b_id ?? null}, player_b_id),
         updated_at = CURRENT_TIMESTAMP
     WHERE match_id = ${matchId}
     RETURNING *

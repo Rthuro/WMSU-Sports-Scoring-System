@@ -21,6 +21,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDepartmentStore } from "@/store/useDepartmentStore";
 import toast from "react-hot-toast";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from "@/components/ui/sheet";
+
 
 export function Player() {
     const [searchParams] = useSearchParams();
@@ -31,7 +33,7 @@ export function Player() {
     const { sports, fetchSports } = useSportsStore();
     const { departments, fetchDepartments } = useDepartmentStore();
 
-    const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+    const [isEditSheetOpen, setIsEditSheetOpen] = React.useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
     const [editFormData, setEditFormData] = React.useState({
         first_name: "",
@@ -114,21 +116,21 @@ export function Player() {
                     <p className="text-lg font-semibold text-muted-foreground">Back</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                        <DialogTrigger asChild>
+                    <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
+                        <SheetTrigger asChild>
                             <Button variant="outline" className="gap-2">
                                 <Edit2 size={16} />
                                 Edit Information
                             </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-[70vw]">
-                            <DialogHeader>
-                                <DialogTitle>Edit Player Information</DialogTitle>
-                                <DialogDescription>
+                        </SheetTrigger>
+                        <SheetContent side="right" className="overflow-y-auto min-w-[400px]" >
+                            <SheetHeader>
+                                <SheetTitle>Edit Player Information</SheetTitle>
+                                <SheetDescription>
                                     Update the player profile details here. Click save when you are done.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <form onSubmit={handleEditSubmit} className="grid gap-4 py-4 -mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4">
+                                </SheetDescription>
+                            </SheetHeader>
+                            <form onSubmit={handleEditSubmit} className="grid gap-4 py-4 px-3">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="grid gap-2">
                                         <Label htmlFor="first_name">First Name</Label>
@@ -172,7 +174,7 @@ export function Player() {
                                             value={editFormData.gender}
                                             onValueChange={(value) => setEditFormData({ ...editFormData, gender: value })}
                                         >
-                                            <SelectTrigger>
+                                            <SelectTrigger className="w-full" >
                                                 <SelectValue placeholder="Select gender" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -189,7 +191,7 @@ export function Player() {
                                             value={editFormData.sport_id}
                                             onValueChange={(value) => setEditFormData({ ...editFormData, sport_id: value })}
                                         >
-                                            <SelectTrigger>
+                                            <SelectTrigger className="w-full" >
                                                 <SelectValue placeholder="Select sport" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -213,12 +215,12 @@ export function Player() {
                                     />
                                 </div>
                             </form>
-                            <DialogFooter>
-                                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+                            <SheetFooter>
+                                <Button variant="outline" onClick={() => setIsEditSheetOpen(false)}>Cancel</Button>
                                 <Button type="submit" onClick={handleEditSubmit} className="bg-red text-white hover:bg-red/90">Save Changes</Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+                            </SheetFooter>
+                        </SheetContent>
+                    </Sheet>
 
                     <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                         <DialogTrigger asChild>

@@ -39,6 +39,7 @@ import statsRoutes from "./routes/sports/statsRoutes.js";
 // Players related routes
 import playerTeamRoutes from "./routes/players/playerTeamRoutes.js"
 import playerStatsRoutes from "./routes/players/playerStatsRoutes.js";
+import playerPenaltyRoutes from "./routes/players/playerPenaltyRoutes.js";
 
 // Tournaments related routes
 import tournamentRoutes from "./routes/tournamentRoutes.js";
@@ -60,7 +61,7 @@ const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
 const PORT = process.env.PORT || 3000;
 const __dirname = path.resolve();
 
-app.use(express.json()); 
+app.use(express.json());
 app.use(cors({
   origin: allowedOrigin,
   credentials: true
@@ -69,29 +70,30 @@ app.use(
   helmet({
     contentSecurityPolicy: false,
   })
-); 
+);
 app.use(morgan("dev")) // log request
 
 
-app.use("/api/accounts", accountRoutes ) 
-app.use("/api/departments", departmentRoutes ) 
-app.use("/api/events", eventRoutes ) 
-app.use("/api/sports", sportRoutes ) 
-app.use("/api/match", matchRoutes )
-app.use("/api/players", playerRoutes )
-app.use("/api/teams", teamRoutes ) 
-app.use("/api/upload", uploadRoutes ) 
+app.use("/api/accounts", accountRoutes)
+app.use("/api/departments", departmentRoutes)
+app.use("/api/events", eventRoutes)
+app.use("/api/sports", sportRoutes)
+app.use("/api/match", matchRoutes)
+app.use("/api/players", playerRoutes)
+app.use("/api/teams", teamRoutes)
+app.use("/api/upload", uploadRoutes)
 
 // Sports related routes
-app.use("/api/penalties", penaltyRoutes) 
+app.use("/api/penalties", penaltyRoutes)
 app.use("/api/scoring-points", scoringPointsRoutes)
-app.use("/api/set-rules", setRulesRoutes) 
-app.use("/api/sport-positions", sportPositionRoutes) 
-app.use("/api/stats", statsRoutes) 
+app.use("/api/set-rules", setRulesRoutes)
+app.use("/api/sport-positions", sportPositionRoutes)
+app.use("/api/stats", statsRoutes)
 
 // // Players related routes
-app.use("/api/player-team", playerTeamRoutes) 
-app.use("/api/player-stats", playerStatsRoutes) 
+app.use("/api/player-team", playerTeamRoutes)
+app.use("/api/player-stats", playerStatsRoutes)
+app.use("/api/player-penalties", playerPenaltyRoutes)
 
 // // tournaments related routes
 app.use("/api/tournaments", tournamentRoutes)
@@ -124,5 +126,5 @@ initDB()
   .catch((err) => {
     console.error("❌ DATABASE CONNECTION FAILED:");
     console.error(err);
-    process.exit(1); 
+    process.exit(1);
   });

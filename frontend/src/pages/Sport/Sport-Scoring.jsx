@@ -2,22 +2,23 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { PageSync } from "@/components/custom/PageSync";
 import { useMatchStore, useMatchPointsStore } from "@/store/useMatchStore";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { ArrowLeft, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Settings, ChevronLeft, ChevronRight, SquarePen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTournamentMatchStore } from "@/store/useTournamentStore2";
 import { useSportsStore } from "@/store/useSportsStore";
-import { useTeamStore } from '@/store/useTeamStore';
+import { useTeamStore, useTeamPlayersStore } from '@/store/useTeamStore';
 import { usePlayerStore } from '@/store/usePlayerStore';
 import { SportPoints } from "@/components/custom/sport-points";
 import { getTimeStringForDB, getTimeInSeconds, combineDateAndTime, formatDateForInput, formatTimeForInput } from "@/lib/helpers";
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from "@/components/ui/sheet";
 import { useTournamentTallyStore } from "@/store/useTournamentStore2";
 import { EditMatchSheet } from "@/components/custom/EditMatchSheet";
+import { ScoreboardPlayerTable } from "@/components/custom/ScoreboardPlayerTable";
+import { EditableValueInput } from "@/components/custom/EditableValueInput";
 
 function useSaveMatchPoint() {
     const { addMatchPoint, updateMatchPoint } = useMatchPointsStore();
@@ -58,6 +59,7 @@ function useSaveMatchPoint() {
     return save;
 }
 
+
 export function SportScoring() {
     const navigate = useNavigate();
     const { sport } = useParams();
@@ -72,6 +74,7 @@ export function SportScoring() {
     const { match, fetchMatch, updateTournamentMatch } = useTournamentMatchStore();
     const { sports, fetchPenalties, penalties, fetchScoringPoints, scoringPoints, fetchSportById, fetchSports } = useSportsStore();
     const { teamsBySport, fetchTeamsBySport } = useTeamStore();
+    const { ByTeamPlayers, fetchByTeamPlayers } = useTeamPlayersStore();
     const { players, fetchPlayersBySport } = usePlayerStore();
     const { tally, updateTournamentTally } = useTournamentTallyStore();
 
@@ -104,7 +107,10 @@ export function SportScoring() {
     const isTeamMatch = matchInformation?.is_team !== false;
 
     useEffect(() => {
-        if (matchInformation?.match_id) fetchMatchPoints(matchInformation.match_id);
+        if (matchInformation?.match_id) {
+            fetchMatchPoints(matchInformation.match_id);
+        }
+
     }, [matchInformation?.match_id, fetchMatchPoints]);
 
     const participantA = isTeamMatch
@@ -120,6 +126,42 @@ export function SportScoring() {
             const p = players.find((p) => p.player_id === matchInformation?.player_b_id);
             return p ? `${p.first_name} ${p.last_name}` : null;
         })();
+
+
+    const [teamAPlayers, setTeamAPlayers] = useState([]);
+    const [teamBPlayers, setTeamBPlayers] = useState([]);
+
+    useEffect(() => {
+        if (isTeamMatch && matchInformation) {
+            const fetchPlayers = async () => {
+                if (matchInformation.team_a_id) {
+                    const dataA = await fetchByTeamPlayers(matchInformation.team_a_id);
+                    if (dataA) setTeamAPlayers(dataA);
+                }
+                if (matchInformation.team_b_id) {
+                    const dataB = await fetchByTeamPlayers(matchInformation.team_b_id);
+                    if (dataB) setTeamBPlayers(dataB);
+                }
+            };
+            fetchPlayers();
+        }
+    }, [matchInformation?.team_a_id, matchInformation?.team_b_id, isTeamMatch, fetchByTeamPlayers]);
+
+    const team_a_players = () => {
+        if (!isTeamMatch) return [];
+        return teamAPlayers?.map((player) => {
+            const pInfo = players.find((p) => p.player_id === player.player_id);
+            return { ...pInfo, ...player };
+        }).filter(p => p.player_id);
+    }
+
+    const team_b_players = () => {
+        if (!isTeamMatch) return [];
+        return teamBPlayers?.map((player) => {
+            const pInfo = players.find((p) => p.player_id === player.player_id);
+            return { ...pInfo, ...player };
+        }).filter(p => p.player_id);
+    }
 
     const [matchPointsData, setMatchPointsData] = useState({
         set_number: 1,
@@ -155,7 +197,7 @@ export function SportScoring() {
     const [minusPenaltyA, changeMinusPenaltyA] = useState(0);
     const [minusPenaltyB, changeMinusPenaltyB] = useState(0);
 
-    console.log("match points", matchPoints)
+    // console.log("match points", matchPoints)
     const computeWins = () => {
         let winsA = 0, winsB = 0;
         matchPoints?.forEach((mp) => {
@@ -284,12 +326,14 @@ export function SportScoring() {
         }
     };
 
-    // ── Edit Match Sheet ──────────────────────────────────────────────
     const [sheetOpen, setSheetOpen] = useState(false);
     const [editFormData, setEditFormData] = useState({
         match_name: "",
         date: "",
         location: "",
+        start_time: "",
+        end_time: "",
+        winner: null
     });
 
     const [loading, setLoading] = useState(false);
@@ -300,7 +344,8 @@ export function SportScoring() {
                 date: formatDateForInput(matchInformation.date) || "",
                 location: matchInformation.location || "",
                 start_time: formatTimeForInput(matchInformation.start_time) || "",
-                end_time: formatTimeForInput(matchInformation.end_time) || ""
+                end_time: formatTimeForInput(matchInformation.end_time) || "",
+                winner: matchInformation.winner || null
             });
         }
     }, [matchInformation, sheetOpen]);
@@ -385,19 +430,16 @@ export function SportScoring() {
     const isArnis = sport?.toLowerCase() === "arnis";
     const setOrRound = sportData?.use_set_based_scoring ? "Set" : "Round";
 
-    // ══════════════════════════════════════════════════════════════════
-    // ── RENDER ────────────────────────────────────────────────────────
-    // ══════════════════════════════════════════════════════════════════
     return <>
         {/* Winner Modal */}
         <Dialog open={showWinnerModal} onOpenChange={setShowWinnerModal}>
-            <DialogContent>
+            <DialogContent className="max-w-[400px] p-6">
                 <DialogHeader>
-                    <DialogTitle>Match Winner!</DialogTitle>
+                    <DialogTitle className="text-center text-2xl">Match Winner!</DialogTitle>
                 </DialogHeader>
                 <div className="text-center py-4">
-                    <p className="text-xl font-bold">{winnerName}</p>
-                    <p className="mt-2">is the winner of this match!</p>
+                    <p className="text-3xl font-bold text-green-700">{winnerName}</p>
+                    <p className="mt-2 text-lg">is the winner of this match!</p>
                 </div>
                 <DialogFooter className="grid grid-cols-2 gap-4">
                     <Button onClick={() => setShowWinnerModal(false)}>Close</Button>
@@ -406,68 +448,7 @@ export function SportScoring() {
             </DialogContent>
         </Dialog>
 
-        {/* Edit Match Sheet (right side) — only for saved matches */}
         {!isQuickScoring && (
-            // <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-            //     <SheetContent side="right" className="overflow-y-auto">
-            //         <SheetHeader>
-            //             <SheetTitle>Edit Match</SheetTitle>
-            //             <SheetDescription>
-            //                 Update the match details below.
-            //             </SheetDescription>
-            //         </SheetHeader>
-            //         <div className="flex flex-col gap-4 px-4 pb-4">
-            //             <div className="grid gap-2">
-            //                 <Label htmlFor="edit-match-name">Match Name</Label>
-            //                 <Input
-            //                     id="edit-match-name"
-            //                     value={editFormData.match_name}
-            //                     onChange={(e) => setEditFormData({ ...editFormData, match_name: e.target.value })}
-            //                 />
-            //             </div>
-            //             <div className="grid gap-2">
-            //                 <Label htmlFor="edit-date">Date</Label>
-            //                 <Input
-            //                     id="edit-date"
-            //                     type="date"
-            //                     value={editFormData.date}
-            //                     onChange={(e) => setEditFormData({ ...editFormData, date: e.target.value })}
-            //                 />
-            //             </div>
-            //             <div className="grid gap-2">
-            //                 <Label htmlFor="edit-location">Location</Label>
-            //                 <Input
-            //                     id="edit-location"
-            //                     value={editFormData.location}
-            //                     onChange={(e) => setEditFormData({ ...editFormData, location: e.target.value })}
-            //                 />
-            //             </div>
-
-            //             {/* Match info (read-only) */}
-            //             <Separator />
-            //             <div className="grid gap-2">
-            //                 <Label className="text-muted-foreground text-xs uppercase tracking-wide">
-            //                     {isTeamMatch ? "Teams" : "Players"}
-            //                 </Label>
-            //                 <div className="flex flex-col gap-1 text-sm">
-            //                     <p><span className="text-blue-600 font-medium">A:</span> {participantA || "Not set"}</p>
-            //                     <p><span className="text-red-600 font-medium">B:</span> {participantB || "Not set"}</p>
-            //                 </div>
-            //             </div>
-            //             <div className="grid gap-2">
-            //                 <Label className="text-muted-foreground text-xs uppercase tracking-wide">Sport</Label>
-            //                 <p className="text-sm">{sportData?.name || sport}</p>
-            //             </div>
-            //             <div className="grid gap-2">
-            //                 <Label className="text-muted-foreground text-xs uppercase tracking-wide">Type</Label>
-            //                 <p className="text-sm">{isTeamMatch ? "Team Match" : "Individual Match"}</p>
-            //             </div>
-            //         </div>
-            //         <SheetFooter>
-            //             <Button onClick={handleSaveMatchEdit} className="w-full">Save Changes</Button>
-            //         </SheetFooter>
-            //     </SheetContent>
-            // </Sheet>
             <EditMatchSheet
                 sheetOpen={sheetOpen}
                 setSheetOpen={setSheetOpen}
@@ -647,14 +628,15 @@ export function SportScoring() {
                         penalties={penalties}
                         teamScore={matchPointsData.team_a_score}
                         matchPointsData={matchPointsData}
-                        setMatchPointsData={setMatchPointsData}
+                        handleTableScoreChange={handleTableScoreChange}
                         minusPenalty={minusPenaltyA}
                         changeMinusPenalty={changeMinusPenaltyA}
                         regularPenalty={regularPenaltyA}
                         changeRegularPenalty={changeRegularPenaltyA}
                         resetScoringState={resetScoringState}
-                        maxScore={sportData?.max_score}
-                        team="team_a_score"
+                        sportData={sportData}
+
+                        team_type="a"
                     />
                 </div>
 
@@ -664,6 +646,7 @@ export function SportScoring() {
                         className="text-xs md:text-sm lg:text-md py-2 lg:py-5 cursor-pointer"
                         variant="outline"
                         onClick={() => {
+                            handleTableScoreChange(matchPointsData.set_number, "a", 0);
                             setMatchPointsData((prev) => ({ ...prev, team_a_score: 0 }));
                             changeRegularPenaltyA(0);
                             changeMinusPenaltyA(0);
@@ -682,6 +665,7 @@ export function SportScoring() {
                         className="text-xs md:text-sm lg:text-md py-2 lg:py-5 cursor-pointer"
                         variant="outline"
                         onClick={() => {
+                            handleTableScoreChange(matchPointsData.set_number, "b", 0);
                             setMatchPointsData((prev) => ({ ...prev, team_b_score: 0 }));
                             changeRegularPenaltyB(0);
                             changeMinusPenaltyB(0);
@@ -697,19 +681,22 @@ export function SportScoring() {
                     penalties={penalties}
                     teamScore={matchPointsData.team_b_score}
                     matchPointsData={matchPointsData}
-                    setMatchPointsData={setMatchPointsData}
+                    handleTableScoreChange={handleTableScoreChange}
                     minusPenalty={minusPenaltyB}
                     changeMinusPenalty={changeMinusPenaltyB}
                     regularPenalty={regularPenaltyB}
                     changeRegularPenalty={changeRegularPenaltyB}
                     resetScoringState={resetScoringState}
-                    maxScore={sportData?.max_score}
-                    team="team_b_score"
+                    sportData={sportData}
+                    team_type="b"
                 />
             </div>
         </main>
 
-        {/* ── Editable Scores Table ──────────────────────────────── */}
+        <Separator />
+
+        {/* ── Table ──────────────────────────────── */}
+
         {matchInformation && (
             <div className="border overflow-hidden rounded-lg">
                 <Table>
@@ -729,27 +716,23 @@ export function SportScoring() {
                             >
                                 <TableCell className="font-medium">{row.set_number}</TableCell>
                                 <TableCell>
-                                    <Input
-                                        type="number"
-                                        min="0"
+                                    <EditableValueInput
                                         className="w-20 h-8"
                                         value={row.isActive ? matchPointsData.team_a_score : row.a_score}
-                                        onChange={(e) => handleTableScoreChange(row.set_number, "a", e.target.value)}
+                                        onSave={(val) => handleTableScoreChange(row.set_number, "a", val)}
                                     />
                                 </TableCell>
                                 <TableCell>
-                                    <Input
-                                        type="number"
-                                        min="0"
+                                    <EditableValueInput
                                         className="w-20 h-8"
                                         value={row.isActive ? matchPointsData.team_b_score : row.b_score}
-                                        onChange={(e) => handleTableScoreChange(row.set_number, "b", e.target.value)}
+                                        onSave={(val) => handleTableScoreChange(row.set_number, "b", val)}
                                     />
                                 </TableCell>
                                 <TableCell>
                                     {!row.isActive && (
                                         <Button
-                                            variant="ghost"
+                                            variant="outline"
                                             size="sm"
                                             onClick={() => jumpToRound(row.set_number)}
                                         >
@@ -757,7 +740,7 @@ export function SportScoring() {
                                         </Button>
                                     )}
                                     {row.isActive && (
-                                        <span className="text-xs text-muted-foreground">Active</span>
+                                        <span className="text-xs font-semibold bg-green-100 text-green-700 rounded-full px-2 py-1">Active</span>
                                     )}
                                 </TableCell>
                             </TableRow>
@@ -766,5 +749,23 @@ export function SportScoring() {
                 </Table>
             </div>
         )}
+
+
+        {isTeamMatch && (
+            <>
+                <Separator />
+                <ScoreboardPlayerTable
+                    sportData={sportData}
+                    matchData={matchInformation}
+                    isTeamMatch={isTeamMatch}
+                    team_a_players={team_a_players}
+                    team_b_players={team_b_players}
+                    participantA={participantA}
+                    participantB={participantB}
+                />
+            </>
+        )}
     </>
 }
+
+

@@ -1,7 +1,7 @@
 import { PageSync } from "@/components/custom/PageSync"
 import { useParams, useNavigate, Link } from "react-router-dom"
-import { Card, CardHeader, CardFooter, CardTitle } from "@/components/ui/card";
-import { UsersRound, ArrowRight, ArrowLeft, CalendarClock, ArrowUpRight, Eye, SquareArrowOutUpRight, Edit3 } from "lucide-react";
+import { Card, CardHeader, CardFooter, CardTitle, CardContent } from "@/components/ui/card";
+import { UsersRound, ArrowRight, ArrowLeft, CalendarClock, ArrowUpRight, Eye, SquareArrowOutUpRight, Edit3, Settings, UserCircle2, Users2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { ScoringDialogue } from "@/components/custom/scoring-dialogue";
 import { StatsFilterTable } from "@/components/custom/stats-filter-table"
@@ -15,10 +15,10 @@ import {
 } from "@/components/ui/table"
 import { useTournamentStore, useTournamentMatchStore } from "@/store/useTournamentStore2";
 import { useEventStore } from "@/store/useEventStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useMatchStore } from "@/store/useMatchStore";
 import { useSportsStore } from "@/store/useSportsStore";
-import { usePlayerStore } from "@/store/usePlayerStore";
+import { usePlayerStore, usePlayerStatsStore } from "@/store/usePlayerStore";
 import { useTeamStore } from "@/store/useTeamStore";
 import { formatDateToString, formatTime } from "@/lib/helpers";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ export function Sport() {
     const { matchBySport, fetchMatchBySports } = useMatchStore();
     const { sports, fetchSports } = useSportsStore();
     const { players, fetchPlayersBySport } = usePlayerStore();
+    const { fetchMultiplePlayerStats } = usePlayerStatsStore();
     const { teamsBySport, fetchTeamsBySport } = useTeamStore();
     const { tournamentMatch, fetchTournamentMatch } = useTournamentMatchStore();
 
@@ -55,14 +56,78 @@ export function Sport() {
     const tournamentMatchList = tournamentMatch?.filter(t => t.sport_id == sportsData?.sport_id) || [];
     const sportTournaments = tournaments?.filter(t => t.sport_id == sportsData?.sport_id) || [];
 
-    console.log(matchBySport)
+    const [playerStats, setPlayerStats] = useState([]);
+
+    useEffect(() => {
+        async function loadTeamStats() {
+            const teamPlayerIds = players.map(p => p.player_id);
+
+            const stats = await fetchMultiplePlayerStats(teamPlayerIds.join(","));
+            setPlayerStats(stats || []);
+        }
+
+        if (players?.length > 0) {
+            loadTeamStats();
+        }
+    }, [players, fetchMultiplePlayerStats]);
+
+    const displayPlayerStats = playerStats.reduce((acc, stat) => {
+        let existingPlayer = acc.find(s => s.player_id === stat.player_id);
+        const statName = stat.stats_name || "Unknown Stat";
+        const statValue = parseInt(stat.value, 10) || 0;
+        const teamName = stat.team_name || "Unknown Team";
+
+        if (!existingPlayer) {
+            existingPlayer = {
+                player_id: stat.player_id,
+                player_name: stat.player_name,
+                teams: {}
+            };
+            acc.push(existingPlayer);
+        }
+
+        if (!existingPlayer.teams[teamName]) {
+            existingPlayer.teams[teamName] = {
+                matches: new Set(),
+                stats: {}
+            };
+        }
+
+        existingPlayer.teams[teamName].matches.add(stat.match_id);
+
+        if (!existingPlayer.teams[teamName].stats[statName]) {
+            existingPlayer.teams[teamName].stats[statName] = 0;
+        }
+        existingPlayer.teams[teamName].stats[statName] += statValue;
+
+        return acc;
+    }, []);
+
+    const finalPlayerStats = displayPlayerStats.map(p => ({
+        ...p,
+        teamsData: Object.entries(p.teams).map(([teamName, data]) => ({
+            teamName,
+            totalMatches: data.matches.size,
+            stats: data.stats
+        }))
+    }));
 
     return <>
         <PageSync page="Sport" />
-        <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="cursor-pointer" ><ArrowLeft /></button>
-            <h1 className=" text-xl font-semibold ">{sportsData?.name}</h1>
+        <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+                <button onClick={() => navigate(-1)} className="cursor-pointer" ><ArrowLeft /></button>
+                <h1 className=" text-xl font-semibold ">{sportsData?.name}</h1>
+            </div>
+            <Link to={adminRoute(`Sports/EditSport?id=${sportsData?.sport_id}`)}>
+                <Button variant="outline" >
+                    <Settings className="size-4 " />
+                    Settings
+                </Button>
+            </Link>
+
         </div>
+
 
         <div className=" dark:*:data-[slot=card]:bg-card grid grid-cols-2 gap-3  @xl/main:grid-cols-2 @5xl/main:grid-cols-3 ">
             <Link to={adminRoute(`Sports/${sportsData?.name}/AddPlayer`)} >
@@ -70,7 +135,7 @@ export function Sport() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-3 tabular-nums ">
                             <div className="bg-red-50 text-red border border-red-200 rounded-lg p-3">
-                                <UsersRound className="size-5 " />
+                                <UserCircle2 className="size-5 " />
                             </div>
                             <div>
                                 <p className="text-lg @[250px]/card:text-xl font-semibold">{players.length}</p>
@@ -116,7 +181,7 @@ export function Sport() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-3 tabular-nums ">
                             <div className="bg-red-50 text-red border border-red-200 rounded-lg p-3">
-                                <CalendarClock className="size-5 " />
+                                <Users2 className="size-5 " />
                             </div>
                             <div>
                                 <p className="text-lg @[250px]/card:text-xl font-semibold">
@@ -144,9 +209,43 @@ export function Sport() {
 
 
         <Separator />
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 max-w-[70vw]">
             <p className=" text-xl font-semibold ">Player Stats</p>
-            {/* <StatsFilterTable /> */}
+            {finalPlayerStats.length === 0 ? (
+                <p className="text-muted-foreground text-sm">No player stats found.</p>
+            ) : (
+                <div className="flex overflow-x-auto pb-1 gap-4">
+                    {finalPlayerStats.map((stat) => (
+                        <Card key={stat.player_id} className="flex flex-col min-w-64">
+                            <CardHeader className="border-b">
+                                <CardTitle className="flex justify-between items-center text-lg">
+                                    <span className="truncate">{stat.player_name}</span>
+                                    <Link to={adminRoute(`Player?id=${stat.player_id}`)} className="text-blue-600 hover:text-blue-800 shrink-0">
+                                        <SquareArrowOutUpRight size="16" />
+                                    </Link>
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex flex-col gap-4 flex-1">
+                                {stat.teamsData.map((team, idx) => (
+                                    <div key={idx} className="flex flex-col gap-2">
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="font-semibold text-slate-700">{team.teamName}</span>
+                                            <span className="text-xs text-muted-foreground">{team.totalMatches} match{team.totalMatches > 1 ? "es" : ""}</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {Object.entries(team.stats).map(([statName, val]) => (
+                                                <span key={statName} className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200">
+                                                    {statName}: <span className="font-semibold">{val}</span>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
         </div>
 
         <div className="flex flex-col gap-3">

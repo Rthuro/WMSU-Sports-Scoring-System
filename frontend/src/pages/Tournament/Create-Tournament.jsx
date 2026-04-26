@@ -1,6 +1,6 @@
 import { PageSync } from "@/components/custom/PageSync"
 import { useNavigate, useSearchParams, Link } from "react-router-dom"
-import { ArrowLeft, ChevronsUpDown, Check, Plus } from "lucide-react";
+import { ArrowLeft, ChevronsUpDown, Check, Plus, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -52,7 +52,7 @@ export function CreateTournament() {
     const [searchParams] = useSearchParams();
     const sport = searchParams.get("sport");
     const eventId = searchParams.get("event-id");
-
+    const [loader, setLoader] = useState(false);
 
     const { formData, setFormData, createTournament } = useTournamentStore();
     const { sports, fetchSports } = useSportsStore();
@@ -135,9 +135,9 @@ export function CreateTournament() {
                 <button onClick={() => navigate(-1)} className="cursor-pointer" >
                     <ArrowLeft />
                 </button>
-                <Button type="submit" className="mt-6" form="createTournament" >
-                    <Plus />
-                    Create Tournament
+                <Button type="submit" className="mt-6" form="createTournament" disabled={loader} >
+                    {loader ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus />}
+                    {loader ? "Creating Tournament" : "Create Tournament"}
                 </Button>
 
             </div>
@@ -284,7 +284,8 @@ export function CreateTournament() {
             <div className='flex flex-col gap-6 border rounded-xl px-6 py-5 mx-auto w-full'>
                 <div className='flex flex-col gap-1'>
                     <p className='text-xl font-bold'>Teams & Bracketing</p>
-                    <p className='text-muted-foreground text-sm'>Select your bracket format and participating teams to generate the structure.</p>
+                    <p className="text-muted-foreground text-sm">Select your bracket format and participating teams to generate the structure. </p>
+                    <p className="text-red-700 text-sm italic font-medium mt-1">Note: Select event or sport to see available teams</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -311,7 +312,7 @@ export function CreateTournament() {
 
                     <div className="flex flex-col gap-2">
                         <Label htmlFor="teams" >
-                            Teams
+                            Teams ({teamsDisplay()?.length})
                             <span className="text-muted-foreground text-xs ml-2">Minimum of 2 teams</span>
                         </Label>
                         <Popover open={open} onOpenChange={setOpen}>

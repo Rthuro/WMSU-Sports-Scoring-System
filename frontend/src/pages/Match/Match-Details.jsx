@@ -20,7 +20,6 @@ import { cn } from '@/lib/utils';
 import { adminRoute, capitalizeFirstLetter } from '@/lib/helpers';
 import toast from 'react-hot-toast';
 
-
 export function MatchDetails() {
   const today = new Date().toISOString().split("T")[0];
   const { sport } = useParams();
@@ -29,12 +28,13 @@ export function MatchDetails() {
   const { sports, fetchSports } = useSportsStore();
   const { players, fetchPlayersBySport } = usePlayerStore();
   const { teamsBySport, fetchTeamsBySport } = useTeamStore();
+  const [loader, setLoader] = useState(false);
 
   const [is_team, setIsTeam] = useState(true);
 
   const sportData = sports.find((s) => s.name.toLowerCase() === sport?.toLowerCase());
 
-  console.log("sports", sportData);
+  // console.log("sports", sportData);
   // console.log("players", players);
   // console.log("teamsBySport", teamsBySport);
 
@@ -132,11 +132,13 @@ export function MatchDetails() {
     };
     setFormData(updatedFormData);
 
-    // addMatch handles its own toasts internally
+    setLoader(true);
     const result = await addMatch(e);
     if (result) {
       navigate(adminRoute(`Sports/${sport}/scoring?m-id=${result.match_id}`));
+      setLoader(false);
     }
+    setLoader(false);
   }
   // console.log("formData", formData);
 
@@ -148,9 +150,9 @@ export function MatchDetails() {
       <button onClick={() => navigate(-1)} className="cursor-pointer" >
         <ArrowLeft />
       </button>
-      <Button type="submit" form="createMatch" >Start Scoring</Button>
+      <Button type="submit" form="createMatch" disabled={loader} >{loader ? "Creating match..." : "Start Scoring"}</Button>
     </div>
-    <div className='flex flex-col gap-3 border rounded-xl px-6 py-4 mx-auto max-w-[425px]'>
+    <div className='flex flex-col gap-3 border rounded-xl px-6 py-4 mx-auto max-w-[650px]'>
       <div className='flex flex-col gap-1'>
         <p className='text-lg font-semibold'>Start Match Scoring</p>
         <p className='text-muted-foreground text-sm'  >Fill in match details before proceeding to the scoring interface.
@@ -182,12 +184,26 @@ export function MatchDetails() {
             <Input id="start_date" name="start_date" type="date"
               value={formData?.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              required min={today} />
+              min={today} />
           </div>
           <div className="grid gap-3">
             <Label htmlFor="location">Location</Label>
             <Input id="location" name="location" value={formData?.location} className=""
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+            />
+          </div>
+          <div className="grid gap-3">
+            <Label htmlFor="start_time">Start Time</Label>
+            <Input id="start_time" name="start_time" value={formData?.start_time} className=""
+              onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+              type="time"
+            />
+          </div>
+          <div className="grid gap-3">
+            <Label htmlFor="end_time">End Time</Label>
+            <Input id="end_time" name="end_time" value={formData?.end_time} className=""
+              onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+              type="time"
             />
           </div>
           <div className="flex items-center justify-between border border-input px-3 py-2  shadow-xs rounded-md col-span-2">

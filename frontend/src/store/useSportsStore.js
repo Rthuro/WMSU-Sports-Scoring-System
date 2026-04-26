@@ -71,14 +71,132 @@ export const useSportsStore = create((set, get) => ({
     },
 
 
-    fetchStats: async (sport_id) => {
+    fetchStats: async () => {
         try {
-            const response = await axios.get(`${BASE_URL}/api/stats/${sport_id}`);
+            const response = await axios.get(`${BASE_URL}/api/stats/`);
             set({ stats: response.data.data });
         } catch (err) {
             if (err.status === 429)
                 set({ error: "Rate limit exceeded" });
             else set({ error: "Something went wrong" });
+        }
+    },
+
+    sportStats: [],
+
+    fetchStatsBySportId: async (sport_id) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/api/stats/sport/${sport_id}`);
+            set({ sportStats: response.data.data });
+        } catch (err) {
+            if (err.status === 429)
+                set({ error: "Rate limit exceeded" });
+            else set({ error: "Something went wrong" });
+        }
+    },
+
+    addStat: async (statData) => {
+        try {
+            const response = await axios.post(`${BASE_URL}/api/stats`, statData);
+            set((state) => ({ stats: [...state.stats, response.data.data] }));
+            toast.success("Stat added successfully");
+            return true;
+        } catch (err) {
+            console.log("Error in sport function", err);
+            if (err.response?.data?.errors) {
+                // Show first validation error from Zod
+                toast.error(err.response.data.errors[0]?.message || "Validation failed");
+            } else {
+                toast.error("Something went wrong");
+            }
+            return false;
+        }
+    },
+
+    updateStat: async (statData) => {
+        try {
+            const response = await axios.put(`${BASE_URL}/api/stats/${statData.stats_id}`, statData);
+            set((state) => ({ stats: state.stats.map((stat) => stat.stats_id === statData.stats_id ? response.data.data : stat) }));
+            set((state) => ({ sportStats: state.sportStats.map((stat) => stat.stats_id === statData.stats_id ? response.data.data : stat) }));
+            toast.success("Stat updated successfully");
+        } catch (err) {
+            console.log("Error in sport function", err);
+            if (err.response?.data?.errors) {
+                // Show first validation error from Zod
+                toast.error(err.response.data.errors[0]?.message || "Validation failed");
+            } else {
+                toast.error("Something went wrong");
+            }
+        }
+    },
+
+    addPenalties: async (penaltyData) => {
+        try {
+            const response = await axios.post(`${BASE_URL}/api/penalties`, penaltyData);
+            set((state) => ({ penalties: [...state.penalties, response.data.data] }));
+            toast.success("Penalty added successfully");
+            return true;
+        } catch (err) {
+            console.log("Error in sport function", err);
+            if (err.response?.data?.errors) {
+                // Show first validation error from Zod
+                toast.error(err.response.data.errors[0]?.message || "Validation failed");
+            } else {
+                toast.error("Something went wrong");
+            }
+            return false;
+        }
+    },
+
+    updatePenalties: async (penaltyData) => {
+        try {
+            const response = await axios.put(`${BASE_URL}/api/penalties/${penaltyData.penalty_id}`, penaltyData);
+            set((state) => ({ penalties: state.penalties.map((penalty) => penalty.penalty_id === penaltyData.penalty_id ? response.data.data : penalty) }));
+            toast.success("Penalty updated successfully");
+        } catch (err) {
+            console.log("Error in sport function", err);
+            if (err.response?.data?.errors) {
+                // Show first validation error from Zod
+                toast.error(err.response.data.errors[0]?.message || "Validation failed");
+            } else {
+                toast.error("Something went wrong");
+            }
+        }
+    },
+
+    deleteStat: async (stat_id) => {
+        try {
+            await axios.delete(`${BASE_URL}/api/stats/${stat_id}`);
+            set((state) => ({ stats: state.stats.filter((stat) => stat.stat_id !== stat_id) }));
+            toast.success("Stat deleted successfully");
+            return true;
+        } catch (err) {
+            console.log("Error in sport function", err);
+            if (err.response?.data?.errors) {
+                // Show first validation error from Zod
+                toast.error(err.response.data.errors[0]?.message || "Validation failed");
+            } else {
+                toast.error("Something went wrong");
+            }
+            return false;
+        }
+    },
+
+    deletePenalties: async (penalty_id) => {
+        try {
+            await axios.delete(`${BASE_URL}/api/penalties/${penalty_id}`);
+            set((state) => ({ penalties: state.penalties.filter((penalty) => penalty.penalty_id !== penalty_id) }));
+            toast.success("Penalty deleted successfully");
+            return true;
+        } catch (err) {
+            console.log("Error in sport function", err);
+            if (err.response?.data?.errors) {
+                // Show first validation error from Zod
+                toast.error(err.response.data.errors[0]?.message || "Validation failed");
+            } else {
+                toast.error("Something went wrong");
+            }
+            return false;
         }
     },
 
@@ -177,6 +295,26 @@ export const useSportsStore = create((set, get) => ({
             } else {
                 toast.error("Something went wrong");
             }
+        }
+    },
+
+    updateSportDetails: async (sportId, formData) => {
+        try {
+            const res = await axios.put(`${BASE_URL}/api/sports/${sportId}`, formData);
+            set((state) => ({
+                sports: state.sports.map((s) => s.sport_id === sportId ? res.data.data : s),
+                sport: res.data.data
+            }));
+            toast.success("Sport updated successfully");
+            return true;
+        } catch (error) {
+            console.log("Error updating sport", error);
+            if (error.response?.data?.errors) {
+                toast.error(error.response.data.errors[0]?.message || "Validation failed");
+            } else {
+                toast.error("Something went wrong");
+            }
+            return false;
         }
     },
 

@@ -129,12 +129,59 @@ export const useTeamStore = create((set, get) => ({
 
 export const useTeamPlayersStore = create((set, get) => ({
     teamPlayers: [],
+    ByTeamPlayers: [],
+
     fetchTeamPlayers: async () => {
         try {
             const res = await axios.get(`${BASE_URL}/api/player-team`);
             set({ teamPlayers: res.data.data });
         } catch (error) {
             set({ error });
+        }
+    },
+    fetchByTeamPlayers: async (teamId) => {
+        try {
+            const res = await axios.get(`${BASE_URL}/api/player-team/by-team/${teamId}`);
+            console.log(res.data.data)
+            return res.data.data;
+        } catch (error) {
+            set({ error });
+        }
+    },
+    addPlayerTeam: async (data) => {
+        try {
+            const res = await axios.post(`${BASE_URL}/api/player-team`, data);
+            set((state) => ({
+                teamPlayers: [...state.teamPlayers, res.data.data]
+            }));
+            return true;
+        } catch (error) {
+            set({ error });
+            return false;
+        }
+    },
+    updatePlayerTeam: async (id, data) => {
+        try {
+            const res = await axios.put(`${BASE_URL}/api/player-team/${id}`, data);
+            set((state) => ({
+                teamPlayers: state.teamPlayers.map((t) => t.player_team_id === id ? { ...t, ...res.data.data } : t)
+            }));
+            return true;
+        } catch (error) {
+            set({ error });
+            return false;
+        }
+    },
+    deletePlayerTeam: async (id) => {
+        try {
+            await axios.delete(`${BASE_URL}/api/player-team/${id}`);
+            set((state) => ({
+                teamPlayers: state.teamPlayers.filter((t) => t.player_team_id !== id)
+            }));
+            return true;
+        } catch (error) {
+            set({ error });
+            return false;
         }
     },
 }));

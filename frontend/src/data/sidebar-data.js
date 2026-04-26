@@ -7,7 +7,8 @@ import {
   IconListDetails,
   IconSettings,
   IconUsers,
-  IconBrandAsana
+  IconBrandAsana,
+  IconUserSquare
 } from "@tabler/icons-react";
 import avatar from "../assets/avatar/avatar.jpeg"
 
@@ -54,6 +55,12 @@ export const sidebarData = {
       url: "#",
       icon: IconUsers,
       link: "TeamManagement"
+    },
+    {
+      title: "Manage Admins",
+      url: "#",
+      icon: IconUserSquare,
+      link: "ManageAdmins"
     },
   ],
 

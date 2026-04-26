@@ -77,6 +77,93 @@ export async function createWithSubResources(data) {
   }
 }
 
+/**
+ * Updates a sport and all its sub-resources in a single transaction.
+ * Deletes existing sub-resources and re-inserts the new ones.
+ */
+export async function updateWithSubResources(id, data) {
+  const txSql = neon(connectionString, { fullResults: false });
+
+  await txSql("BEGIN");
+
+  try {
+    // 1. Update the sport
+    const [sport] = await txSql(
+      `UPDATE sports
+       SET name=$1, icon_path=$2, scoring_type=$3, default_sets=$4, max_sets=$5,
+           max_score=$6, timePerSet=$7, min_players=$8, max_players=$9,
+           use_set_based_scoring=$10, has_penalty_affects_score=$11, has_set_lineup=$12,
+           updated_at=CURRENT_TIMESTAMP
+       WHERE sport_id = $13 AND is_deleted = false
+       RETURNING *`,
+      [data.name, data.iconPath, data.scoringType, data.defaultSets, data.maxSets,
+       data.maxScore, data.timePerSet, data.minPlayers, data.maxPlayers,
+       data.useSetBasedScoring, data.hasPenaltyAffectsScore, data.hasSetLineUp, id]
+    );
+
+    if (!sport) {
+      await txSql("ROLLBACK");
+      return null;
+    }
+
+    const sportId = sport.sport_id;
+
+    // 2. Delete existing sub-resources
+    await txSql(`DELETE FROM set_rules WHERE sport_id = $1`, [sportId]);
+    await txSql(`DELETE FROM scoring_points WHERE sport_id = $1`, [sportId]);
+    await txSql(`DELETE FROM penalty_types WHERE sport_id = $1`, [sportId]);
+    await txSql(`DELETE FROM stats WHERE sport_id = $1`, [sportId]);
+    await txSql(`DELETE FROM sports_position WHERE sport_id = $1`, [sportId]);
+
+    // 3. Re-insert set rules
+    for (const rule of data.set_rules || []) {
+      await txSql(
+        `INSERT INTO set_rules (sport_id, set_number, max_score, time_limit) VALUES ($1, $2, $3, $4)`,
+        [sportId, rule.set_number, rule.max_score || null, rule.time || rule.time_limit || null]
+      );
+    }
+
+    // 4. Re-insert scoring points
+    for (const point of data.scoring_points || []) {
+      await txSql(
+        `INSERT INTO scoring_points (sport_id, point) VALUES ($1, $2)`,
+        [sportId, point]
+      );
+    }
+
+    // 5. Re-insert penalties
+    for (const penalty of data.penalties || []) {
+      await txSql(
+        `INSERT INTO penalty_types (sport_id, penalty_name, description, penalty_point, affects_score, penalty_limit) VALUES ($1, $2, $3, $4, $5, $6)`,
+        [sportId, penalty.penalty_name, penalty.description || "", penalty.penalty_point, penalty.affects_score || false, penalty.penalty_limit || null]
+      );
+    }
+
+    // 6. Re-insert stats
+    for (const stat of data.stats || []) {
+      await txSql(
+        `INSERT INTO stats (sport_id, stats_name, is_player_stat) VALUES ($1, $2, $3)`,
+        [sportId, stat.stats_name, stat.is_player_stat || false]
+      );
+    }
+
+    // 7. Re-insert positions
+    for (const position of data.positions || []) {
+      await txSql(
+        `INSERT INTO sports_position (sport_id, position_name) VALUES ($1, $2)`,
+        [sportId, position]
+      );
+    }
+
+    await txSql("COMMIT");
+    return sport;
+
+  } catch (error) {
+    await txSql("ROLLBACK");
+    throw error;
+  }
+}
+
 export async function findAll() {
   return await sql`SELECT * FROM sports WHERE is_deleted = false ORDER BY created_at DESC`;
 }
