@@ -21,8 +21,12 @@ export async function create(data) {
 export async function update(id, data) {
   const result = await sql`
     UPDATE events
-    SET name=${data.name}, description=${data.description},
-    start_date=${data.start_date}, end_date=${data.end_date}, location=${data.location}, banner_image=${data.banner_image},
+    SET name=COALESCE(${data.name}, name), 
+    description=COALESCE(${data.description}, description),
+    start_date=COALESCE(${data.start_date}, start_date), 
+    end_date=COALESCE(${data.end_date}, end_date),
+    location=COALESCE(${data.location}, location), 
+    banner_image=COALESCE(${data.banner_image}, banner_image),
     updated_at=CURRENT_TIMESTAMP
     WHERE event_id = ${id} AND is_deleted = false
     RETURNING *

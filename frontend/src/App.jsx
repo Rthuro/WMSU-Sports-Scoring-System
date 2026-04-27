@@ -30,6 +30,7 @@ import { PublicSports } from "./pages/Public/Sports";
 import { PublicEvents } from "./pages/Public/Events";
 import { PublicDepartments } from "./pages/Public/Departments";
 import { ManageMatches } from "./pages/Match/Manage-Matches";
+import { ManageAdmins } from "./pages/Admin/ManageAdmins";
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuthStore();
@@ -100,6 +101,7 @@ export default function App() {
             <Route path='/Admin/TeamManagement/CreateTeam' element={<CreateTeam />}></Route>
             <Route path='/Admin/ManageTeam' element={<TeamProfile />}></Route>
             <Route path='/Admin/Settings' element={<Settings />}></Route>
+            <Route path='/Admin/ManageAdmins' element={<ManageAdmins />}></Route>
           </Route>
         </Routes>
       </Router>

@@ -14,35 +14,27 @@ const connectionString = `postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDAT
  */
 export async function createWithTeamsAndMatches(data) {
   const txSql = neon(connectionString, { fullResults: false });
-  await txSql("BEGIN");
+  await txSql`BEGIN`;
 
   try {
     // 1. Insert the tournament
-    const [tournament] = await txSql(
-      `INSERT INTO tournaments (tournament_id, event_id, sport_id, name, description, start_date, end_date, location, banner_image, bracketing)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-       RETURNING *`,
-      [data.tournament_id, data.event_id || null, data.sport_id, data.name, data.description || null, data.start_date, data.end_date, data.location || null, data.banner_image || null, data.bracketing]
-    );
+    const [tournament] = await txSql`
+      INSERT INTO tournaments (tournament_id, event_id, sport_id, name, description, start_date, end_date, location, banner_image, bracketing)
+       VALUES (${data.tournament_id}, ${data.event_id || null}, ${data.sport_id}, ${data.name}, ${data.description || null}, ${data.start_date}, ${data.end_date}, ${data.location || null}, ${data.banner_image || null}, ${data.bracketing})
+       RETURNING *`;
 
     const teamIds = data.teams || [];
 
     // 2. Enroll teams in tournament + create tally entries
     for (const teamId of teamIds) {
-      await txSql(
-        `INSERT INTO tournament_teams (tournament_id, team_id) VALUES ($1, $2)`,
-        [data.tournament_id, teamId]
-      );
-      await txSql(
-        `INSERT INTO tournament_tally (tournament_id, team_id, wins, losses) VALUES ($1, $2, 0, 0)`,
-        [data.tournament_id, teamId]
-      );
+      await txSql`INSERT INTO tournament_teams (tournament_id, team_id) VALUES (${data.tournament_id}, ${teamId})`;
+      await txSql`INSERT INTO tournament_tally (tournament_id, team_id, wins, losses) VALUES (${data.tournament_id}, ${teamId}, 0, 0)`;
     }
 
     // 3. Generate bracket matches based on bracketing type
     if (teamIds.length >= 2) {
       // Fetch team names for match naming
-      const allTeams = await txSql(`SELECT team_id, name FROM teams WHERE team_id = ANY($1)`, [teamIds]);
+      const allTeams = await txSql`SELECT team_id, name FROM teams WHERE team_id = ANY(${teamIds})`;
       const teamMap = {};
       for (const t of allTeams) {
         teamMap[t.team_id] = t.name;
@@ -55,11 +47,9 @@ export async function createWithTeamsAndMatches(data) {
           for (let j = i + 1; j < teamIds.length; j++) {
             const matchId = `${data.tournament_id}_RR_M${matchCounter++}`;
             const matchName = `${getTeamName(teamIds[i])} vs ${getTeamName(teamIds[j])}`;
-            await txSql(
-              `INSERT INTO tournament_matches (match_id, sport_id, tournament_id, match_name, team_a_id, team_b_id, round)
-               VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-              [matchId, data.sport_id, data.tournament_id, matchName, teamIds[i], teamIds[j], 1]
-            );
+            await txSql`
+              INSERT INTO tournament_matches (match_id, sport_id, tournament_id, match_name, team_a_id, team_b_id, round)
+               VALUES (${matchId}, ${data.sport_id}, ${data.tournament_id}, ${matchName}, ${teamIds[i]}, ${teamIds[j]}, 1)`;
           }
         }
       } else if (data.bracketing === "single-elimination") {
@@ -81,11 +71,9 @@ export async function createWithTeamsAndMatches(data) {
             } else {
               matchName = `R${round} M${i+1}`;
             }
-            await txSql(
-              `INSERT INTO tournament_matches (match_id, sport_id, tournament_id, match_name, team_a_id, team_b_id, round)
-               VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-              [matchId, data.sport_id, data.tournament_id, matchName, team1, team2, round]
-            );
+            await txSql`
+              INSERT INTO tournament_matches (match_id, sport_id, tournament_id, match_name, team_a_id, team_b_id, round)
+               VALUES (${matchId}, ${data.sport_id}, ${data.tournament_id}, ${matchName}, ${team1}, ${team2}, ${round})`;
           }
           round++;
           matchesInRound /= 2;
@@ -110,11 +98,9 @@ export async function createWithTeamsAndMatches(data) {
             } else {
               matchName = `UB R${ubRound} M${i+1}`;
             }
-            await txSql(
-              `INSERT INTO tournament_matches (match_id, sport_id, tournament_id, match_name, team_a_id, team_b_id, round)
-               VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-              [matchId, data.sport_id, data.tournament_id, matchName, team1, team2, ubRound]
-            );
+            await txSql`
+              INSERT INTO tournament_matches (match_id, sport_id, tournament_id, match_name, team_a_id, team_b_id, round)
+               VALUES (${matchId}, ${data.sport_id}, ${data.tournament_id}, ${matchName}, ${team1}, ${team2}, ${ubRound})`;
           }
           ubRound++;
           ubMatchesInRound /= 2;
@@ -128,11 +114,9 @@ export async function createWithTeamsAndMatches(data) {
           for (let i = 0; i < lbMatchesInRound; i++) {
             const matchId = `${data.tournament_id}_DE_LB_R${currentLbRound}_M${i+1}`;
             const matchName = `LB R${currentLbRound} M${i+1}`;
-            await txSql(
-              `INSERT INTO tournament_matches (match_id, sport_id, tournament_id, match_name, team_a_id, team_b_id, round)
-               VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-              [matchId, data.sport_id, data.tournament_id, matchName, null, null, currentLbRound]
-            );
+            await txSql`
+              INSERT INTO tournament_matches (match_id, sport_id, tournament_id, match_name, team_a_id, team_b_id, round)
+               VALUES (${matchId}, ${data.sport_id}, ${data.tournament_id}, ${matchName}, null, null, ${currentLbRound})`;
           }
           currentLbRound++;
           if (currentLbRound % 2 !== 0) lbMatchesInRound /= 2;
@@ -140,19 +124,17 @@ export async function createWithTeamsAndMatches(data) {
 
         // Grand Final
         const grandFinalId = `${data.tournament_id}_DE_FINAL`;
-        await txSql(
-          `INSERT INTO tournament_matches (match_id, sport_id, tournament_id, match_name, team_a_id, team_b_id, round)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-          [grandFinalId, data.sport_id, data.tournament_id, "Grand Final", null, null, 99]
-        );
+        await txSql`
+          INSERT INTO tournament_matches (match_id, sport_id, tournament_id, match_name, team_a_id, team_b_id, round)
+           VALUES (${grandFinalId}, ${data.sport_id}, ${data.tournament_id}, ${"Grand Final"}, null, null, 99)`;
       }
     }
 
-    await txSql("COMMIT");
+    await txSql`COMMIT`;
     return tournament;
 
   } catch (error) {
-    await txSql("ROLLBACK");
+    await txSql`ROLLBACK`;
     throw error;
   }
 }

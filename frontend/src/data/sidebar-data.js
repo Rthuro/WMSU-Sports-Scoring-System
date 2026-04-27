@@ -1,16 +1,16 @@
 import {
-  IconChartBar,
-  IconDashboard,
-  IconCalendarEvent,
-  IconBallBaseball,
-  IconHelp,
-  IconListDetails,
-  IconSettings,
-  IconUsers,
-  IconBrandAsana,
-  IconUserSquare,
-  IconAppWindow
-} from "@tabler/icons-react";
+  BarChart,
+  LayoutDashboard,
+  Calendar,
+  Dribbble,
+  HelpCircle,
+  List,
+  Settings,
+  Users,
+  Swords,
+  UserSquare,
+  AppWindow
+} from "lucide-react";
 import avatar from "../assets/avatar/avatar.jpeg"
 
 export const sidebarData = {
@@ -18,54 +18,54 @@ export const sidebarData = {
     {
       title: "Home",
       url: "#",
-      icon: IconDashboard,
+      icon: LayoutDashboard,
       link: "Dashboard"
     },
     {
       title: "Manage Matches",
       url: "#",
-      icon: IconBrandAsana,
+      icon: Swords,
       link: "ManageMatches"
     },
     {
       title: "Manage Events",
       url: "#",
-      icon: IconCalendarEvent,
+      icon: Calendar,
       link: "ManageEvents"
     },
     {
       title: "Manage Tournament",
       url: "#",
-      icon: IconListDetails,
+      icon: List,
       link: "ManageTournament"
     },
     {
       title: "Sports",
       url: "#",
-      icon: IconBallBaseball,
+      icon: Dribbble,
       link: "Sports"
     },
     {
       title: "Player Stats",
       url: "#",
-      icon: IconChartBar,
+      icon: BarChart,
       link: "PlayerStats"
     },
     {
       title: "Team Management",
       url: "#",
-      icon: IconUsers,
+      icon: Users,
       link: "TeamManagement"
     },
     {
       title: "Manage Admins",
       url: "#",
-      icon: IconUserSquare,
+      icon: UserSquare,
       link: "ManageAdmins"
     }, {
       title: "Manage Website",
       url: "#",
-      icon: IconAppWindow,
+      icon: AppWindow,
       link: "ManageWebsite"
     },
   ],
@@ -74,13 +74,13 @@ export const sidebarData = {
     {
       title: "Settings",
       url: "#",
-      icon: IconSettings,
+      icon: Settings,
       link: "Settings"
     },
     {
       title: "Get Help",
       url: "#",
-      icon: IconHelp,
+      icon: HelpCircle,
       link: "GetHelp"
     },
   ],

@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom"
 import { useTournamentStore, useTournamentTeamStore, useTournamentMatchStore, useTournamentTallyStore } from "@/store/useTournamentStore2";
 import { PageSync } from "@/components/custom/PageSync";
-import { ArrowLeft, Dot, Edit3, SquareArrowOutUpRight, Download, RefreshCw, Eye } from "lucide-react";
+import { ArrowLeft, Dot, Edit3, SquareArrowOutUpRight, Download, RefreshCw, Eye, MapPin } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +13,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTeamStore } from "@/store/useTeamStore";
 import { useSportsStore } from "@/store/useSportsStore";
 import { formatDateToString } from "@/lib/helpers"
@@ -21,12 +21,13 @@ import { useEventStore } from "@/store/useEventStore";
 import { useMatchPointsStore } from "@/store/useMatchStore";
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
-import html2canvas from 'html2canvas';
 import { TournamentBracketPreview, generateMockBracket } from "@/components/custom/TournamentBracketPreview";
 import { MatchDetailsDialog } from "@/components/custom/MatchDetailsDialog";
 import { EditTournamentDialog } from "@/components/custom/EditTournamentDialog";
 import { TeamRecordDialog } from "@/components/custom/TeamRecordDialog";
 import { adminRoute } from "@/lib/helpers";
+import sample_bg from "@/assets/sample.jpg";
+import html2canvas from 'html2canvas-pro';
 
 export function Tournament() {
     const navigate = useNavigate();
@@ -41,10 +42,10 @@ export function Tournament() {
     const { tally, fetchTournamentTally } = useTournamentTallyStore();
     const { fetchAllMatchPoints } = useMatchPointsStore();
 
-    const bracketRef = React.useRef(null);
-    const [selectedEditMatch, setSelectedEditMatch] = React.useState(null);
-    const [isEditTournamentOpen, setIsEditTournamentOpen] = React.useState(false);
-    const [selectedTeamRecord, setSelectedTeamRecord] = React.useState(null);
+    const bracketRef = useRef(null);
+    const [selectedEditMatch, setSelectedEditMatch] = useState(null);
+    const [isEditTournamentOpen, setIsEditTournamentOpen] = useState(false);
+    const [selectedTeamRecord, setSelectedTeamRecord] = useState(null);
 
     useEffect(() => {
         if (tournamentId) {
@@ -118,41 +119,63 @@ export function Tournament() {
     };
 
 
+
     return <>
         <PageSync page="Tournament Information" />
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3">
             <button onClick={() => navigate(-1)} className="cursor-pointer" >
                 <ArrowLeft />
             </button>
-            <p className="text-lg font-semibold "></p>
+            <Button variant="outline" onClick={() => setIsEditTournamentOpen(true)}>
+                Edit
+                <Edit3 />
+            </Button>
+        </div>
+        <div
+        className="relative bg-cover bg-center w-full h-[280px] rounded-lg overflow-hidden"
+        style={{ backgroundImage: `url(${tournament?.banner_image || sample_bg})` }}
+        >
+            <div className="absolute top-0 right-0 left-0 bottom-0 bg-black opacity-50"></div>
+                <div className="absolute top-0 right-0 left-0 bottom-0 flex flex-col items-center justify-center gap-2 drop-shadow-lg">
+                    <h1 className=" text-3xl text-white font-freshman tracking-widest">{tournament.name?.toUpperCase()}</h1>
+                    <p className="text-white ">{tournament.description}</p>
+
+                    <p className="text-red font-semibold flex items-center gap-2 bg-white px-4 py-1 rounded-full">
+                    {tournament?.start_date
+                        ? formatDateToString(tournament.start_date)
+                        : "Start Date"}
+                    <span>-</span>
+                    {tournament?.end_date
+                        ? formatDateToString(tournament.end_date)
+                        : " End Date"}
+                    </p>
+                    <p className="text-white flex items-center gap-1">
+                    <MapPin className="inline size-4" />
+                    {tournament?.location || "Event Location"}
+                    </p>
+                </div>
         </div>
         <div className="flex items-start justify-between">
             <div className="flex flex-col items-start gap-1">
-                <h1 className=" text-2xl text-red font-freshman tracking-widest">{tournament.name?.toUpperCase()}</h1>
-                <p className="text-muted-foreground">{tournament.description}</p>
 
                 {tournamentEvent && (
                     <Link to={adminRoute(`ManageEvents/${tournament.event_id}`)} className="flex items-center gap-2 ">
-                        <p className="text-muted-foreground">
+                         <p className="text-muted-foreground">
                             Event:
                         </p>
                         <p className="flex items-center gap-1 text-blue-800 text-sm">
                             <SquareArrowOutUpRight size="14" />
                             {tournamentEvent}
                         </p>
+                        <Dot className="inline text-muted-foreground size-4" />
+                        <p className="text-red font-medium">{sport.name}</p>
                     </Link>
                 )}
 
-
-                <div className="flex text-sm items-center text-muted-foreground">
-                    <p className="text-red font-medium">{sport.name}</p>
-                    <Dot />
-                    <p className="">{formatDateToString(tournament.start_date)} - {formatDateToString(tournament.end_date)}</p>
-                </div>
                 <p className=" mt-4 font-semibold">Teams Competing</p>
                 <div className="flex items-center gap-3 flex-wrap">
                     {tournamentTeams.map(team => (
-                        <Link to={adminRoute(`ManageTeam/${team.team_id}`)} key={team.tournament_team_id} className="flex items-center gap-2 mt-1 py-2 px-4 bg-red-50 text-red-800  border border-red-200 rounded-lg shadow-lg shadow-red-100 text-sm">
+                        <Link to={adminRoute(`ManageTeam?type=tournament&id=${team.team_id}`)} key={team.tournament_team_id} className="flex items-center gap-2 mt-1 py-2 px-4 bg-red-50 text-red-800  border border-red-200 rounded-lg shadow-lg shadow-red-100 text-sm">
                             <SquareArrowOutUpRight size="16" />
                             <p >
                                 {teams.find(t => t.team_id == team.team_id)?.name}
@@ -162,10 +185,6 @@ export function Tournament() {
                 </div>
 
             </div>
-            <Button variant="outline" onClick={() => setIsEditTournamentOpen(true)}>
-                Edit
-                <Edit3 />
-            </Button>
         </div>
 
         <div className='flex flex-col gap-2'>
@@ -183,15 +202,17 @@ export function Tournament() {
                 </div>
 
             </div>
-            <TournamentBracketPreview
-                bracketingType={tournament?.bracketing}
-                matches={tournamentMatch && tournamentMatch.length > 0 ? tournamentMatch : previewMatches}
-                teams={teams}
-                onMatchClick={(match) => {
-                    if (!match) return;
-                    setSelectedEditMatch(match);
-                }}
-            />
+            <div ref={bracketRef} className="w-full bg-white rounded-lg p-4">
+                <TournamentBracketPreview
+                    bracketingType={tournament?.bracketing}
+                    matches={tournamentMatch && tournamentMatch.length > 0 ? tournamentMatch : previewMatches}
+                    teams={teams}
+                    onMatchClick={(match) => {
+                        if (!match) return;
+                        setSelectedEditMatch(match);
+                    }}
+                />
+            </div>
         </div>
 
 
@@ -270,13 +291,14 @@ export function Tournament() {
                                     </p>
                                 </TableCell>
                                 <TableCell>
-                                    <Link to={adminRoute(`ManageTeam/${match.team_a_id}`)} className="flex items-center gap-2 text-blue-800">
+                                    <Link to={adminRoute(`ManageTeam?type=tournament&id=${match.team_a_id}`)} 
+                                    className="flex items-center gap-2 text-blue-800">
                                         <SquareArrowOutUpRight size="16" />
                                         {teams.find(t => t.team_id == match.team_a_id)?.short_name}
                                     </Link >
                                 </TableCell>
                                 <TableCell>
-                                    <Link to={adminRoute(`ManageTeam/${match.team_b_id}`)} className="flex items-center gap-2 text-blue-800">
+                                    <Link to={adminRoute(`ManageTeam?type=tournament&id=${match.team_b_id}`)} className="flex items-center gap-2 text-blue-800">
                                         <SquareArrowOutUpRight size="16" />
                                         {teams.find(t => t.team_id == match.team_b_id)?.short_name}
                                     </Link>
@@ -287,7 +309,7 @@ export function Tournament() {
                                 </TableCell>
                                 <TableCell className="flex gap-2 my-3">
                                     <Button variant="outline" size="sm"
-                                        onClick={() => navigate(`/Sports/${sport.name}/scoring?tm-id=${match.match_id}`)}
+                                        onClick={() => navigate(adminRoute(`Sports/${sport.name}/scoring?tm-id=${match.match_id}`))}
                                     >
                                         <Eye />
                                     </Button>

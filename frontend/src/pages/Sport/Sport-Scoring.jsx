@@ -105,6 +105,7 @@ export function SportScoring() {
     if (tournamentMatchId) matchInformation = match;
 
     const isTeamMatch = matchInformation?.is_team !== false;
+    console.log(matchInformation)
 
     useEffect(() => {
         if (matchInformation?.match_id) {
