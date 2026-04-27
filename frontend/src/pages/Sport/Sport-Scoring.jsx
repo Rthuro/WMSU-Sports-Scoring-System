@@ -59,6 +59,23 @@ function useSaveMatchPoint() {
     return save;
 }
 
+function recomputeWins(mpList) {
+    let winsA = 0;
+    let winsB = 0;
+
+    mpList?.forEach((mp) => {
+        const scoreA = Number(mp.a_score || 0);
+        const scoreB = Number(mp.b_score || 0);
+
+        if (scoreA > scoreB) {
+            winsA++;
+        } else if (scoreB > scoreA) {
+            winsB++;
+        }
+    });
+    return { winsA, winsB };
+}
+
 
 export function SportScoring() {
     const navigate = useNavigate();
@@ -105,7 +122,6 @@ export function SportScoring() {
     if (tournamentMatchId) matchInformation = match;
 
     const isTeamMatch = matchInformation?.is_team !== false;
-    console.log(matchInformation)
 
     useEffect(() => {
         if (matchInformation?.match_id) {
@@ -168,7 +184,9 @@ export function SportScoring() {
         set_number: 1,
         team_a_score: 0,
         team_b_score: 0,
-        time: 0
+        time: 0,
+        a_wins: 0,
+        b_wins: 0
     });
 
     const loadScoresForSet = useCallback((setNum) => {
@@ -179,11 +197,14 @@ export function SportScoring() {
                 m.team_b_id === matchInformation?.team_b_id &&
                 m.set_number === setNum
         );
+        const wins = recomputeWins(matchPoints);
         setMatchPointsData({
             set_number: setNum,
             team_a_score: mp?.a_score ?? 0,
             team_b_score: mp?.b_score ?? 0,
             time: getTimeInSeconds(mp?.time) || 0,
+            a_wins: wins.winsA,
+            b_wins: wins.winsB
         });
     }, [matchInformation, matchPoints]);
 
@@ -197,17 +218,18 @@ export function SportScoring() {
     const [regularPenaltyB, changeRegularPenaltyB] = useState(0);
     const [minusPenaltyA, changeMinusPenaltyA] = useState(0);
     const [minusPenaltyB, changeMinusPenaltyB] = useState(0);
+    const [winner, setWinner] = useState({ teamA: 0, teamB: 0 });
 
-    // console.log("match points", matchPoints)
-    const computeWins = () => {
-        let winsA = 0, winsB = 0;
-        matchPoints?.forEach((mp) => {
-            if (mp.a_score > mp.b_score) winsA++;
-            else if (mp.b_score > mp.a_score) winsB++;
-        });
-        return { teamA: winsA, teamB: winsB };
-    };
-    const winner = computeWins();
+    console.log("match points", matchPoints)
+    // const computeWins = () => {
+    //     let winsA = 0, winsB = 0;
+    //     matchPoints?.forEach((mp) => {
+    //         if (mp.a_score > mp.b_score) winsA++;
+    //         else if (mp.b_score > mp.a_score) winsB++;
+    //     });
+    //     return { teamA: winsA, teamB: winsB };
+    // };
+    // const winner = computeWins();
 
     const [isRunning, setIsRunning] = useState(false);
     const timerRef = useRef(null);
@@ -401,7 +423,7 @@ export function SportScoring() {
                 [side === "a" ? "team_a_score" : "team_b_score"]: numValue,
             }));
         }
-
+        
         // Find existing entry
         const existing = matchPoints?.find(
             (mp) =>
@@ -419,7 +441,22 @@ export function SportScoring() {
             { a: currentA, b: currentB },
             setNumber,
             matchPointsData.time
-        );
+        );     
+
+        setMatchPointsData((prev) => {
+            const updatedMpList = matchPoints.map(mp => 
+                mp.set_number === setNumber 
+                ? { ...mp, a_score: currentA, b_score: currentB } 
+                : mp
+            );
+            const wins = recomputeWins(updatedMpList);
+            return {
+                ...prev,
+                a_wins: wins.winsA,
+                b_wins: wins.winsB,
+            };
+        });
+
     };
 
     // ── Jump to round from table ──────────────────────────────────────
@@ -504,14 +541,14 @@ export function SportScoring() {
                             </div>
                             <div className="flex-col flex items-center justify-center gap-3 py-3 bg-white w-full border-2">
                                 <p className="font-semibold border-b-2 text-center w-full pb-2 text-md md:text-sm">WIN</p>
-                                <p className="text-3xl lg:text-5xl font-bold">{winner.teamA}</p>
+                                <p className="text-3xl lg:text-5xl font-bold">{matchPointsData.a_wins}</p>
                             </div>
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 w-full">
                             <div className="flex-col flex items-center justify-center gap-3 py-3 bg-white w-full border-1">
                                 <p className="text-lg font-semibold border-b-2 text-center w-full pb-2">WIN</p>
-                                <p className="text-3xl lg:text-6xl font-bold">{winner.teamA}</p>
+                                <p className="text-3xl lg:text-6xl font-bold">{matchPointsData.a_wins}</p>
                             </div>
                             <div className="flex-col flex items-center justify-center gap-3 py-3 bg-white w-full border-1">
                                 <p className="text-lg font-semibold border-b-2 text-center w-full pb-2">Penalty</p>
@@ -602,14 +639,14 @@ export function SportScoring() {
                             </div>
                             <div className="flex-col flex items-center justify-center gap-3 py-3 bg-white w-full border-2">
                                 <p className="font-semibold border-b-2 text-center w-full pb-2 text-md md:text-sm">WIN</p>
-                                <p className="text-3xl lg:text-5xl font-bold">{winner.teamB}</p>
+                                <p className="text-3xl lg:text-5xl font-bold">{matchPointsData.b_wins}</p>
                             </div>
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 w-full">
                             <div className="flex-col flex items-center justify-center gap-3 py-3 bg-white w-full border-1">
                                 <p className="text-lg font-semibold border-b-2 text-center w-full pb-2">WIN</p>
-                                <p className="text-3xl lg:text-6xl font-bold">{winner.teamB}</p>
+                                <p className="text-3xl lg:text-6xl font-bold">{matchPointsData.b_wins}</p>
                             </div>
                             <div className="flex-col flex items-center justify-center gap-3 py-3 bg-white w-full border-1">
                                 <p className="text-lg font-semibold border-b-2 text-center w-full pb-2">Penalty</p>

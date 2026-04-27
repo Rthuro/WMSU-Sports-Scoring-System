@@ -47,7 +47,6 @@ export function MatchDetailsDialog({ isOpen, onClose, match, tournamentTeams, te
         try {
             setLoader(true);
             await onSave(payload);
-            setLoader(false);
             onClose();
         } catch (error) {
             console.error("Error updating match:", error);
