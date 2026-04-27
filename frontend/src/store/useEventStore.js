@@ -77,4 +77,29 @@ export const useEventStore = create((set, get) => ({
         }
     },
 
+    updateEvent: async (id, updateData) => {
+        try {
+            const res = await axios.put(`${BASE_URL}/api/events/${id}`, updateData);
+            set((state) => ({
+                events: state.events.map((e) => (e.event_id === id ? res.data.data : e)),
+            }));
+            toast.success("Event updated successfully");
+        } catch (error) {
+            set({ error, loading: false });
+            toast.error("Failed to update event");
+        }
+    },
+
+    deleteEvent: async (id) => {
+        try {
+            await axios.delete(`${BASE_URL}/api/events/${id}`);
+            set((state) => ({
+                events: state.events.filter((e) => e.event_id !== id),
+            }));
+            toast.success("Event deleted successfully");
+        } catch (error) {
+            toast.error("Failed to delete event");
+        }
+    },
+
 }));

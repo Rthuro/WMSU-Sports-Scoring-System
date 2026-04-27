@@ -87,3 +87,21 @@ export const checkPlayerExists = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getPlayersByDepartment = async (req, res, next) => {
+    try {
+        const players = await playerRepo.findByDepartment(req.params.departmentId);
+        res.status(200).json({ success: true, data: players });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getPlayersByTeam = async (req, res, next) => {
+    try {
+        const players = await playerRepo.findByTeam(req.params.teamId);
+        res.status(200).json({ success: true, data: players });
+    } catch (error) {
+        next(error);
+    }
+};

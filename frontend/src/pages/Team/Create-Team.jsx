@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Plus, Check, ChevronsUpDown } from "lucide-react";
+import { ArrowLeft, Plus, Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +33,7 @@ import { usePlayerStore } from "@/store/usePlayerStore";
 import { useDepartmentStore } from "@/store/useDepartmentStore";
 import { cn } from "@/lib/utils"
 import { capitalizeFirstLetter } from "@/lib/helpers";
+import { ImageUpload } from "@/components/custom/ImageUpload";
 
 export function CreateTeam() {
 
@@ -52,7 +53,7 @@ export function CreateTeam() {
     const [selectedEvents, setEvents] = useState(eventId || "")
     const [selectedPlayers, setSelectedPlayers] = useState([]);
     const [ selectedDepartment, setSelectedDepartment ] = useState("");
-
+    const [loading, setLoading] = useState(false);
     
     useEffect(() => {
         fetchEvents();
@@ -81,13 +82,31 @@ export function CreateTeam() {
     };
 
     const handleSubmit = async (e) => {
-        const success = await addTeam(e); 
-        if (success) {
-           navigate(-1);
-           return;
+        setLoading(true);
+        try {
+            const success = await addTeam(e); 
+            if (success) {
+               navigate(-1);
+               return;
+            }
+        } catch (err) {
+            console.log(err)
+        } finally{
+            setLoading(false);
         }
     };
 
+    const diplaySelectedPlayers = (selected_players) => {
+        if (selected_players.length === 0) {
+            return "No selected players.";
+        }
+        const displayPlayers = selected_players.map( p => 
+            players.find( player => player.player_id === p)
+        )
+        return displayPlayers.map(player => (player?.first_name + " " + player?.last_name)).join(", ");
+    }
+
+    console.log(selectedPlayers)
 
     return (
         <section className="flex flex-col gap-6 ">
@@ -96,8 +115,8 @@ export function CreateTeam() {
                 <button onClick={() => navigate(-1)} className="cursor-pointer" id="backButton" >
                     <ArrowLeft />
                 </button>
-                <Button form="createTeam">
-                    <Plus />
+                <Button form="createTeam" disabled={loading}>
+                    {loading ? <Loader2 className="animate-spin" /> : <Plus />}
                     Create Team
                 </Button>
             </div>
@@ -107,165 +126,171 @@ export function CreateTeam() {
                     <p className='text-xl font-bold'>Team Information</p>
                     <p className='text-muted-foreground text-sm'>Fill in team information.</p>
                 </div>
-                <div className="flex flex-col gap-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-2">
-                            <Label htmlFor="events">Events</Label>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline">
-                                        {
-                                        selectedEvents ?
-                                        capitalizeFirstLetter(events?.find(e => e.event_id === selectedEvents)?.name)  : "Select event"
-                                        }
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-60">
-                                    <DropdownMenuRadioGroup 
-                                    value={selectedEvents}  
-                                    onValueChange={(val) => {
-                                        setFormData({ ...formData, event_id: val });
-                                        setEvents(val);
-                                    }}>
-                                    {events?.map((e) => (
-                                            <DropdownMenuRadioItem key={e.event_id} value={e.event_id}>
-                                                {e.name}
-                                            </DropdownMenuRadioItem>
-                                    ))}
-
-                                    { events?.length === 0 && (
-                                        <DropdownMenuRadioItem disabled>  
-                                            No events available.
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="events">Events</Label>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline">
+                                    {
+                                    selectedEvents ?
+                                    capitalizeFirstLetter(events?.find(e => e.event_id === selectedEvents)?.name)  : "Select event"
+                                    }
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-60">
+                                <DropdownMenuRadioGroup 
+                                value={selectedEvents}  
+                                onValueChange={(val) => {
+                                    setFormData({ ...formData, event_id: val });
+                                    setEvents(val);
+                                }}>
+                                {events?.map((e) => (
+                                        <DropdownMenuRadioItem key={e.event_id} value={e.event_id}>
+                                            {e.name}
                                         </DropdownMenuRadioItem>
-                                    )}
-                                   </DropdownMenuRadioGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <Label htmlFor="events">Departments</Label>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" >
-                                       { selectedDepartment ?
-                                        capitalizeFirstLetter(departments?.find(d => d.department_id === selectedDepartment)?.name) : "Select Department"}
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-60">
-                                    <DropdownMenuRadioGroup 
-                                    value={selectedDepartment}  
-                                    onValueChange={(val) => {
-                                        setFormData({ ...formData, department_id: val });
-                                        setSelectedDepartment(val);
-                                    }}>
-                                    {departments?.map((d) => (
-                                            <DropdownMenuRadioItem key={d.department_id} value={d.department_id}>
-                                                {capitalizeFirstLetter(d.name)}
-                                            </DropdownMenuRadioItem>
-                                    ))}
-                                      { departments?.length === 0 && (
-                                        <DropdownMenuRadioItem disabled>  
-                                            No departments available.
+                                ))}
+                                <DropdownMenuRadioItem key={"Not Set"} value={null}>
+                                    Not Set
+                                </DropdownMenuRadioItem>
+                                { events?.length === 0 && (
+                                    <DropdownMenuRadioItem disabled>  
+                                        No events available.
+                                    </DropdownMenuRadioItem>
+                                )}
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="events">Departments</Label>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" >
+                                    { selectedDepartment ?
+                                    capitalizeFirstLetter(departments?.find(d => d.department_id === selectedDepartment)?.name) : "Select Department"}
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-60">
+                                <DropdownMenuRadioGroup 
+                                value={selectedDepartment}  
+                                onValueChange={(val) => {
+                                    setFormData({ ...formData, department_id: val });
+                                    setSelectedDepartment(val);
+                                }}>
+                                {departments?.map((d) => (
+                                        <DropdownMenuRadioItem key={d.department_id} value={d.department_id}>
+                                            {capitalizeFirstLetter(d.name)}
                                         </DropdownMenuRadioItem>
-                                      )}
-                                    
-                                    </DropdownMenuRadioGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <Label htmlFor="sport">
-                                Sports
-                                <span className='text-muted-foreground'>*</span>
-                            </Label>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" 
-                                    disabled={sport}>
-                                        {
-                                        selectedSport ?
-                                        capitalizeFirstLetter(sports?.find(s => s.sport_id === selectedSport)?.name)  : "Select Sport"
-                                        }
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-60">
-                                    <DropdownMenuRadioGroup 
-                                    value={selectedSport}  
-                                    onValueChange={(val) => {
-                                        setFormData({ 
-                                            ...formData, 
-                                            sport_id: val,
-                                            players: []
-                                        });
-                                        setSport(val);
-                                        setSelectedPlayers([]);
-                                    }}>
-                                    {sports?.map((s) => (
-                                            <DropdownMenuRadioItem key={s.sport_id} value={s.sport_id}>
-                                                {s.name}
-                                            </DropdownMenuRadioItem>
-                                    ))}
-                                      { sports?.length === 0 && (
-                                        <DropdownMenuRadioItem disabled>  
-                                            No sports available.
+                                ))}
+                                <DropdownMenuRadioItem key={"Not Set"} value={null}>
+                                    Not Set
+                                </DropdownMenuRadioItem>
+                                { departments?.length === 0 && (
+                                    <DropdownMenuRadioItem disabled>  
+                                        No departments available.
+                                    </DropdownMenuRadioItem>
+                                )}
+                                
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="sport">
+                            Sports
+                            <span className='text-muted-foreground'>*</span>
+                        </Label>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" 
+                                disabled={sport}>
+                                    {
+                                    selectedSport ?
+                                    capitalizeFirstLetter(sports?.find(s => s.sport_id === selectedSport)?.name)  : "Select Sport"
+                                    }
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-60">
+                                <DropdownMenuRadioGroup 
+                                value={selectedSport}  
+                                onValueChange={(val) => {
+                                    setFormData({ 
+                                        ...formData, 
+                                        sport_id: val,
+                                        players: []
+                                    });
+                                    setSport(val);
+                                    setSelectedPlayers([]);
+                                }}>
+                                {sports?.map((s) => (
+                                        <DropdownMenuRadioItem key={s.sport_id} value={s.sport_id}>
+                                            {s.name}
                                         </DropdownMenuRadioItem>
-                                    )}
-                                    </DropdownMenuRadioGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
+                                ))}
+                                    { sports?.length === 0 && (
+                                    <DropdownMenuRadioItem disabled>  
+                                        No sports available.
+                                    </DropdownMenuRadioItem>
+                                )}
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                     <div className="flex flex-col gap-2 ">
                         <Label htmlFor="player_teams">Team players</Label>
-                         <Popover open={open} onOpenChange={setOpen}>
-                              <PopoverTrigger asChild>
+                        <Popover open={open} onOpenChange={setOpen}>
+                            <PopoverTrigger asChild>
                                 <Button
-                                  variant="outline"
-                                  role="combobox"
-                                  aria-expanded={open}
-                                  className="w-full justify-between"
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={open}
+                                className="w-full justify-between"
                                 >
-                                  Select players
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                                Select players
+                                <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                                 </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-full p-0">
+                            </PopoverTrigger>
+                            <PopoverContent className="w-full p-0">
                                 <Command>
-                                  <CommandInput placeholder="Search player..." className="h-9" />
-                                  <CommandList>
+                                <CommandInput placeholder="Search player..." className="h-9" />
+                                <CommandList>
                                     <CommandEmpty>No players found.</CommandEmpty>
                                     <CommandGroup>
-                                      {players.map((player) => (
+                                    {players.map((player) => (
                                         <CommandItem
-                                          key={player.player_id}
-                                          value={player.player_id}
-                                          onSelect={() => togglePlayer(player.player_id)}
+                                        key={player.player_id}
+                                        value={player.player_id}
+                                        onSelect={() => togglePlayer(player.player_id)}
                                         >
                                             {capitalizeFirstLetter(player.first_name)} &nbsp; 
-                                           {capitalizeFirstLetter(player.last_name)}
+                                        {capitalizeFirstLetter(player.last_name)}
                                             
-                                          <Check
+                                        <Check
                                                 className={cn(
                                                 "ml-auto h-4 w-4",
                                                 selectedPlayers.includes(player.player_id) ? "opacity-100" : "opacity-0"
                                                 )}
                                             />
                                         </CommandItem>
-                                      ))}
+                                    ))}
                                     </CommandGroup>
-                                  </CommandList>
+                                </CommandList>
                                 </Command>
-                              </PopoverContent>
+                            </PopoverContent>
                             </Popover>
                     </div>
+                
+                    <div className="flex flex-col col-span-2 gap-1 bg-muted p-3 rounded-md border border-gray-200">
+                        <Label htmlFor="shortName">Selected Players </Label>
+                        <p className='text-muted-foreground text-sm'>{diplaySelectedPlayers(selectedPlayers)}</p>
                     </div>
-                   
-                </div>
-                <Separator className="my-2"/>     
-                 <div className="grid grid-cols-2 gap-4">
+                <Separator className="my-2 col-span-2"/>   
+
                     <div className="flex flex-col gap-2">
                         <Label htmlFor="teamName">
                             Team name
-                             <span className='text-muted-foreground'>*</span>
+                            <span className='text-muted-foreground'>*</span>
                         </Label>
                         <Input id="teamName"
                             name="teamName" placeholder="Team name"
@@ -281,15 +306,17 @@ export function CreateTeam() {
                             onChange={(e) => setFormData({ ...formData, short_name: e.target.value })}
                         />
                     </div>
-                    <div className="flex flex-col gap-2 ">
-                        <Label htmlFor="banner_image">Banner image</Label>
-                        <Input id="banner_image" type="file"
-                        accept="image/*"
-                            value={formData?.banner_image}
-                            onChange={(e) => setFormData({ ...formData, banner_image: e.target.files[0] })}
+                    <div className="flex flex-col gap-2 col-span-2">
+                        <ImageUpload
+                            label="Banner image"
+                            folder="teams"
+                            defaultImage={formData.banner_image}
+                            onUploadSuccess={(url) =>
+                            setFormData({ ...formData, banner_image: url })
+                            }
                         />
                     </div>
-                </div>               
+                </div>             
             </form>
             </div>
         </section>

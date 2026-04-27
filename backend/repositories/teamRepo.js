@@ -12,30 +12,29 @@ const connectionString = `postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDAT
  */
 export async function createWithPlayers(data) {
   const txSql = neon(connectionString, { fullResults: false });
-  await txSql("BEGIN");
+  await txSql`BEGIN`;
 
   try {
-    const [team] = await txSql(
-      `INSERT INTO teams (event_id, department_id, sport_id, name, short_name, banner_image)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING *`,
-      [data.event_id || null, data.department_id || null, data.sport_id, data.name, data.short_name || null, data.banner_image || null]
-    );
+    const [team] = await txSql`
+      INSERT INTO teams (event_id, department_id, sport_id, name, short_name, banner_image)
+      VALUES (${data.event_id || null}, ${data.department_id || null}, ${data.sport_id}, ${data.name}, ${data.short_name || null}, ${data.banner_image || null})
+      RETURNING *
+    `;
 
     const teamId = team.team_id;
 
     for (const playerId of data.players || []) {
-      await txSql(
-        `INSERT INTO player_teams (player_id, team_id, position_id, jersey_number) VALUES ($1, $2, $3, $4)`,
-        [playerId, teamId, null, null]
-      );
+      await txSql`
+        INSERT INTO player_teams (player_id, team_id, position_id, jersey_number) 
+        VALUES (${playerId}, ${teamId}, null, null)
+      `;
     }
 
-    await txSql("COMMIT");
+    await txSql`COMMIT`;
     return team;
 
   } catch (error) {
-    await txSql("ROLLBACK");
+    await txSql`ROLLBACK`;
     throw error;
   }
 }

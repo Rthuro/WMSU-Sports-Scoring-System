@@ -275,7 +275,7 @@ export const useSportsStore = create((set, get) => ({
     },
 
     addSport: async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
 
         try {
             const { formData } = get();
@@ -287,6 +287,7 @@ export const useSportsStore = create((set, get) => ({
 
             toast.success("Sport added successfully");
             get().resetForm();
+            return true;
         } catch (error) {
             console.log("Error in sport function", error);
             if (error.response?.data?.errors) {
@@ -295,6 +296,7 @@ export const useSportsStore = create((set, get) => ({
             } else {
                 toast.error("Something went wrong");
             }
+            return false;
         }
     },
 
@@ -318,5 +320,23 @@ export const useSportsStore = create((set, get) => ({
         }
     },
 
+    deleteSport: async (id) => {
+        try {
+            await axios.delete(`${BASE_URL}/api/sports/${id}`);
+            set((state) => ({
+                sports: state.sports.filter((s) => s.sport_id !== id)
+            }));
+            toast.success("Sport deleted successfully");
+            return true;
+        } catch (error) {
+            console.log("Error deleting sport", error);
+            if (error.response?.data?.errors) {
+                toast.error(error.response.data.errors[0]?.message || "Validation failed");
+            } else {
+                toast.error("Something went wrong");
+            }
+            return false;
+        }
+    }
 
 }));

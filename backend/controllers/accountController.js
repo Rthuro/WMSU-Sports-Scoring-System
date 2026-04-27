@@ -186,8 +186,17 @@ export const deleteAccount = async (req, res, next) => {
     }
 };
 
-export const createAccount = async (req, redirect, next) => {
+export const createAccount = async (req, res, next) => {
     try {
+        const { firstName, lastName, email, passwordHash, role } = req.body;
+
+        const existingUser = await accountRepo.findByEmail(email);
+        if (existingUser) {
+            throw new AppError("Email already registered", 400);
+        }
+
+        const hashedPassword = await bcrypt.hash(passwordHash, 10);
+
         const account = await accountRepo.create({
             firstName,
             lastName,
@@ -197,11 +206,26 @@ export const createAccount = async (req, redirect, next) => {
             role: role || "admin"
         });
 
+        const token = jwt.sign(
+            { accountId: account.account_id, email: account.email, role: account.role },
+            JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        const userData = {
+            account_id: account.account_id,
+            first_name: account.first_name,
+            middle_name: account.middle_name,
+            last_name: account.last_name,
+            email: account.email,
+            role: account.role
+        };
+
         res.status(201).json({
             success: true,
-            user: userData
+            data: { token, user: userData }
         });
     } catch (error) {
         next(error);
     }
-}
+};

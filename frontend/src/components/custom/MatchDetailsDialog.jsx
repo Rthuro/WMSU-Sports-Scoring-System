@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Trash2, Loader2 } from "lucide-react";
 
 export function MatchDetailsDialog({ isOpen, onClose, match, tournamentTeams, teams, onSave }) {
     const [editTeamA, setEditTeamA] = useState("empty");
@@ -15,6 +16,7 @@ export function MatchDetailsDialog({ isOpen, onClose, match, tournamentTeams, te
     const [editEndTime, setEditEndTime] = useState("");
     const [editLocation, setEditLocation] = useState("");
     const [editIsFinished, setEditIsFinished] = useState(false);
+    const [loader, setLoader] = useState(false);
 
     useEffect(() => {
         if (match) {
@@ -29,7 +31,8 @@ export function MatchDetailsDialog({ isOpen, onClose, match, tournamentTeams, te
         }
     }, [match]);
 
-    const handleSave = () => {
+    const handleSave = async () => {
+
         const payload = {
             team_a_id: editTeamA,
             team_b_id: editTeamB,
@@ -40,23 +43,34 @@ export function MatchDetailsDialog({ isOpen, onClose, match, tournamentTeams, te
             location: editLocation || null,
             is_finished: editIsFinished
         };
-        onSave(payload);
+        
+        try {
+            setLoader(true);
+            await onSave(payload);
+            setLoader(false);
+            onClose();
+        } catch (error) {
+            console.error("Error updating match:", error);
+        } finally {
+            setLoader(false);
+
+        }
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-[425px] overflow-y-auto min-w-[45vw] max-h-[90vh]">
+            <DialogContent className="sm:max-w-[425px]  min-w-[45vw]">
                 <DialogHeader>
                     <DialogTitle>Match Details</DialogTitle>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
+                <div className="grid gap-4 py-4  overflow-y-auto max-h-[70vh] px-2 -mr-2">
 
                     {/* Teams Selection */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
                             <Label>Team A</Label>
                             <Select value={editTeamA} onValueChange={setEditTeamA}>
-                                <SelectTrigger>
+                                <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Select Team A" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -72,7 +86,7 @@ export function MatchDetailsDialog({ isOpen, onClose, match, tournamentTeams, te
                         <div className="grid gap-2">
                             <Label>Team B</Label>
                             <Select value={editTeamB} onValueChange={setEditTeamB}>
-                                <SelectTrigger>
+                                <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Select Team B" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -91,7 +105,7 @@ export function MatchDetailsDialog({ isOpen, onClose, match, tournamentTeams, te
                     <div className="grid gap-2">
                         <Label>Winner</Label>
                         <Select value={editWinner} onValueChange={setEditWinner}>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select Winner" />
                             </SelectTrigger>
                             <SelectContent>
@@ -144,7 +158,9 @@ export function MatchDetailsDialog({ isOpen, onClose, match, tournamentTeams, te
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>Cancel</Button>
-                    <Button onClick={handleSave}>Save Details</Button>
+                    <Button onClick={handleSave} disabled={loader}>
+                        {loader ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Details"}
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

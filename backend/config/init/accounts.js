@@ -10,7 +10,7 @@ export async function initAccountsTable(){
             account_id SERIAL PRIMARY KEY,
             first_name VARCHAR(150) NOT NULL,
             last_name VARCHAR(150) NOT NULL,
-            middle_name VARCHAR(5) NOT NULL,
+            middle_name VARCHAR(50) NULL,
             role VARCHAR(25) NOT NULL CHECK (role IN ('super_admin', 'admin')),
             email VARCHAR(255) NOT NULL,
             password_hash TEXT NOT NULL,

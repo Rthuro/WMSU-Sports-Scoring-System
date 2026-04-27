@@ -121,9 +121,16 @@ export function CreateTournament() {
             return;
         }
 
-        const success = await createTournament(e);
-        if (success) {
-            navigate(-1);
+        try {
+            setLoader(true);
+            const success = await createTournament(e);
+            if (success) {
+                navigate(-1);
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoader(false);
         }
     };
 

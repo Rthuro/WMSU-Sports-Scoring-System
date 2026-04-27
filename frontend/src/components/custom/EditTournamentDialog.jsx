@@ -4,13 +4,14 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import { useTournamentStore } from "@/store/useTournamentStore2";
 import { useNavigate } from "react-router-dom";
 
 export function EditTournamentDialog({ isOpen, onClose, tournament }) {
     const navigate = useNavigate();
     const { updateTournament, deleteTournament } = useTournamentStore();
+    const [loader, setLoader] = useState(false);
 
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
@@ -38,17 +39,33 @@ export function EditTournamentDialog({ isOpen, onClose, tournament }) {
             location: location || undefined
         };
 
-        const success = await updateTournament(tournament.tournament_id, payload);
-        if (success) {
-            onClose();
+        setLoader(true);
+        try {
+            const success = await updateTournament(tournament.tournament_id, payload);
+            if (success) {
+                onClose();
+            }
+        } catch (error) {
+            console.error("Error updating tournament:", error);
+        } finally {
+            setLoader(false);
         }
+        
     };
 
+    const [deleteLoader, setDeleteLoader] = useState(false);
     const handleDelete = async () => {
-        const success = await deleteTournament(tournament.tournament_id);
-        if (success) {
-            onClose();
-            navigate("/ManageTournaments");
+        setDeleteLoader(true);
+        try {
+            const success = await deleteTournament(tournament.tournament_id);
+            if (success) {
+                onClose();
+                navigate(-1);
+            }
+        } catch (error) {
+            console.error("Error deleting tournament:", error);
+        } finally {
+            setDeleteLoader(false);
         }
     };
 
@@ -95,7 +112,7 @@ export function EditTournamentDialog({ isOpen, onClose, tournament }) {
 
                         <div className="flex gap-2">
                             <Button variant="outline" onClick={onClose}>Cancel</Button>
-                            <Button onClick={handleSave}>Save Changes</Button>
+                            <Button onClick={handleSave} disabled={loader}>{loader ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}</Button>
                         </div>
                     </DialogFooter>
                 </DialogContent>
@@ -112,7 +129,9 @@ export function EditTournamentDialog({ isOpen, onClose, tournament }) {
                     </p>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsDeleting(false)}>Cancel</Button>
-                        <Button variant="destructive" onClick={handleDelete}>Confirm Delete</Button>
+                        <Button variant="destructive" onClick={handleDelete}>
+                            {deleteLoader ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm Delete" }
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
