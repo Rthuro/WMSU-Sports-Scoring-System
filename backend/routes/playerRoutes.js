@@ -7,7 +7,9 @@ import {
     createPlayer,
     updatePlayer,
     deletePlayer,
-    checkPlayerExists
+    checkPlayerExists,
+    getPlayersByDepartment,
+    getPlayersByTeam
 } from "../controllers/playerController.js";
 
 const router = express.Router();
@@ -21,4 +23,6 @@ router.post("/", createPlayer);
 router.put("/:id", updatePlayer);
 router.delete("/:id", deletePlayer);
 
+router.get("/department/:departmentId", getPlayersByDepartment)
+router.get("/team/:teamId", getPlayersByTeam )
 export default router;

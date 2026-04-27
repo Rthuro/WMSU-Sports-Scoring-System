@@ -212,7 +212,7 @@ export function Sport() {
         <div className="flex flex-col gap-3 max-w-[70vw]">
             <p className=" text-xl font-semibold ">Player Stats</p>
             {finalPlayerStats.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No player stats found.</p>
+                <p className="text-muted-foreground text-center">No player stats found.</p>
             ) : (
                 <div className="flex overflow-x-auto pb-1 gap-4">
                     {finalPlayerStats.map((stat) => (
@@ -248,6 +248,8 @@ export function Sport() {
             )}
         </div>
 
+        <Separator />
+        
         <div className="flex flex-col gap-3">
             <p className=" text-xl font-semibold ">Match List</p>
             <div className="border overflow-hidden rounded-lg">

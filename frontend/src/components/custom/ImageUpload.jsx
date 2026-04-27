@@ -53,7 +53,9 @@ export function ImageUpload({ onUploadSuccess, defaultImage, label = "Upload Ima
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={(e) => { e.preventDefault(); document.getElementById("file-upload").click(); }}
+                onClick={(e) => { 
+                  e.preventDefault(); 
+                  document.getElementById("file-upload").click(); }}
                 disabled={loading}
               >
                 Change
@@ -61,7 +63,10 @@ export function ImageUpload({ onUploadSuccess, defaultImage, label = "Upload Ima
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={(e) => { e.preventDefault(); setPreview(""); onUploadSuccess(""); }}
+                onClick={(e) => { 
+                  e.preventDefault(); 
+                  setPreview(""); 
+                  onUploadSuccess(""); }}
                 disabled={loading}
               >
                 Remove

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { PageSync } from '@/components/custom/PageSync';
-import { ArrowLeft, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useSportsStore } from '@/store/useSportsStore';
 import { Switch } from '@/components/ui/switch';
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/tabs"
 import toast from 'react-hot-toast';
 import { Separator } from '@/components/ui/separator';
+import { ImageUpload } from '@/components/custom/ImageUpload';
 
 export function CreateSport() {
     const navigate = useNavigate();
@@ -41,6 +42,7 @@ export function CreateSport() {
     const [setRules, setSetRules] = useState([
         { set_number: null, max_score: null, time: '', minutes: '', seconds: '' }
     ]);
+    const [loader, setLoader] = useState(false);
 
     // Format stats
     const buildStats = (playerStats = [], teamStats = []) => {
@@ -196,7 +198,7 @@ export function CreateSport() {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         const minPlayers = Number(formData.minPlayers);
         const maxPlayers = Number(formData.maxPlayers);
         const defaultSets = Number(formData.defaultSets);
@@ -228,21 +230,50 @@ export function CreateSport() {
             return;
         }
 
-        addSport(e);
+        setLoader(true);
+        const formattedData = {
+            ...formData,
+            minPlayers: minPlayers,
+            maxPlayers: maxPlayers,
+            defaultSets: defaultSets,
+            maxSets: maxSets,
+            maxScore: formData.maxScore ? Number(formData.maxScore) : null,
+            scoring_points: formData.scoring_points.map(Number),
+            penalties: formData.penalties.map(p => ({
+                ...p,
+                penalty_point: p.penalty_point ? Number(p.penalty_point) : null,
+                penalty_limit: p.penalty_limit ? Number(p.penalty_limit) : null
+            })),
+            set_rules: formData.set_rules.map(r => ({
+                ...r,
+                set_number: r.set_number ? Number(r.set_number) : null,
+                max_score: r.max_score ? Number(r.max_score) : null
+            }))
+        };
+        setFormData(formattedData);
 
-        setPoints(["", ""]);
-        setPositions(["", ""]);
-        setPlayerStats(["", ""]);
-        setTeamStats(["", ""]);
-        setPenalty([
-            { penalty_name: "", description: "", penalty_point: "", affects_score: false, penalty_limit: "" }
-        ]);
-        setTimePerSet({ minutes: null, seconds: null });
-        setSetRules([
-            { set_number: null, max_score: '', time: '', minutes: '', seconds: '' }
-        ]);
+        try {
+            const success = await addSport(e);
+            if (success) {
+                setPoints(["", ""]);
+                setPositions(["", ""]);
+                setPlayerStats(["", ""]);
+                setTeamStats(["", ""]);
+                setPenalty([
+                    { penalty_name: "", description: "", penalty_point: "", affects_score: false, penalty_limit: "" }
+                ]);
+                setTimePerSet({ minutes: null, seconds: null });
+                setSetRules([
+                    { set_number: null, max_score: '', time: '', minutes: '', seconds: '' }
+                ]);
+                navigate(-1);
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoader(false);
+        }
 
-        navigate(-1);
 
     };
 
@@ -253,18 +284,25 @@ export function CreateSport() {
                 <button onClick={() => navigate(-1)} className="cursor-pointer" >
                     <ArrowLeft />
                 </button>
-                <Button type="submit" form="createSport" className="w-fit">
-                    <Plus />
-                    Create Sport
+                <Button 
+                onClick={handleSubmit} 
+                className="w-fit"
+                disabled={loader}
+                >
+                    {loader ? <Loader2 className="animate-spin" /> : <Plus />}
+                    {loader ? "Creating..." : "Create Sport"}
                 </Button>
             </div>
-            <form id="createSport" onSubmit={handleSubmit} className='container max-w-8xl mx-auto px-4 flex flex-col gap-6 my-6 border rounded-xl py-6 shadow-md'>
+            <section className='container max-w-8xl mx-auto px-4 flex flex-col gap-6 my-6 border rounded-xl py-6 shadow-md'>
                 <div className="grid grid-cols-3 gap-4">
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor="sportIcon">Sport Icon</Label>
-                        <Input id="sportIcon" type="file"
-                            value={formData.iconPath}
-                            onChange={(e) => setFormData({ ...formData, iconPath: e.target.files[0] })}
+                    <div className="flex flex-col gap-2 col-span-3">
+                        <ImageUpload
+                            label="Sport Icon"
+                            folder="sports"
+                            defaultImage={formData.iconPath}
+                            onUploadSuccess={(url) =>
+                            setFormData({ ...formData, iconPath: url })
+                            }
                         />
                     </div>
                     <div className="flex flex-col gap-2">
@@ -695,7 +733,7 @@ export function CreateSport() {
                 </Tabs>
 
 
-            </form>
+            </section>
         </main>
     )
 }

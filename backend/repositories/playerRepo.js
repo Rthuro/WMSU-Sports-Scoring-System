@@ -4,6 +4,7 @@ export async function findAll() {
   return await sql`SELECT * FROM players WHERE is_deleted = false`;
 }
 
+
 export async function findById(id) {
   const result = await sql`SELECT * FROM players WHERE player_id = ${id} AND is_deleted = false`;
   return result[0] || null;
@@ -109,4 +110,24 @@ export async function softDelete(id) {
     UPDATE players SET is_deleted = true WHERE player_id = ${id} RETURNING *
   `;
   return result[0] || null;
+}
+
+export async function findByDepartment(departmentId){
+  return await sql`
+  SELECT p.*, t.name AS team_name, pt.position_id, pt.jersey_number, pt.team_id
+  FROM players p
+  JOIN player_teams pt ON pt.player_id = p.player_id
+  JOIN teams t ON t.team_id = pt.team_id
+  WHERE t.department_id = ${departmentId} 
+    AND p.is_deleted = false 
+    AND t.is_deleted = false`;
+}
+
+export async function findByTeam(teamId){
+  return await sql`
+  SELECT p.*, pt.position_id, pt.jersey_number, pt.team_id 
+  FROM players p
+  JOIN player_teams pt ON pt.player_id = p.player_id
+  WHERE pt.team_id = ${teamId} 
+    AND p.is_deleted = false`;
 }
