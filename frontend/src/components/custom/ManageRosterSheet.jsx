@@ -38,7 +38,6 @@ import {
 import { usePlayerStore } from "@/store/usePlayerStore";
 import { useTeamPlayersStore } from "@/store/useTeamStore";
 
-const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000" : import.meta.env.VITE_API_URL;
 
 export function ManageRosterSheet({ sheetOpen, setSheetOpen, teamId, type, sportId, currentPlayers = [], onUpdate }) {
     const navigate = useNavigate();
