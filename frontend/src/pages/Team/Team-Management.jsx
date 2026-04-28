@@ -161,9 +161,6 @@ export function TeamManagement() {
                                             >
                                                 <Eye />
                                             </Button>
-                                            <Button variant="outline" size="sm"  >
-                                                <Edit3Icon className=" h-4 w-4" />
-                                            </Button>
                                             <Dialog id="teamDeleteDialog">
                                                 <DialogTrigger asChild >
                                                     <Button variant="destructive" size="sm">
@@ -467,12 +464,9 @@ export function TeamManagement() {
                                 </TableCell>
                                 <TableCell className="flex gap-2">
                                     <Button variant="outline" size="sm"
-                                        onClick={() => navigate(`/TeamManagement/${player.player_id}`)}
+                                        onClick={() => navigate(adminRoute(`Player?id=${player.player_id}`))}
                                     >
                                         <Eye />
-                                    </Button>
-                                    <Button variant="outline" size="sm"  >
-                                        <Edit3Icon className=" h-4 w-4" />
                                     </Button>
                                     <Dialog id="playerDeleteDialog">
                                         <DialogTrigger asChild >

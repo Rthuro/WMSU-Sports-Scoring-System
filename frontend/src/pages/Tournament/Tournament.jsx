@@ -29,6 +29,7 @@ import { adminRoute } from "@/lib/helpers";
 import sample_bg from "@/assets/sample.jpg";
 import html2canvas from 'html2canvas-pro';
 
+
 export function Tournament() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -39,7 +40,7 @@ export function Tournament() {
     const { teams, fetchTeams } = useTeamStore();
     const { tournamentTeams, fetchTournamentTeams } = useTournamentTeamStore();
     const { tournamentMatch, fetchTournamentMatch, updateTournamentMatch } = useTournamentMatchStore();
-    const { tally, fetchTournamentTally } = useTournamentTallyStore();
+    const { tally, fetchTournamentTally, updateTournamentTally } = useTournamentTallyStore();
     const { fetchAllMatchPoints } = useMatchPointsStore();
 
     const bracketRef = useRef(null);
@@ -109,16 +110,76 @@ export function Tournament() {
         }
     };
 
+    // const handleSaveMatchEdit = async (payload) => {
+    //     if (!selectedEditMatch) return;
+    //     const success = await updateTournamentMatch(selectedEditMatch.match_id, payload);
+
+    //     if(payload.winner_id == payload.team_a_id) {
+    //         await updateTournamentTally(tournamentId, payload.team_a_id,  {
+    //             wins: tally.find(t => t.team_id === payload.team_a_id)?.wins + 1 || 1,
+    //         });
+    //         await updateTournamentTally(tournamentId, payload.team_b_id, {
+    //             losses: tally.find(t => t.team_id === payload.team_b_id)?.losses + 1 || 1,
+    //         });
+    //     } else {
+    //          await updateTournamentTally(tournamentId, payload.team_a_id,  {
+    //             losses: tally.find(t => t.team_id === payload.team_a_id)?.losses + 1 || 1,
+    //         });
+    //         await updateTournamentTally(tournamentId, payload.team_b_id, {
+    //             wins: tally.find(t => t.team_id === payload.team_b_id)?.wins + 1 || 1,
+    //         });
+    //     }
+
+        
+
+    //     if (success) {
+    //         fetchTournamentMatch(tournamentId);
+    //         setSelectedEditMatch(null);
+    //         fetchTournamentTally();
+    //     }
+    // };
+
     const handleSaveMatchEdit = async (payload) => {
         if (!selectedEditMatch) return;
-        const success = await updateTournamentMatch(selectedEditMatch.match_id, payload);
-        if (success) {
-            fetchTournamentMatch(tournamentId);
-            setSelectedEditMatch(null);
+
+        try {
+            const res = await updateTournamentMatch(selectedEditMatch.match_id, payload);
+
+            if(res){
+                fetchTournamentMatch(tournamentId);
+                setSelectedEditMatch(null);
+                recountTournamentTally()
+            }
+           
+        } catch (error) {
+            console.error("Error updating match", error);
         }
+
+
     };
 
+    const recountTournamentTally = async () => {
+        
+        const updatePromises = tournamentTeams.map(async (team) => {
+            const teamId = team.team_id;
+            
+            const teamMatches = tournamentMatch.filter(m => 
+                (m.team_a_id === teamId || m.team_b_id === teamId) && m.winner_id
+            );
 
+            const wins = teamMatches.filter(m => m.winner_id === teamId).length;
+            const losses = teamMatches.length - wins;
+
+            return updateTournamentTally(tournamentId, teamId, {
+                wins: wins,
+                losses: losses,
+            });
+        });
+
+        await Promise.all(updatePromises);
+        
+        fetchTournamentTally();
+    };
 
     return <>
         <PageSync page="Tournament Information" />
@@ -195,10 +256,10 @@ export function Tournament() {
                         <Download className="size-4" />
                         Export PDF
                     </Button>
-                    <Button variant="outline" className="w-fit flex self-end" onClick={fetchTournamentMatch}>
+                    {/* <Button variant="outline" className="w-fit flex self-end" onClick={fetchTournamentMatch}>
                         <RefreshCw className="size-4" />
                         Refresh
-                    </Button>
+                    </Button> */}
                 </div>
 
             </div>
@@ -219,7 +280,7 @@ export function Tournament() {
         <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
                 <p className=" text-2xl font-semibold ">Tournament Tally</p>
-                <Button variant="outline" className="w-fit flex self-end" onClick={fetchTournamentTally}>
+                <Button variant="outline" className="w-fit flex self-end" onClick={recountTournamentTally}>
                     <RefreshCw className="size-4" />
                     Refresh
                 </Button>
@@ -278,6 +339,7 @@ export function Tournament() {
                             <TableHead> Team A</TableHead>
                             <TableHead> Team B</TableHead>
                             <TableHead> Date </TableHead>
+                            <TableHead> Winner </TableHead>
                             <TableHead> Status </TableHead>
                             <TableHead>Actions</TableHead>
                         </TableRow>
@@ -304,6 +366,9 @@ export function Tournament() {
                                     </Link>
                                 </TableCell>
                                 <TableCell>{formatDateToString(match.date) || "--"}</TableCell>
+                                <TableCell>
+                                    {match.winner_id == match.team_a_id ? teams.find(t => t.team_id == match.team_a_id)?.short_name : match.winner_id == match.team_b_id ? teams.find(t => t.team_id == match.team_b_id)?.short_name : "--"}
+                                </TableCell>
                                 <TableCell>
                                     {match.is_finished ? 'finished' : "on-going"}
                                 </TableCell>

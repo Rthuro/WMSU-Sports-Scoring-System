@@ -133,7 +133,7 @@ export function ManageEvents() {
                             <Card className="bg-white shadow border border-gray-100 hover:shadow-lg py-3">
                                 <CardHeader className="px-3">
                                     <CardTitle className="flex flex-col gap-2">
-                                        <img src={sample_bg} alt="" srcset=""
+                                        <img src={event?.banner_image || sample_bg} alt="" srcset=""
                                             className="rounded-lg h-36 object-cover object-center" />
                                         <div className="flex items-center justify-between mt-2">
                                             <p className="text-lg font-semibold">{event.name}</p>

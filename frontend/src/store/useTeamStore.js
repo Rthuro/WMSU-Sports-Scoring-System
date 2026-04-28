@@ -162,6 +162,7 @@ export const useTeamPlayersStore = create((set, get) => ({
     },
     updatePlayerTeam: async (id, data) => {
         try {
+            // need team_id in data
             const res = await axios.put(`${BASE_URL}/api/player-team/${id}`, data);
             set((state) => ({
                 teamPlayers: state.teamPlayers.map((t) => t.player_team_id === id ? { ...t, ...res.data.data } : t)
@@ -172,9 +173,9 @@ export const useTeamPlayersStore = create((set, get) => ({
             return false;
         }
     },
-    deletePlayerTeam: async (id) => {
+    deletePlayerTeam: async (id, team_id) => {
         try {
-            await axios.delete(`${BASE_URL}/api/player-team/${id}`);
+            await axios.delete(`${BASE_URL}/api/player-team/${id}/${team_id}`);
             set((state) => ({
                 teamPlayers: state.teamPlayers.filter((t) => t.player_team_id !== id)
             }));

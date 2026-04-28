@@ -21,7 +21,7 @@ export async function create(data) {
 export async function update(id, data) {
   const result = await sql`
     UPDATE departments
-    SET name=${data.name}, abbreviation=${data.abbreviation}, logo=${data.logo}, updated_at=CURRENT_TIMESTAMP
+    SET name=COALESCE(${data.name}, name), abbreviation=COALESCE(${data.abbreviation}, abbreviation), logo=COALESCE(${data.logo}, logo), updated_at=CURRENT_TIMESTAMP
     WHERE department_id = ${id} AND is_deleted = false
     RETURNING *
   `;

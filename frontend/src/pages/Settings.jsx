@@ -9,28 +9,80 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { capitalizeFirstLetter } from '@/lib/helpers';
 import { useEffect } from 'react';
 import { ImageUpload } from '@/components/custom/ImageUpload';
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetClose } from "@/components/ui/sheet";
+import { useState } from 'react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 export function Settings () {
-    const { formData, setFormData, addDepartment, departments, fetchDepartments, deleteDepartment } = useDepartmentStore();
+    const { formData, setFormData, addDepartment, departments, fetchDepartments, deleteDepartment, updateDepartment } = useDepartmentStore();
+    const [editFormData, setEditFormData] = useState({
+        id: "",
+        name: "",
+        abbreviation: "",
+        logo: null
+    })
+    const [sheetOpen, setSheetOpen] = useState(false)
+    const [dialogOpen, setDialogOpen] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [delLoader, setDelLoader] = useState(false)
 
     useEffect(() => {
         fetchDepartments();
     }, [fetchDepartments]);
 
     const handleSubmitDepartment = async (e) => {
-        const success = await addDepartment(e);
-        if (success) {
-            const closeBtn = document.querySelector('[data-slot="dialog-close"]');
-            if (closeBtn) closeBtn.click();
-            return;
+        setLoading(true)
+        try {
+            const success = await addDepartment(e);
+            if (success) {
+                setDialogOpen(false);
+                return;
+            }
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false)
         }
     }
 
     const handleDelete = async (e, id) => {
-        const success = await deleteDepartment(e, id);
-        if (success) {
-            document.getElementById("departmentDeleteDialog").close();
+        setDelLoader(true)
+        try {
+            const success = await deleteDepartment(e, id);
+            if (success) {
+                document.getElementById("departmentDeleteDialog").close();
+                return;
+            }
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setDelLoader(false)
+        }
+    }
+
+    const handleSaveDepartmentEdit = async (e) => {
+        if (!editFormData?.id) {
+            console.error("No department ID provided");
             return;
+        }
+
+        setLoading(true);
+        try {
+            const success = await updateDepartment(e, editFormData);
+            if (success) {
+                fetchDepartments();
+                setSheetOpen(false);
+                setEditFormData({
+                    id: "",
+                    name: "",
+                    abbreviation: "",
+                    logo: null
+                });
+            }
+        } catch (error) {
+            console.error("Error saving department:", error);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -39,7 +91,7 @@ export function Settings () {
             <PageSync page="Settings" />
             <div className="flex items-center justify-between my-4">
                 <p className=" text-2xl font-semibold ">Departments</p>
-                <Dialog id="addDepartmentDialog">
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen} >
                     <DialogTrigger asChild>
                         <Button type="button" className="w-fit">
                             <Plus />
@@ -82,7 +134,7 @@ export function Settings () {
                             <DialogClose asChild>
                                 <Button variant="outline">Cancel</Button>
                             </DialogClose>
-                            <Button type="submit" form="addDepartment">Add department</Button>
+                            <Button type="submit" form="addDepartment" disabled={loading}>{loading ? "Adding department..." : "Add department"}</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
@@ -99,12 +151,25 @@ export function Settings () {
                         {departments?.map((department) => (
                             <TableRow key={department.department_id}>
                                 <TableCell className="font-medium ">
-                                    <div>
-                                        {capitalizeFirstLetter(department.name)}
+                                    <div className='flex items-center gap-3'>
+                                        <Avatar className="size-9">
+                                            <AvatarImage src={department.logo} alt={department.abbreviation} />
+                                            <AvatarFallback>{department.abbreviation}</AvatarFallback>
+                                        </Avatar>
+                                        <p>{department.name} {department.abbreviation && `(${department.abbreviation})`}</p>
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    <Button variant="outline" size="sm" className="mr-2" >
+                                    <Button variant="outline" size="sm" className="mr-2" 
+                                    onClick={() => {
+                                        setEditFormData({
+                                            id: department.department_id,
+                                            name: department.name,
+                                            abbreviation: department.abbreviation,
+                                            logo: department.logo
+                                        })
+                                        setSheetOpen(true);
+                                    }}>
                                         <Edit3Icon className=" h-4 w-4" />
                                     </Button>
                                     <Dialog id="departmentDeleteDialog">
@@ -144,7 +209,46 @@ export function Settings () {
                     </TableBody>
                 </Table>
             </section>
-            
+            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+                <SheetContent side="right" className="overflow-y-auto min-w-[500px]">
+                    <SheetHeader>
+                        <SheetTitle>Edit Department</SheetTitle>
+                        <SheetDescription>
+                            Update the department details below.
+                        </SheetDescription>
+                    </SheetHeader>
+                    <div className="flex flex-col gap-4 px-4 pb-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="edit-match-name">Name</Label>
+                            <Input
+                                value={editFormData?.name || null}
+                                onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="edit-match-name">Abbreviation</Label>
+                            <Input
+                                id="edit-match-name"
+                                value={editFormData.abbreviation}
+                                onChange={(e) => setEditFormData({ ...editFormData, abbreviation: e.target.value })}
+                            />
+                        </div>
+                        <div className="grid gap-2">
+                             <ImageUpload
+                                label="Department Logo"
+                                folder="departments"
+                                defaultImage={editFormData.logo}
+                                onUploadSuccess={(url) => setEditFormData({ ...editFormData, logo: url })}
+                            />
+                        </div>
+                    </div>
+                    <SheetFooter>
+                        <Button onClick={(e) => handleSaveDepartmentEdit(e, editFormData)} className="w-full" variant="outline" disabled={loading}>
+                            {loading ? "Saving..." : "Save Changes"}
+                        </Button>
+                    </SheetFooter>
+                </SheetContent>
+            </Sheet>
         </main>
     )
 }

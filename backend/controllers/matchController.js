@@ -31,6 +31,15 @@ export const getMatchesBySport = async (req, res, next) => {
     }
 };
 
+export const getMatchesByDate = async (req, res, next) => {
+    try {
+        const result = await matchRepo.findByDateRange(req.params.startDate, req.params.endDate);
+        res.status(200).json({ success: true, data: result });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const createMatch = async (req, res, next) => {
     try {
         // Use transactional method that also creates participants

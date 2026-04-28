@@ -1,7 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { useTeamStore } from "@/store/useTeamStore";
 import { PageSync } from "@/components/custom/PageSync"
+import { ManageRosterSheet } from "@/components/custom/ManageRosterSheet";
 import {
     ArrowLeft, MapPin, CalendarDays, Activity, FileDigit,
     Eye, Edit2, Settings2, Trophy, Users, Info
@@ -26,12 +27,14 @@ export function TeamProfile() {
     const type = searchParams.get("type");
     const id = searchParams.get("id");
 
+    const [rosterSheetOpen, setRosterSheetOpen] = useState(false);
+
     const navigate = useNavigate();
     const { teamProfile, profileLoading, fetchTeamProfile, updateTeam } = useTeamStore();
     const { sports, fetchSports } = useSportsStore();
 
-    const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
-    const [editFormData, setEditFormData] = React.useState({
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [editFormData, setEditFormData] = useState({
         name: "",
         sport_id: "",
         department_name: "",
@@ -73,6 +76,8 @@ export function TeamProfile() {
     }
 
     const { players = [], tournaments = [], matches = [] } = teamProfile;
+
+    // console.log(teamProfile)
 
     return (
         <div className="flex flex-col gap-6 pb-12 w-full max-w-6xl mx-auto">
@@ -237,7 +242,7 @@ export function TeamProfile() {
                             </span>
                             Player Roster
                         </h2>
-                        <Button variant="outline" size="sm" className="gap-2 text-xs h-8">
+                        <Button variant="outline" size="sm" className="gap-2 text-xs h-8" onClick={() => setRosterSheetOpen(true)}>
                             <Settings2 size={14} />
                             Manage Roster
                         </Button>
@@ -253,9 +258,9 @@ export function TeamProfile() {
                                 <TableHeader className="bg-slate-50/80 backdrop-blur-sm sticky top-0">
                                     <TableRow>
                                         <TableHead className="font-bold">Player Name</TableHead>
-                                        <TableHead className="font-bold">ID Number</TableHead>
                                         <TableHead className="font-bold">Gender</TableHead>
-                                        <TableHead className="text-center font-bold">Blood Type</TableHead>
+                                        <TableHead className="font-bold">Jersey Number</TableHead>
+                                        <TableHead className="font-bold">Position</TableHead>
                                         <TableHead className="text-right font-bold">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -274,17 +279,14 @@ export function TeamProfile() {
                                                     {`${p.first_name} ${p.last_name || ''}`}
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-slate-500 font-mono text-xs">{p.id_number || 'N/A'}</TableCell>
                                             <TableCell>
                                                 <Badge variant="secondary" className="bg-slate-100 text-slate-600 hover:bg-slate-100 border-none px-2 py-0">
                                                     {p.gender || 'N/A'}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="text-center">
-                                                <span className="bg-red-50 text-red font-black text-xs px-2 py-1 rounded-md border border-red-100">
-                                                    {p.blood_type || 'N/A'}
-                                                </span>
-                                            </TableCell>
+                                            <TableCell className="text-slate-500 font-mono text-xs">{p.jersey_number || 'N/A'}</TableCell>
+                                            <TableCell className="text-slate-500 font-mono text-xs">{p.position_name || 'N/A'}</TableCell>
+
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-1">
                                                     <Link to={adminRoute(`Player/?id=${p.player_id}`)}>
@@ -397,6 +399,16 @@ export function TeamProfile() {
                     )}
                 </div>
             </div>
+
+            <ManageRosterSheet 
+                sheetOpen={rosterSheetOpen} 
+                setSheetOpen={setRosterSheetOpen}
+                teamId={id}
+                type={type}
+                sportId={teamProfile?.sport_id}
+                currentPlayers={players}
+                onUpdate={() => fetchTeamProfile(type, id)}
+            />
         </div>
     );
 }

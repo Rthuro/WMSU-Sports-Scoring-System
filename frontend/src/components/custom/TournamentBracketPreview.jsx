@@ -22,7 +22,7 @@ function getTeamDetails(teamId, teams, winnerId) {
     id: teamId,
     name: team ? team.name : "Unknown",
     isWinner: winnerId && teamId === winnerId,
-    resultText: winnerId && teamId === winnerId ? "WINNER" : ""
+    resultText: winnerId && teamId === winnerId ? "Won" : "Lost"
   };
 }
 

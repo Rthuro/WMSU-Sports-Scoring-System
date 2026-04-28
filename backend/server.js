@@ -51,6 +51,10 @@ import tournamentTallyRoutes from "./routes/tournaments/tournamentTallyRoutes.js
 import matchPointsRoutes from "./routes/matches/matchPointsRoutes.js";
 import matchParticipantsRoutes from "./routes/matches/matchParticipantsRoutes.js";
 
+// public routes
+import articleRoutes from "./routes/public/articleRoutes.js";
+import publicRoutes from "./routes/public/publicRoutes.js";
+
 
 import { initDB } from "./config/init/init.js";
 
@@ -104,6 +108,10 @@ app.use("/api/tournament-tally", tournamentTallyRoutes)
 // // match related routes
 app.use("/api/match-points", matchPointsRoutes)
 app.use("/api/match-participants", matchParticipantsRoutes)
+
+// // public routes
+app.use("/api/articles", articleRoutes)
+app.use("/api/public", publicRoutes)
 
 // Global error handler — MUST be after all routes
 app.use(errorHandler);

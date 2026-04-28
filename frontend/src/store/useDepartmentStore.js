@@ -55,12 +55,33 @@ export const useDepartmentStore = create((set, get) => ({
         }
     },
 
+    updateDepartment: async (e, dataToUpdate) => {
+        e.preventDefault();
+        const id = dataToUpdate.id;
+        try {
+            const res = await axios.put(`${BASE_URL}/api/departments/${id}`, dataToUpdate);
+            
+            set((state) => ({
+                departments: state.departments.map(d => d.id === id ? res.data.data : d)
+            }));
+
+            toast.success("Department updated successfully");
+            return true;
+        } catch (error) {
+            toast.error("Failed to update department");
+            return false;
+
+        }
+    },
+
     deleteDepartment: async (e, id) => {
         e.preventDefault();
         try {
             await axios.delete(`${BASE_URL}/api/departments/${id}`);
+            set({
+                departments: get().departments.filter((d) => d.id !== id),
+            });
             toast.success("Department deleted successfully");
-            get().fetchDepartments();
             return true;
         } catch {
             toast.error("Failed to delete department");

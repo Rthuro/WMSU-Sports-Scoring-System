@@ -125,7 +125,7 @@ export async function findByDepartment(departmentId){
 
 export async function findByTeam(teamId){
   return await sql`
-  SELECT p.*, pt.position_id, pt.jersey_number, pt.team_id 
+  SELECT p.*, pt.id as player_team_id, pt.position_id, pt.jersey_number, pt.team_id 
   FROM players p
   JOIN player_teams pt ON pt.player_id = p.player_id
   WHERE pt.team_id = ${teamId} 
