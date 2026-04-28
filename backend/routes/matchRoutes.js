@@ -5,6 +5,7 @@ import {
     getMatches,
     getMatchesById,
     getMatchesBySport,
+    getMatchesByDate,
     createMatch,
     updateMatch,
     softDeleteMatch,
@@ -15,6 +16,7 @@ import {
 const router = express.Router();
 
 router.get("/", getMatches);
+router.get("/date/:startDate/:endDate", getMatchesByDate);
 router.get("/:match_id", getMatchesById);
 router.get("/sport/:sport_id", getMatchesBySport);
 router.post("/", validate(createMatchSchema), createMatch);

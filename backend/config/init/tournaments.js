@@ -17,6 +17,7 @@ export async function initTournamentsTable() {
         is_deleted BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        
       )
     `;
     await sql`CREATE INDEX IF NOT EXISTS idx_tournaments_event_id ON tournaments(event_id)`;
@@ -63,11 +64,13 @@ export async function initTournamentMatchesTable() {
         round INT NOT NULL CHECK (round > 0),
         is_finished BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        is_deleted BOOLEAN DEFAULT FALSE
       )
     `;
     // Ensure winner_id exists if table was already created
     await sql`ALTER TABLE tournament_matches ADD COLUMN IF NOT EXISTS winner_id INT REFERENCES teams(team_id) DEFAULT NULL`;
+    await sql`ALTER TABLE tournament_matches ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE`;
     await sql`CREATE INDEX IF NOT EXISTS idx_tournament_matches_tournament_id ON tournament_matches(tournament_id)`;
     console.log("✅ tournament_matches table initialized");
   } catch (error) {

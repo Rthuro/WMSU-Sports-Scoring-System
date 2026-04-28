@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useEffect} from "react"
 import hero_img from "@/assets/home/hero_img.png"
 import departments from "@/data/department_loop.js"
 import { ArrowRight, ArrowUpRight, FileText } from 'lucide-react'
@@ -7,8 +7,18 @@ import { events, events_match, event_winners } from '@/data/events.js'
 import Event_Match from "@/components/Event_Match"
 import Event_Winner from "@/components/Event_Winner"
 import { Link } from 'react-router-dom'
+import { usePublicStore } from "@/store/usePublicStore";
 
 export function PublicHome() {
+      const { allMatches, allTournaments, fetchAllMatches, } = usePublicStore();
+       useEffect(() => {
+            fetchAllMatches();
+        }, [fetchAllMatches]);
+
+      const limit = 4;
+      const recentMatches = allMatches.slice(0, limit);
+      const recentTournaments = allTournaments.slice(0, limit);
+  
   return (
     <div className="pb-16">
 
@@ -50,22 +60,43 @@ export function PublicHome() {
         </div>
         <section className="grid grid-cols-1 md:grid-cols-2 w-full gap-x-6 gap-y-3 ">
           {
-            events.map(event => (
-              events_match.map((match, idx) =>
-                match.event_id == event.event_id ?
+              recentMatches.map((match, idx) =>
                   <Event_Match key={idx}
-                    event_name={event.event_name}
+                    event_name={match.match_name}
                     event_date={match.date}
                     match_start_time={match.start_time}
                     match_end_time={match.end_time}
-                    sports_category={match.sports_category}
+                    sports_category={match.sport_name}
                     team_a={match.team_a}
                     team_b={match.team_b}
                     team_a_logo={match.team_a_logo}
-                    team_b_logo={match.team_b_logo} />
-                  : ''
+                    team_b_logo={match.team_b_logo} 
+                    team_a_score={match.total_a_score}
+                    team_b_score={match.total_b_score}
+                    />
               )
-            )
+          }{
+             recentTournaments.map((match, idx) =>
+                  <Event_Match key={idx}
+                    event_name={match.match_name}
+                    event_date={match.date}
+                    match_start_time={match.start_time}
+                    match_end_time={match.end_time}
+                    sports_category={match.sport_name}
+                    team_a={match.team_a}
+                    team_b={match.team_b}
+                    team_a_logo={match.team_a_logo}
+                    team_b_logo={match.team_b_logo}
+                    team_a_score={match.total_a_score}
+                    team_b_score={match.total_b_score} />
+                  
+              )
+          }
+          {
+            recentMatches.length === 0 && recentTournaments.length === 0 && (
+               <div className="text-center py-12 text-muted-foreground">
+                    <p className="text-white">No events created</p>
+                </div>
             )
           }
         </section>
@@ -82,24 +113,50 @@ export function PublicHome() {
 
         <section className="grid grid-cols-1 md:grid-cols-2 w-full space-x-6 space-y-3 bg-custom-primary/5">
           {
-            events.map(event => (
-              event_winners.map((winner, idx) =>
-                winner.event_id == event.event_id ?
+              recentMatches.map((winner, idx) =>
                   <Event_Winner key={idx}
-                    event_name={event.event_name}
+                    event_name={winner.match_name}
                     event_date={winner.date}
                     match_start_time={winner.start_time}
                     match_end_time={winner.end_time}
-                    sports_category={winner.sports_category}
+                    sports_category={winner.sport_name}
                     team_a={winner.team_a}
                     team_b={winner.team_b}
                     team_a_logo={winner.team_a_logo}
                     team_b_logo={winner.team_b_logo}
-                    winner={winner.winner}
+                    winner={winner.winner_id}
+                    team_a_id={winner.team_a_id}
+                    team_b_id={winner.team_b_id}
+                    total_a_score={winner.total_a_score}
+                    total_b_score={winner.total_b_score}
                   />
-                  : ''
               )
-            )
+          }
+           {
+              recentTournaments.map((winner, idx) =>
+                  <Event_Winner key={idx}
+                    event_name={winner.match_name}
+                    event_date={winner.date}
+                    match_start_time={winner.start_time}
+                    match_end_time={winner.end_time}
+                    sports_category={winner.sport_name}
+                    team_a={winner.team_a}
+                    team_b={winner.team_b}
+                    team_a_logo={winner.team_a_logo}
+                    team_b_logo={winner.team_b_logo}
+                    winner={winner.winner_id}
+                    team_a_id={winner.team_a_id}
+                    team_b_id={winner.team_b_id}
+                    total_a_score={winner.total_a_score}
+                    total_b_score={winner.total_b_score}
+                  />
+              )
+          }
+          {
+            recentMatches.length === 0 && recentTournaments.length === 0 && (
+               <div className="text-center py-12 text-muted-foreground">
+                    <p className="text-white">Nothing to show</p>
+                </div>
             )
           }
         </section>

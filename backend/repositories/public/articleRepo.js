@@ -1,7 +1,7 @@
 import { sql } from "../../config/db.js";
 
 export async function findAll() {
-    return await sql`SELECT * FROM articles WHERE is_deleted = false ORDER BY created_at DESC`;
+    return await sql`SELECT * FROM articles ORDER BY created_at DESC`;
 }
 export async function findAllPublic() {
     return await sql`SELECT * FROM articles WHERE is_deleted = false AND is_public = true ORDER BY created_at DESC`;

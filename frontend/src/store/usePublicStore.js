@@ -37,6 +37,7 @@ export const usePublicStore = create((set, get) => ({
             const response = await axios.post(`${BASE_URL}/api/articles`, articleData);
             set((state) => ({ articles: [...state.articles, response.data.data] }));
             toast.success("Article added successfully");
+            get().fetchArticles();
             return true;
         } catch (err) {
             console.log("Error in sport function", err);
@@ -55,6 +56,8 @@ export const usePublicStore = create((set, get) => ({
             const response = await axios.put(`${BASE_URL}/api/articles/${articleData.article_id}`, articleData);
             set((state) => ({ articles: state.articles.map((article) => article.article_id === articleData.article_id ? response.data.data : article) }));
             toast.success("Article updated successfully");
+            get().fetchArticles();
+            return true;
         } catch (err) {
             console.log("Error in sport function", err);
             if (err.response?.data?.errors) {
@@ -79,6 +82,45 @@ export const usePublicStore = create((set, get) => ({
             } else {
                 toast.error("Something went wrong");
             }
+        }
+    },
+
+    matchesByDate: [],
+    tournamentsByDate: [],
+    loading: false,
+    error: null,
+
+    fetchMatchesByDateRange: async (startDate, endDate) => {
+        set({ loading: true, error: null });
+        try {
+            const res = await axios.get(`${BASE_URL}/api/public/date/${startDate}/${endDate}`);
+            const data = res.data.data;
+            set({ 
+                matchesByDate: data.matches || [], 
+                tournamentsByDate: data.tournaments || [],
+                loading: false 
+            });
+        } catch (error) {
+            set({ error, loading: false });
+        }
+    },
+
+    allMatches: [],
+    allTournaments: [],
+    fetchAllMatches: async () => {
+        set({ loading: true, error: null });
+        try {
+            const response = await axios.get(`${BASE_URL}/api/public/all`);
+            const data = response.data.data;
+            set({ 
+                allMatches: data.matches || [], 
+                allTournaments: data.tournaments || [],
+                loading: false 
+            });
+        } catch (err) {
+            if (err.status === 429)
+                set({ error: "Rate limit exceeded" });
+            else set({ error: "Something went wrong" });
         }
     },
 

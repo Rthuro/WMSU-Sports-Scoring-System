@@ -73,6 +73,42 @@ export async function findBySport(sportId) {
   WHERE m.sport_id = ${sportId} ORDER BY m.date DESC`;
 }
 
+export async function findByDateRange(startDate, endDate) {
+  const matches = await sql`
+  SELECT m.*,
+    team_a.name AS team_a,
+    team_a.banner_image AS team_a_logo,
+    team_b.name AS team_b,
+    team_b.banner_image AS team_b_logo,
+    sports.name AS sports_category
+  FROM matches m
+  LEFT JOIN teams team_a ON m.team_a_id = team_a.team_id
+  LEFT JOIN teams team_b ON m.team_b_id = team_b.team_id
+  LEFT JOIN sports ON m.sport_id = sports.sport_id
+  WHERE m.date >= ${startDate} AND m.date <= ${endDate} AND m.is_deleted = false
+  ORDER BY m.date ASC, m.start_time ASC`;
+
+  const tournaments = await sql`
+  SELECT 
+    t.*,
+    s.name AS sport_name,
+    team_a.name AS team_a,
+    team_a.banner_image AS team_a_logo,
+    team_b.name AS team_b,
+    team_b.banner_image AS team_b_logo
+  FROM tournament_matches t
+  LEFT JOIN teams team_a ON t.team_a_id = team_a.team_id
+  LEFT JOIN teams team_b ON t.team_b_id = team_b.team_id
+  LEFT JOIN sports s ON t.sport_id = s.sport_id
+  WHERE t.date >= ${startDate} AND t.date <= ${endDate} AND t.is_deleted = false
+   ORDER BY t.date ASC, t.start_time ASC`;
+
+  return {
+    matches,
+    tournaments
+  };
+}
+
 export async function create(data) {
   const result = await sql`
     INSERT INTO matches (match_id, sport_id, match_name, date, start_time, end_time, location, is_team, team_a_id, team_b_id, player_a_id, player_b_id)

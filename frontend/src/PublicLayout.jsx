@@ -28,6 +28,8 @@ export function PublicLayout() {
             >
               <Link onClick={() => setSidebarVisibility(visible => !visible)} to="/">Home</Link>
               <Link onClick={() => setSidebarVisibility(visible => !visible)} to="/Events">Events</Link>
+              <Link onClick={() => setSidebarVisibility(visible => !visible)} to="/Tournaments">Tournaments</Link>
+              <Link onClick={() => setSidebarVisibility(visible => !visible)} to="/Calendar">Calendar</Link>
               <Link onClick={() => setSidebarVisibility(visible => !visible)} to="/Sports">Sports</Link>
               <Link onClick={() => setSidebarVisibility(visible => !visible)} to="/Departments">Departments</Link>
             </motion.div>
@@ -39,6 +41,8 @@ export function PublicLayout() {
         <div className='hidden md:flex items-center text-lg gap-6 drop-shadow-md font-medium'>
           <Link to="/">Home</Link>
           <Link to="/Events">Events</Link>
+          <Link to="/Tournaments">Tournaments</Link>
+          <Link to="/Calendar">Calendar</Link>
           <Link to="/Sports">Sports</Link>
           <Link to="/Departments">Departments</Link>
         </div>

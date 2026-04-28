@@ -46,3 +46,14 @@ export async function remove(id) {
   const result = await sql`DELETE FROM tournament_matches WHERE match_id = ${id} RETURNING *`;
   return result[0] || null;
 }
+
+export async function softDelete(matchId) {
+    const result = await sql`
+        UPDATE tournament_matches
+        SET is_deleted = TRUE,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE match_id = ${matchId}
+        RETURNING *
+    `;
+    return result[0] || null;
+}

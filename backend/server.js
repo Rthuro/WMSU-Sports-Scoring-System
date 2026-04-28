@@ -53,6 +53,7 @@ import matchParticipantsRoutes from "./routes/matches/matchParticipantsRoutes.js
 
 // public routes
 import articleRoutes from "./routes/public/articleRoutes.js";
+import publicRoutes from "./routes/public/publicRoutes.js";
 
 
 import { initDB } from "./config/init/init.js";
@@ -110,6 +111,7 @@ app.use("/api/match-participants", matchParticipantsRoutes)
 
 // // public routes
 app.use("/api/articles", articleRoutes)
+app.use("/api/public", publicRoutes)
 
 // Global error handler — MUST be after all routes
 app.use(errorHandler);

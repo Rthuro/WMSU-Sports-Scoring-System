@@ -38,3 +38,11 @@ export const deleteTournamentMatch = async (req, res, next) => {
         res.status(200).json({ success: true, data: match });
     } catch (error) { next(error); }
 };
+
+export const softDeleteTournamentMatch = async (req, res, next) => {
+    try {
+        const match = await tournamentMatchesRepo.softDelete(req.params.id);
+        if (!match) throw new AppError("Tournament match not found", 404);
+        res.status(200).json({ success: true, data: match });
+    } catch (error) { next(error); }
+};

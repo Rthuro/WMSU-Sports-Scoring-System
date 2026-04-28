@@ -13,13 +13,33 @@ export const useMatchStore = create((set, get) => ({
     matchPoints: [],
     matchParticipants: [],
     matchBySport: [],
+    matchesByDate: [],
+    tournamentsByDate: [],
+    loading: false,
+    error: null,
 
     fetchMatches: async () => {
+        set({ loading: true, error: null });
         try {
             const res = await axios.get(`${BASE_URL}/api/match`);
-            set({ matches: res.data.data });
+            set({ matches: res.data.data, loading: false });
         } catch (error) {
-            set({ error });
+            set({ error, loading: false });
+        }
+    },
+
+    fetchMatchesByDateRange: async (startDate, endDate) => {
+        set({ loading: true, error: null });
+        try {
+            const res = await axios.get(`${BASE_URL}/api/match/date/${startDate}/${endDate}`);
+            const data = res.data.data;
+            set({ 
+                matchesByDate: data.matches || [], 
+                tournamentsByDate: data.tournaments || [],
+                loading: false 
+            });
+        } catch (error) {
+            set({ error, loading: false });
         }
     },
 

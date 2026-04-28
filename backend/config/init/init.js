@@ -26,6 +26,7 @@ initMatchPoints
 } from "./matches.js" 
 import { initStatsTable } from "./stats.js"
 import { initTeamsTable } from "./teams.js"
+import { initArticlesTable , initWebsiteSettingsTable} from "./public.js"
 
 export async function initDB() {
     try {
@@ -71,6 +72,10 @@ export async function initDB() {
 
         // tables needed: event, tournament, team, player
         await initEventAwardsTable();
+
+        // tables needed: website
+        await initArticlesTable();
+        await initWebsiteSettingsTable();
         
         // console.log("✅ All wmsu-sport tables initialized");
     } catch (error) {
