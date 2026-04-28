@@ -216,7 +216,7 @@ export function TournamentBracketPreview({ bracketingType, matches = [], teams =
 
   if (bracketingType === "single-elimination") {
     return (
-      <div className="w-full bg-gray-200 border rounded-lg overflow-hidden flex justify-center items-center" ref={containerRef} style={{ minHeight: '500px' }}>
+      <div className="w-full bg-white border rounded-lg overflow-hidden flex justify-center items-center" ref={containerRef} style={{ minHeight: '500px' }}>
         <SingleEliminationBracket
           matches={formattedMatches}
           matchComponent={Match}
