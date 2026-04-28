@@ -96,9 +96,10 @@ export async function findProfileById(type, id) {
 
   // 1. Players
   const players = await sql`
-    SELECT p.*, pt.position_id, pt.jersey_number 
+    SELECT p.*, pt.id, pt.position_id, pt.jersey_number, sp.position_name  
     FROM player_teams pt
     JOIN players p ON pt.player_id = p.player_id
+    JOIN sports_position sp ON pt.position_id = sp.id
     WHERE pt.team_id = ${id} AND p.is_deleted = false
   `;
 

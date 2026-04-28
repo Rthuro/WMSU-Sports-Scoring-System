@@ -23,8 +23,8 @@ export async function create(data) {
 
 export async function update(id, data) {
   const result = await sql`
-    UPDATE player_teams SET player_id = ${data.player_id}, team_id = ${data.team_id},
-    position_id = ${data.position_id}, jersey_number = ${data.jersey_number}
+    UPDATE player_teams SET
+    position_id = COALESCE(${data.position_id}, position_id), jersey_number = COALESCE(${data.jersey_number}, jersey_number)
     WHERE id = ${id} RETURNING *
   `;
   return result[0] || null;
