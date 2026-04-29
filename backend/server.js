@@ -1,4 +1,5 @@
 import express from "express";
+import { createServer } from "http";
 import helmet from "helmet";
 import morgan from "morgan";
 import cors from "cors"
@@ -57,10 +58,12 @@ import publicRoutes from "./routes/public/publicRoutes.js";
 
 
 import { initDB } from "./config/init/init.js";
+import { initSocket } from "./socketManager.js";
 
 dotenv.config();
 
 const app = express();
+const httpServer = createServer(app);
 const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
 const PORT = process.env.PORT || 3000;
 const __dirname = path.resolve();
@@ -126,9 +129,11 @@ app.use(errorHandler);
 
 initDB()
   .then(() => {
-    app.listen(PORT, '0.0.0.0', () => {
+    initSocket(httpServer, allowedOrigin);
+    httpServer.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server is running on port ${PORT}`);
       console.log(`📡 Allowing requests from: ${allowedOrigin}`);
+      console.log(`🔌 Socket.IO attached`);
     });
   })
   .catch((err) => {

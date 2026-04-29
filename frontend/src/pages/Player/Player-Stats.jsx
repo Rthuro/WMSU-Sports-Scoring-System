@@ -1,16 +1,13 @@
 import { PageSync } from "@/components/custom/PageSync"
-import { StatsFilterTable } from "@/components/custom/stats-filter-table"
 import { useSportsStore } from "@/store/useSportsStore"
 import { useEffect, useState } from "react"
 import { usePlayerStore, usePlayerStatsStore } from "@/store/usePlayerStore"
 import { Input } from "@/components/ui/input"
 import { adminRoute, capitalizeFirstLetter } from "@/lib/helpers"
 import { useMatchStore } from "@/store/useMatchStore"
-import { useTeamPlayersStore } from "@/store/useTeamStore"
-import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Eye, ChevronDown } from "lucide-react"
+import { Eye } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Link } from "react-router-dom"
 
@@ -18,8 +15,7 @@ export function PlayerStats() {
     const { sports, stats } = useSportsStore();
     const { players } = usePlayerStore();
     const { playerStats } = usePlayerStatsStore();
-    const { matchPoints, matchParticipants } = useMatchStore();
-    const { teamPlayers } = useTeamPlayersStore();
+    const { matchParticipants } = useMatchStore();
 
     const [selectedSport, setSelectedSport] = useState("all");
     const [sportTableHeaders, setSportTableHeaders] = useState([]);
@@ -33,40 +29,19 @@ export function PlayerStats() {
         }
     }, [selectedSport, stats]);
 
-    // // Helper to sum all matchPoints for a player
-    const getTotalPoints = (playerId) => {
-        return matchPoints
-            .filter(mp => mp.player_id === playerId)
-            .reduce((sum, mp) => sum + (mp.value || 0), 0);
+    // Count total matches this player has participated in
+    const getMatchPlayed = (playerId) => {
+        return matchParticipants.filter(mp => mp.player_id === playerId).length;
     };
 
+    // Count wins or losses for a player from match_participants
     const getTotalMatchStats = (stat, playerId) => {
-        const playerTeam = teamPlayers.filter(tp => tp.player_id === playerId).team_id;
-        const finishedMatches = () => {
-            let matches = [];
-            matchParticipants.forEach(mp => {
-                if (mp.team_id === playerTeam && mp.is_finished) {
-                    matches.push(mp);
-                }
-            });
-            return matches;
-        };
-
-        let wins = 0;
-        let losses = 0;
-
-        finishedMatches()?.forEach(match => {
-            if (match.is_winner) {
-                wins += 1;
-            } else {
-                losses += 1;
-            }
-        });
+        const playerMatches = matchParticipants.filter(mp => mp.player_id === playerId);
 
         if (stat === "wins") {
-            return wins;
+            return playerMatches.filter(mp => mp.is_winner === true).length;
         } else if (stat === "losses") {
-            return losses;
+            return playerMatches.filter(mp => mp.is_losser === true).length;
         }
 
         return 0;
@@ -124,9 +99,9 @@ export function PlayerStats() {
                     <TableHeader className="bg-muted">
                         <TableRow>
                             <TableHead>Player</TableHead>
-                            <TableHead>Total points</TableHead>
-                            <TableHead>Match wins</TableHead>
-                            <TableHead>Match losses</TableHead>
+                            <TableHead>Total Match Played</TableHead>
+                            <TableHead>Match Wins</TableHead>
+                            <TableHead>Match Losses</TableHead>
 
                             {sportTableHeaders && sportTableHeaders.map(header => (
                                 <TableHead key={header.stats_id}>
@@ -152,7 +127,7 @@ export function PlayerStats() {
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    {getTotalPoints(player.player_id)}
+                                    {getMatchPlayed(player.player_id)}
                                 </TableCell>
                                 <TableCell>
                                     {getTotalMatchStats("wins", player.player_id)}

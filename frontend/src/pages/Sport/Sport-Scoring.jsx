@@ -19,6 +19,7 @@ import { useTournamentTallyStore } from "@/store/useTournamentStore2";
 import { EditMatchSheet } from "@/components/custom/EditMatchSheet";
 import { ScoreboardPlayerTable } from "@/components/custom/ScoreboardPlayerTable";
 import { EditableValueInput } from "@/components/custom/EditableValueInput";
+import { useSocket } from "@/hooks/useSocket";
 
 function useSaveMatchPoint() {
     const { addMatchPoint, updateMatchPoint } = useMatchPointsStore();
@@ -96,6 +97,8 @@ export function SportScoring() {
     const { tally, updateTournamentTally } = useTournamentTallyStore();
 
     const saveMatchPoint = useSaveMatchPoint();
+    const { socket, joinRoom, leaveRoom } = useSocket();
+
     useEffect(() => {
         fetchSports();
         fetchMatches();
@@ -129,6 +132,34 @@ export function SportScoring() {
         }
 
     }, [matchInformation?.match_id, fetchMatchPoints]);
+
+    // ── WebSocket: join match room & listen for real-time score updates ──
+    useEffect(() => {
+        const activeMatchId = matchInformation?.match_id;
+        if (!socket || !activeMatchId) return;
+
+        joinRoom("match", activeMatchId);
+
+        const handlePointsChange = () => {
+            fetchMatchPoints(activeMatchId);
+        };
+
+        socket.on("matchPoints:created", handlePointsChange);
+        socket.on("matchPoints:updated", handlePointsChange);
+
+        // Also listen for tournament match status changes
+        const handleMatchUpdated = () => {
+            if (tournamentMatchId) fetchMatch(tournamentMatchId);
+        };
+        socket.on("tournamentMatch:updated", handleMatchUpdated);
+
+        return () => {
+            socket.off("matchPoints:created", handlePointsChange);
+            socket.off("matchPoints:updated", handlePointsChange);
+            socket.off("tournamentMatch:updated", handleMatchUpdated);
+            leaveRoom("match", activeMatchId);
+        };
+    }, [socket, matchInformation?.match_id]);
 
     const participantA = isTeamMatch
         ? teamsBySport.find((t) => t.team_id === matchInformation?.team_a_id)?.name

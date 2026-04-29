@@ -80,3 +80,43 @@ export async function findMatchWithPoints() {
     tournaments: tournamentMatches
   };
 }
+
+export async function findAllEvents() {
+  return await sql`
+    SELECT 
+      e.*,
+      (SELECT COUNT(*) FROM tournaments t WHERE t.event_id = e.event_id AND t.is_deleted = false) AS tournament_count
+    FROM events e
+    WHERE e.is_deleted = false
+    ORDER BY e.start_date DESC
+  `;
+}
+
+export async function findTournamentsWithTally() {
+  const tournaments = await sql`
+    SELECT 
+      t.*,
+      s.name AS sport_name,
+      e.name AS event_name,
+      e.banner_image AS event_banner
+    FROM tournaments t
+    LEFT JOIN sports s ON t.sport_id = s.sport_id
+    LEFT JOIN events e ON t.event_id = e.event_id
+    WHERE t.is_deleted = false
+    ORDER BY t.start_date DESC
+  `;
+
+  const tally = await sql`
+    SELECT 
+      tt.*,
+      tm.name AS team_name,
+      tm.banner_image AS team_logo,
+      d.name AS department_name
+    FROM tournament_tally tt
+    JOIN teams tm ON tt.team_id = tm.team_id
+    LEFT JOIN departments d ON tm.department_id = d.department_id
+    ORDER BY tt.wins DESC, tt.losses ASC
+  `;
+
+  return { tournaments, tally };
+}

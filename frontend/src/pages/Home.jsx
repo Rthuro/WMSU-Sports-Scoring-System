@@ -7,7 +7,7 @@ import { SportsCard } from "@/components/custom/sports-card"
 import { Separator } from "@/components/ui/separator"
 import { Link } from "react-router-dom"
 import { RefreshCw } from "lucide-react"
-import { DataSync } from "@/components/custom/DataSync"
+
 import { useSportsStore } from "@/store/useSportsStore"
 import { useTournamentStore } from "@/store/useTournamentStore2"
 import { adminRoute } from "@/lib/helpers"
@@ -18,7 +18,7 @@ export function Home() {
 
   return (
     <main className="flex flex-col gap-6">
-      <DataSync />
+
       <PageSync page="Home" />
       <div className="flex items-center justify-end gap-3">
         <Button variant="outline" className="w-fit flex self-end" onClick={fetchSports}>

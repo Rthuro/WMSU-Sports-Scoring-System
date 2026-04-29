@@ -1,4 +1,5 @@
 import * as matchPointsRepo from "../../repositories/matches/matchPointsRepo.js";
+import { getIO } from "../../socketManager.js";
 
 export const getMatchesPoints = async (req, res, next) => {
     try {
@@ -18,6 +19,10 @@ export const createMatchPoints = async (req, res, next) => {
     try {
         const point = await matchPointsRepo.create(req.body);
         res.status(200).json({ success: true, data: point });
+
+        // Broadcast to match room
+        const io = getIO();
+        io.to(`match:${point.match_id}`).emit("matchPoints:created", point);
     } catch (error) { next(error); }
 };
 
@@ -25,5 +30,11 @@ export const updateMatchPoints = async (req, res, next) => {
     try {
         const point = await matchPointsRepo.update(req.body);
         res.status(200).json({ success: true, data: point });
+
+        // Broadcast to match room
+        if (point) {
+            const io = getIO();
+            io.to(`match:${point.match_id}`).emit("matchPoints:updated", point);
+        }
     } catch (error) { next(error); }
 };

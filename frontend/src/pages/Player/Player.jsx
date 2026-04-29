@@ -5,7 +5,7 @@ import { useSportsStore } from "@/store/useSportsStore";
 import { PageSync } from "@/components/custom/PageSync";
 import {
     ArrowLeft, MapPin, CalendarDays, Activity, FileDigit,
-    Eye, Edit2, Trophy, Users, Info, User, Trash2
+    Eye, Edit2, Trophy, Users, Info, User, Trash2, BarChart3
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -102,7 +102,7 @@ export function Player() {
         );
     }
 
-    const { teams = [], tournaments = [], matchParticipations = [] } = playerProfile;
+    const { teams = [], tournaments = [], matchParticipations = [], playerStats = [] } = playerProfile;
 
     return (
         <div className="flex flex-col gap-6 pb-12 w-full max-w-6xl mx-auto">
@@ -311,6 +311,16 @@ export function Player() {
                                         </Link>
                                     </div>
                                     <div className="flex flex-wrap gap-2 mt-2">
+                                        {team.position_name && (
+                                            <Badge className="text-xs bg-violet-50 text-violet-700 border-violet-200" variant="outline">
+                                                {team.position_name}
+                                            </Badge>
+                                        )}
+                                        {team.jersey_number && (
+                                            <Badge className="text-xs bg-amber-50 text-amber-700 border-amber-200" variant="outline">
+                                                #{team.jersey_number}
+                                            </Badge>
+                                        )}
                                         {team.event_name && (
                                             <Badge variant="secondary" className="text-xs">
                                                 {team.event_name}
@@ -367,6 +377,83 @@ export function Player() {
                                 </div>
                             ))}
                         </div>
+                    </div>
+                )}
+
+                {teams.length > 0 && (
+                    <div className="bg-white border rounded-2xl p-6 shadow-sm ring-1 ring-slate-200">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-bold flex items-center gap-2">
+                                <span className="bg-orange-50 text-orange-600 p-2 rounded-xl">
+                                    <BarChart3 size={20} />
+                                </span>
+                                Stats by Team
+                            </h2>
+                        </div>
+
+                        {(() => {
+                            // Group playerStats by team_id
+                            const teamStatMap = {};
+                            playerStats.forEach(ps => {
+                                if (!teamStatMap[ps.team_id]) {
+                                    teamStatMap[ps.team_id] = { team_name: ps.team_name, stats: {} };
+                                }
+                                teamStatMap[ps.team_id].stats[ps.stats_name] = Number(ps.total_value) || 0;
+                            });
+
+                            // Collect unique stat names for columns
+                            const allStatNames = [...new Set(playerStats.map(ps => ps.stats_name))];
+
+                            const teamIds = Object.keys(teamStatMap);
+
+                            if (teamIds.length === 0 && allStatNames.length === 0) {
+                                return (
+                                    <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed">
+                                        <p className="text-muted-foreground text-sm">No stats recorded yet.</p>
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <div className="border rounded-xl overflow-hidden shadow-sm">
+                                    <Table>
+                                        <TableHeader className="bg-slate-50/80 backdrop-blur-sm">
+                                            <TableRow>
+                                                <TableHead className="font-bold">Team</TableHead>
+                                                <TableHead className="font-bold">Position</TableHead>
+                                                {allStatNames.map(name => (
+                                                    <TableHead key={name} className="font-bold capitalize">{name}</TableHead>
+                                                ))}
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {teams.map(team => {
+                                                const tStats = teamStatMap[team.team_id];
+                                                return (
+                                                    <TableRow key={team.team_id} className="hover:bg-slate-50/50 transition-colors">
+                                                        <TableCell className="font-bold text-slate-700">{team.name}</TableCell>
+                                                        <TableCell>
+                                                            {team.position_name ? (
+                                                                <Badge className="text-xs bg-violet-50 text-violet-700 border-violet-200" variant="outline">
+                                                                    {team.position_name}
+                                                                </Badge>
+                                                            ) : (
+                                                                <span className="text-muted-foreground text-xs">—</span>
+                                                            )}
+                                                        </TableCell>
+                                                        {allStatNames.map(name => (
+                                                            <TableCell key={name}>
+                                                                {tStats?.stats[name] ?? 0}
+                                                            </TableCell>
+                                                        ))}
+                                                    </TableRow>
+                                                );
+                                            })}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            );
+                        })()}
                     </div>
                 )}
 
