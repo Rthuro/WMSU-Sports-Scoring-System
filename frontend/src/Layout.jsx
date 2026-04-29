@@ -6,6 +6,7 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
 import { Outlet } from "react-router-dom";
+import { DataSync } from "@/components/custom/DataSync";
 
 export function Layout() {
   return (
@@ -17,6 +18,7 @@ export function Layout() {
         }
       }
     >
+      <DataSync />
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
@@ -33,3 +35,4 @@ export function Layout() {
     </SidebarProvider>
   )
 }
+

@@ -19,3 +19,21 @@ export const getAllMatches = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getPublicEvents = async (req, res, next) => {
+    try {
+        const events = await publicRepo.findAllEvents();
+        res.status(200).json({ success: true, data: events });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getPublicTournaments = async (req, res, next) => {
+    try {
+        const data = await publicRepo.findTournamentsWithTally();
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};

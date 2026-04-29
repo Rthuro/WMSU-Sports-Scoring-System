@@ -56,7 +56,7 @@ export function PublicHome() {
         <div className="flex items-center justify-between bg-custom-primary px-6 py-5 rounded-t-2xl">
           <p className="font-freshman text-2xl tracking-wider flex items-center text-custom-secondary ">
             EVENTS </p>
-          <button className="px-4 py-2 font-medium bg-custom-secondary text-custom-primary rounded">View all events</button>
+          <Link to="/Events" className="px-4 py-2 font-medium bg-custom-secondary text-custom-primary rounded hover:bg-custom-secondary/90 transition-colors">View all events</Link>
         </div>
         <section className="grid grid-cols-1 md:grid-cols-2 w-full gap-x-6 gap-y-3 ">
           {
@@ -108,7 +108,7 @@ export function PublicHome() {
           <p className="font-freshman text-2xl tracking-wider  flex items-center text-custom-secondary gap-2">
             EVENT WINNERS
           </p>
-          <button className="px-4 py-2 font-medium bg-custom-secondary text-custom-primary rounded">View all winners</button>
+          <Link to="/Tournaments" className="px-4 py-2 font-medium bg-custom-secondary text-custom-primary rounded hover:bg-custom-secondary/90 transition-colors">View all winners</Link>
         </div>
 
         <section className="grid grid-cols-1 md:grid-cols-2 w-full space-x-6 space-y-3 bg-custom-primary/5">
@@ -168,7 +168,7 @@ export function PublicHome() {
             <FileText className="mt-[2px]" />
             HEADLINES
           </p>
-          <button className="px-4 py-2 font-medium bg-custom-primary text-custom-secondary rounded">View all archives</button>
+          <Link to="/Archives" className="px-4 py-2 font-medium bg-custom-primary text-custom-secondary rounded hover:bg-custom-primary/90 transition-colors">View all archives</Link>
         </div>
 
         {/* Example Headline */}

@@ -29,6 +29,8 @@ import { PublicHome } from "./pages/Public/Home";
 import { PublicSports } from "./pages/Public/Sports";
 import { PublicCalendar } from "./pages/Public/Calendar";
 // import { PublicTournaments } from "./pages/Public/Tournaments";
+import { PublicTournaments } from "./pages/Public/Tournaments";
+import { PublicEvents } from "./pages/Public/Events";
 import { PublicDepartments } from "./pages/Public/Departments";
 import { ManageMatches } from "./pages/Match/Manage-Matches";
 import { ManageAdmins } from "./pages/Admin/ManageAdmins";
@@ -75,8 +77,8 @@ export default function App() {
           <Route element={<PublicLayout />}>
             <Route path='/' element={<PublicHome />}></Route>
             <Route path='/Sports' element={<PublicSports />}></Route>
-            {/* <Route path='/Events' element={<PublicEvents />}></Route> */}
-            {/* <Route path='/Tournaments' element={<PublicTournaments />}></Route> */}
+            <Route path='/Events' element={<PublicEvents />}></Route>
+            <Route path='/Tournaments' element={<PublicTournaments />}></Route>
             <Route path='/Calendar' element={<PublicCalendar />}></Route>
             <Route path='/Departments' element={<PublicDepartments />}></Route>
             <Route path='/Signup' element={<PublicRoute><Signup /></PublicRoute>}></Route>

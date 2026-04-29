@@ -124,5 +124,32 @@ export const usePublicStore = create((set, get) => ({
         }
     },
 
-}));
+    publicEvents: [],
+    fetchPublicEvents: async () => {
+        set({ loading: true, error: null });
+        try {
+            const response = await axios.get(`${BASE_URL}/api/public/events`);
+            set({ publicEvents: response.data.data || [], loading: false });
+        } catch (err) {
+            set({ error: "Something went wrong", loading: false });
+        }
+    },
 
+    publicTournaments: [],
+    publicTally: [],
+    fetchPublicTournaments: async () => {
+        set({ loading: true, error: null });
+        try {
+            const response = await axios.get(`${BASE_URL}/api/public/tournaments`);
+            const data = response.data.data;
+            set({ 
+                publicTournaments: data.tournaments || [], 
+                publicTally: data.tally || [],
+                loading: false 
+            });
+        } catch (err) {
+            set({ error: "Something went wrong", loading: false });
+        }
+    },
+
+}));

@@ -53,6 +53,7 @@
       "react-router-dom": "^7.6.2",
       "react-svg-pan-zoom": "^3.13.1",
       "recharts": "^3.8.0",
+      "socket.io-client": "^4.8.3",
       "sonner": "^2.0.7",
       "styled-components": "^6.3.12",
       "tabler": "^1.0.0",

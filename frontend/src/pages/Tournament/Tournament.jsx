@@ -28,6 +28,7 @@ import { TeamRecordDialog } from "@/components/custom/TeamRecordDialog";
 import { adminRoute } from "@/lib/helpers";
 import sample_bg from "@/assets/sample.jpg";
 import html2canvas from 'html2canvas-pro';
+import { useSocket } from "@/hooks/useSocket";
 
 
 export function Tournament() {
@@ -42,6 +43,7 @@ export function Tournament() {
     const { tournamentMatch, fetchTournamentMatch, updateTournamentMatch } = useTournamentMatchStore();
     const { tally, fetchTournamentTally, updateTournamentTally } = useTournamentTallyStore();
     const { fetchAllMatchPoints } = useMatchPointsStore();
+    const { socket, joinRoom, leaveRoom } = useSocket();
 
     const bracketRef = useRef(null);
     const [selectedEditMatch, setSelectedEditMatch] = useState(null);
@@ -68,6 +70,31 @@ export function Tournament() {
         fetchEvents();
         fetchAllMatchPoints();
     }, [fetchTournamentTally, fetchEvents, fetchAllMatchPoints]);
+
+    // ── WebSocket: join tournament room & listen for real-time updates ──
+    useEffect(() => {
+        if (!socket || !tournamentId) return;
+
+        joinRoom("tournament", tournamentId);
+
+        const handleTallyUpdated = () => {
+            fetchTournamentTally();
+        };
+
+        const handleMatchUpdated = () => {
+            fetchTournamentMatch(tournamentId);
+            fetchAllMatchPoints();
+        };
+
+        socket.on("tally:updated", handleTallyUpdated);
+        socket.on("tournamentMatch:updated", handleMatchUpdated);
+
+        return () => {
+            socket.off("tally:updated", handleTallyUpdated);
+            socket.off("tournamentMatch:updated", handleMatchUpdated);
+            leaveRoom("tournament", tournamentId);
+        };
+    }, [socket, tournamentId]);
 
 
     const previewMatches = useMemo(() => {
@@ -146,9 +173,8 @@ export function Tournament() {
             const res = await updateTournamentMatch(selectedEditMatch.match_id, payload);
 
             if(res){
-                fetchTournamentMatch(tournamentId);
                 setSelectedEditMatch(null);
-                recountTournamentTally()
+                await recountTournamentTally();
             }
            
         } catch (error) {
@@ -159,11 +185,15 @@ export function Tournament() {
     };
 
     const recountTournamentTally = async () => {
-        
+        // Fetch fresh match data from the API, then read directly from the
+        // Zustand store to avoid the stale React-state closure problem.
+        await fetchTournamentMatch(tournamentId);
+        const freshMatches = useTournamentMatchStore.getState().tournamentMatch;
+
         const updatePromises = tournamentTeams.map(async (team) => {
             const teamId = team.team_id;
             
-            const teamMatches = tournamentMatch.filter(m => 
+            const teamMatches = freshMatches.filter(m => 
                 (m.team_a_id === teamId || m.team_b_id === teamId) && m.winner_id
             );
 

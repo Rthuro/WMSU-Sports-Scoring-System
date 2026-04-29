@@ -1,5 +1,6 @@
 import * as tournamentTallyRepo from "../../repositories/tournaments/tournamentTallyRepo.js";
 import { AppError } from "../../middleware/errorHandler.js";
+import { getIO } from "../../socketManager.js";
 
 export const getTournamentTally = async (req, res, next) => {
     try {
@@ -20,6 +21,10 @@ export const updateTournamentTally = async (req, res, next) => {
         const tally = await tournamentTallyRepo.update(req.params.tournament_id, req.params.team_id, req.body);
         if (!tally) throw new AppError("Tally not found", 404);
         res.status(200).json({ success: true, data: tally });
+
+        // Broadcast to tournament room
+        const io = getIO();
+        io.to(`tournament:${req.params.tournament_id}`).emit("tally:updated", tally);
     } catch (error) { next(error); }
 };
 

@@ -1,5 +1,6 @@
 import * as tournamentMatchesRepo from "../../repositories/tournaments/tournamentMatchesRepo.js";
 import { AppError } from "../../middleware/errorHandler.js";
+import { getIO } from "../../socketManager.js";
 
 export const getTournamentMatches = async (req, res, next) => {
     try {
@@ -28,6 +29,13 @@ export const updateTournamentMatch = async (req, res, next) => {
         const match = await tournamentMatchesRepo.update(req.params.id, req.body);
         if (!match) throw new AppError("Tournament match not found", 404);
         res.status(200).json({ success: true, data: match });
+
+        // Broadcast to tournament room and match room
+        const io = getIO();
+        if (match.tournament_id) {
+            io.to(`tournament:${match.tournament_id}`).emit("tournamentMatch:updated", match);
+        }
+        io.to(`match:${match.match_id}`).emit("tournamentMatch:updated", match);
     } catch (error) { next(error); }
 };
 
