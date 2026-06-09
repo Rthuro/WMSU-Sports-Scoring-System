@@ -33,8 +33,6 @@
 - [Getting Started](#-getting-started)
 - [Environment Variables](#-environment-variables)
 - [Deployment](#-deployment)
-- [Contributing](#-contributing)
-- [License](#-license)
 
 ---
 
@@ -664,17 +662,7 @@ npm run build    # Outputs to frontend/dist/
 
 ---
 
-## 🤝 Contributing
-
-This project was developed as part of a university internship.
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -m 'feat: add your feature'`)
-4. Push to the branch (`git push origin feature/your-feature`)
-5. Open a Pull Request
-
 <p align="center">
-  <strong>Built with ❤️ for WMSU's Smart Campus Initiative</strong><br/>
+  <strong>Built for WMSU's Smart Campus Initiative</strong><br/>
   <em>University Sports Development Office — Western Mindanao State University</em>
 </p>
