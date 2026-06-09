@@ -18,6 +18,12 @@
   <img src="https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white" alt="Docker" />
 </p>
 
+<p align="center">
+  <a href="https://wmsu-sports-system.vercel.app/">
+    <img src="https://img.shields.io/badge/🌐_Live_Demo-wmsu--sports--system.vercel.app-00C853?style=for-the-badge" alt="Live Website" />
+  </a>
+</p>
+
 ---
 
 ## 📋 Table of Contents
