@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { useState } from "react"
 import { motion } from 'framer-motion'
+import { CheckConnection } from "./components/check_connection";
 
 export function PublicLayout() {
   const isOpen = false;
@@ -13,6 +14,7 @@ export function PublicLayout() {
 
   return (
     <main >
+      <CheckConnection />
       <nav className="flex justify-between items-center fixed bg-custom-secondary text-custom-primary py-4 top-0 px-3  lg:px-16 right-0 left-0 z-50">
         <div className="flex items-center gap-3">
           <button onClick={() => setSidebarVisibility(visible => !visible)}>
@@ -48,6 +50,7 @@ export function PublicLayout() {
         </div>
       </nav>
       <Outlet />
+      
     </main>
   )
 }
