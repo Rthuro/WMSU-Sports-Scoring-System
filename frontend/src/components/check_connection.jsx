@@ -51,7 +51,7 @@ export function CheckConnection () {
             <p className="text-lg md:text-xl drop-shadow-md text-white">The Official WMSU Sports Event Website</p>
                         <div className="flex flex-col items-center gap-2">
                             <Loader2 className="size-5 animate-spin text-white" />
-                            <p className="font-bold text-2xl text-white ">Checking connection...</p>
+                            <p className="font-bold text-2xl text-white ">Loading data...</p>
                         </div>
                     </div>
                 </div>
