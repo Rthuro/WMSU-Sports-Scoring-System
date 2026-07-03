@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import wmsu_logo from '@/assets/wmsu_logo.png';
 import { Loader2 } from "lucide-react";
 
+const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000" : import.meta.env.VITE_API_URL;
+
 export function CheckConnection () {
 
     const [isOnline, setIsOnline] = useState(true);
@@ -9,7 +11,7 @@ export function CheckConnection () {
     useEffect(() => {
         const checkConnection = async () => {
             try {
-                const response = await fetch("http://localhost:3000/api/health");
+                const response = await fetch(`${BASE_URL}/api/health`);
                 const data = await response.json();
                 setIsOnline(data.status === "ok");
             } catch (error) {
