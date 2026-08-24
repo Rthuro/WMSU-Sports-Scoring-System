@@ -5,7 +5,8 @@ import {
     getArticleById,
     createArticle,
     updateArticle,
-    deleteArticle
+    deleteArticle,
+    getFeaturedArticles
 } from "../../controllers/public/articleController.js";
 
 const router = express.Router();
@@ -14,6 +15,7 @@ router.get("/", getArticles);
 router.get("/public", getPublicArticles);
 router.get("/:id", getArticleById);
 router.post("/", createArticle);
+router.get("/featured", getFeaturedArticles);
 router.put("/:id", updateArticle);
 router.delete("/:id", deleteArticle);
 

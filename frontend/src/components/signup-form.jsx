@@ -20,7 +20,7 @@ import { signInWithPopup } from "firebase/auth";
 
 export function SignupForm({ className, ...props }) {
   const navigate = useNavigate();
-  const { signup, loading, googleSignUp } = useAuthStore();
+  const { signup, loading, googleSignUp, validateEntry } = useAuthStore();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -30,6 +30,8 @@ export function SignupForm({ className, ...props }) {
   });
   const [error, setError] = useState("");
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  const [validateErr, setValidationErr] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -78,13 +80,43 @@ export function SignupForm({ className, ...props }) {
     }
   };
 
+  const handleValidateEmail = async (email) => {
+    setFormData({ ...formData, email: email });
+    if (email.includes("@") && (email.includes(".edu.ph") || email.includes(".com")) ) {
+      const isEmailValid = await validateEntry(email);
+      if (!isEmailValid) {
+        setFormData({ ...formData, email: "" });
+        setTimeout(() => {
+          setValidationErr("You're not listed as an admin or registered sports athlete of any department. Please contact sports office administrator.")
+        }, 500)
+      } else {
+        setValidationErr("")
+      }
+      
+    } else {
+      setFormData({ ...formData, email: email });
+      setValidationErr("")
+      setError("")
+    }
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      {error !== "" && (
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+      {validateErr !== "" && (
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+          {validateErr}
+        </div>
+      )}
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form onSubmit={handleSubmit} className="p-6 md:p-8">
-            <FieldGroup>
-              <div className="flex flex-col items-center gap-2 text-center">
+              <FieldGroup>
+                <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Create your account</h1>
                 <p className="text-sm text-balance text-muted-foreground">
                   Enter your details below to create your account
@@ -129,7 +161,9 @@ export function SignupForm({ className, ...props }) {
                   placeholder="m@example.com"
                   required
                   value={formData.email}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    handleValidateEmail(e.target.value);
+                  }}
                   disabled={loading || googleLoading}
                 />
               </Field>

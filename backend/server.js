@@ -56,6 +56,7 @@ import matchParticipantsRoutes from "./routes/matches/matchParticipantsRoutes.js
 import articleRoutes from "./routes/public/articleRoutes.js";
 import publicRoutes from "./routes/public/publicRoutes.js";
 import healthRoutes from "./routes/healthRoute.js";
+import articleTypeRoutes from "./routes/public/articleTypeRoutes.js";
 
 
 import { initDB } from "./config/init/init.js";
@@ -115,6 +116,7 @@ app.use("/api/match-participants", matchParticipantsRoutes)
 
 // // public routes
 app.use("/api/articles", articleRoutes)
+app.use("/api/article-types", articleTypeRoutes)
 app.use("/api/public", publicRoutes)
 
 app.use("/api/health", healthRoutes)

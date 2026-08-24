@@ -22,19 +22,27 @@ import { useState, useEffect } from "react";
 import { Loader2, ArrowUpRight, Pencil, Trash2 } from "lucide-react";
 import { usePublicStore } from "@/store/usePublicStore";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { InitialUploadImage } from "@/components/custom/InitialUploadImage";
+import { useImageUpload } from "@/store/useImageUpload";
+import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
+import { adminRoute } from "@/lib/helpers"
 
 export function ManageWebsite() {
-    const {fetchArticles, articles, updateArticle} = usePublicStore();
+    const {fetchArticles, fetchArticleTypes, articleTypes, articles, updateArticle, deleteArticle} = usePublicStore();
     const [onOpenAddArticle, setOnOpenAddArticle] = useState(false);
     const [onOpenEditArticle, setOnOpenEditArticle] = useState(false);
     const [editWebsite, setEditWebsite] = useState(false);
     const {addArticle} = usePublicStore();
+    const {uploadImage} = useImageUpload();
 
     const [formDataArticle, setFormDataArticle] = useState({
         title: "",
         content: "",
         link: "",
         image: "",
+        articleType_id: "",
     });
 
     const [loader, setLoader] = useState(false);
@@ -42,14 +50,32 @@ export function ManageWebsite() {
     const handleAddArticle = async () => {
         setLoader(true);
         try {
-            const result = await addArticle(formDataArticle);
-            if (result.success) {
-                setFormDataArticle({
-                    title: "",
-                    content: "",
-                    link: "",
-                    image: "",
+            const img_formData = new FormData();
+            img_formData.append("image", formDataArticle.image);
+            img_formData.append("folder", "articles");
+
+            const image_res = await uploadImage(img_formData);
+
+            if(image_res.status == "success"){
+
+                const result = await addArticle({
+                    ...formDataArticle,
+                    image: image_res.url,
                 });
+
+                if (result.success) {
+                    setFormDataArticle({
+                        title: "",
+                        content: "",
+                        link: "",
+                        image: "",
+                        articleType_id: "",
+                    });
+                }
+
+            } else {
+                toast.error("Image Storage Error");
+                return;
             }
         } catch (error) {
             console.log(error);
@@ -68,6 +94,7 @@ export function ManageWebsite() {
                     content: "",
                     link: "",
                     image: "",
+                    articleType_id: "",
                 });
             }
         } catch (error) {
@@ -77,8 +104,21 @@ export function ManageWebsite() {
             setLoader(false);
         }
     }
+
+    const handleDeleteArticle = (article_id) => {
+        toast.promise(
+            deleteArticle(article_id),
+            {
+                loading: "Deleting article...",
+                success: "Article deleted successfully",
+                error: "Failed to delete article",
+            }
+        )
+    }
+
     useEffect(() => {
         fetchArticles();
+        fetchArticleTypes();
     }, [fetchArticles])
 
     // console.log(articles)
@@ -89,15 +129,22 @@ export function ManageWebsite() {
             <main className="w-full ">
                 <Tabs defaultValue="articles" className="w-full">
                     <TabsList className="w-full">
-                        <TabsTrigger value="articles">Articles</TabsTrigger>
-                        <TabsTrigger value="configure">Configure Website</TabsTrigger>
+                        <TabsTrigger value="articles" 
+                        className="py-4">Articles</TabsTrigger>
+                        <TabsTrigger value="configure" 
+                        className="py-4">Configure Website</TabsTrigger>
                     </TabsList>
                     <TabsContent value="articles">
                         <div className="border p-3 py-4 rounded-md">
 
                         <div className="flex items-center justify-between px-3">
                             <h3 className="text-lg font-semibold">Articles</h3>
-                            <Button onClick={() => setOnOpenAddArticle(true)}>Add Article</Button>
+                            {/* <Button onClick={() => setOnOpenAddArticle(true)}>
+                                Add Article
+                            </Button> */}
+                            <Link to={adminRoute(`Article?mode=new`)} className="cursor-pointer">
+                                <Button>Add Article</Button>
+                            </Link>
                         </div>
                         <div className="flex flex-col space-y-6 px-3 mt-3">
                             { articles?.length === 0 && (
@@ -114,7 +161,10 @@ export function ManageWebsite() {
                                             setOnOpenEditArticle(true);
                                         }}
                                         ><Pencil /></Button>
-                                        <Button variant="icon" size="sm"><Trash2 /></Button>
+                                        <Button variant="icon" size="sm"
+                                        onClick={() => handleDeleteArticle(article?.article_id)}>
+                                            <Trash2 />
+                                        </Button>
                                     </div>
                                 <div className="p-5 flex flex-col justify-center gap-6 w-full md:w-[50%]">
                                     <div className="space-y-2">
@@ -124,7 +174,8 @@ export function ManageWebsite() {
                                     </div>
                                     <a href={article?.link} className="flex items-center font-semibold gap-2 bg-custom-secondary text-custom-primary w-fit py-2 px-4 rounded">View link <ArrowUpRight /> </a>
                                 </div>
-                                <img src={article?.image} alt="" srcset="" className=" object-cover object-center w-full md:w-[50%]" />
+                                <img src={article?.image} alt="" srcset="" 
+                                className=" object-cover object-center w-full md:w-[50%]" />
                             </section>
                             ))}
                      </div>
@@ -146,12 +197,15 @@ export function ManageWebsite() {
                     
                 </Tabs>
             </main>
+
             <ArticleSheet sheetOpen={onOpenAddArticle} 
             setSheetOpen={setOnOpenAddArticle} 
             formData={formDataArticle} 
             setFormData={setFormDataArticle} 
             loader={loader} setLoader={setLoader} 
-            handleAddArticle={handleAddArticle} />
+            handleAddArticle={handleAddArticle}
+            fetchArticleTypes={fetchArticleTypes}
+            articleTypes={articleTypes} />
 
             <ArticleEditSheet sheetOpen={onOpenEditArticle} 
             setSheetOpen={setOnOpenEditArticle} 
@@ -212,8 +266,7 @@ function ConfigureWebsite({sheetOpen, setSheetOpen}) {
     );
 }
 
-function ArticleSheet({sheetOpen, setSheetOpen, formData, setFormData, loader, setLoader, handleAddArticle}) {
-    
+function ArticleSheet({sheetOpen, setSheetOpen, formData, setFormData, loader, articleTypes, handleAddArticle}) {
     return (
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetContent className="overflow-y-auto min-w-[500px]">
@@ -224,6 +277,27 @@ function ArticleSheet({sheetOpen, setSheetOpen, formData, setFormData, loader, s
                     </SheetDescription>
                 </SheetHeader>
                 <div className="flex flex-col gap-3 px-4">
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="title">Article Type</Label>
+                        <Select 
+                        value={formData.articleType_id || ""}
+                        onValueChange={(value) => setFormData({ ...formData, articleType_id: value })}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select a Article type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    {articleTypes?.map((articleType) => (
+                                        <SelectItem key={articleType.articleType_id} 
+                                        value={articleType.articletype_id}
+                                        >
+                                            {articleType.article_type}
+                                        </SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
                     <div className="flex flex-col gap-2">
                         <Label htmlFor="title">Article title</Label>
                         <Input
@@ -252,11 +326,16 @@ function ArticleSheet({sheetOpen, setSheetOpen, formData, setFormData, loader, s
                         />
                     </div>
                     <div>
-                        <ImageUpload
+                        {/* <ImageUpload
                             label="Article Image"
                             folder="articles"
                             defaultImage={formData.image}
                             onUploadSuccess={(url) => setFormData({ ...formData, image: url })}
+                        /> */}
+                        <InitialUploadImage
+                            label="Article Image"
+                            defaultImage={formData.image?.name}
+                            onUpload={(file) => setFormData({ ...formData, image: file })}
                         />
                     </div>
                 </div>
@@ -319,12 +398,13 @@ function ArticleEditSheet({sheetOpen, setSheetOpen, formData, setFormData, loade
                         />
                     </div>
                     <div>
-                        <ImageUpload
+                        {/* <ImageUpload
                             label="Article Image"
                             folder="articles"
                             defaultImage={formData.image}
                             onUploadSuccess={(url) => setFormData({ ...formData, image: url })}
-                        />
+                        /> */}
+
                     </div>
                 </div>
                 <SheetFooter>

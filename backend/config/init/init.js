@@ -26,7 +26,8 @@ initMatchPoints
 } from "./matches.js" 
 import { initStatsTable } from "./stats.js"
 import { initTeamsTable } from "./teams.js"
-import { initArticlesTable , initWebsiteSettingsTable} from "./public.js"
+import { initArticlesTable,
+    initArticleTypeTable , initWebsiteSettingsTable} from "./public.js"
 
 export async function initDB() {
     try {
@@ -74,6 +75,7 @@ export async function initDB() {
         await initEventAwardsTable();
 
         // tables needed: website
+        await initArticleTypeTable();
         await initArticlesTable();
         await initWebsiteSettingsTable();
         

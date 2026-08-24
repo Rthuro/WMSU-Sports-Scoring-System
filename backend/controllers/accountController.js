@@ -15,6 +15,19 @@ export const getAccounts = async (req, res, next) => {
     }
 };
 
+export const getEmail = async (req, res, next) => {
+    try {
+        const {email} = req.params;
+        const account = await accountRepo.findByEmail(email);
+        if (!account) {
+            throw new AppError("Email not found", 404);
+        }
+        res.status(200).json({ success: true, data: account, message: "Email found" });
+    } catch (error) {
+        next(error);
+    }
+}
+
 export const signup = async (req, res, next) => {
     try {
         const { firstName, lastName, email, passwordHash, role } = req.body;
@@ -114,7 +127,7 @@ export const googleAuth = async (req, res, next) => {
         // Check if user already exists
         let account = await accountRepo.findByEmail(email);
 
-        if (!account) {
+        if (account) {
             // Create a new account for Google users
             const nameParts = (name || "").split(" ");
             const firstName = nameParts[0] || "";
@@ -131,6 +144,11 @@ export const googleAuth = async (req, res, next) => {
                 passwordHash: randomPassword,
                 role: "admin"
             });
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: "You're not registered as an admin or registered sports athlete of any department. Please contact sports office administrator."
+            })
         }
 
         const jwtToken = jwt.sign(

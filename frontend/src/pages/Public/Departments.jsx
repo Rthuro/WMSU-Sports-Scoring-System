@@ -4,7 +4,7 @@ import departments from "@/data/department_loop.js"
 
 export function PublicDepartments() {
     return (
-        <div className="mx-auto my-24 max-w-6xl pt-8 pb-16 px-3 flex flex-col">
+        <div className="mx-auto my-12 max-w-6xl px-3 flex flex-col">
             <h1 className="mb-6 border-l-8 border-custom-primary pl-3 font-freshman tracking-wider text-custom-secondary text-2xl">DEPARTMENTS</h1>
             <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 w-full gap-3">
                 {

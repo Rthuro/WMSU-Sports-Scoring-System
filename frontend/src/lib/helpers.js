@@ -76,3 +76,13 @@ export function getTimeInSeconds(timeString) {
 export function adminRoute(route) {
     return `/Admin/${route}`;
 }
+
+export function getPublicIdFromUrl(url) {
+    const part_1 = url.split('/upload/');
+    if (part_1.length < 2) return null;
+
+    // Strip out any versioning (v1234567/) and the extension (.jpg)
+    const part_2 = part_1[1].split('/wmsu_sports/');
+    const publicIdWithExtension = part_2[1].replace(/^v\d+\//, '');
+    return publicIdWithExtension.substring(0, publicIdWithExtension.lastIndexOf('.'));
+}

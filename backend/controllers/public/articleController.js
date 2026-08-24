@@ -40,6 +40,15 @@ export const createArticle = async (req, res, next) => {
     }
 };
 
+export const getFeaturedArticles = async (req, res, next) => {
+    try {
+        const articles = await articleRepo.findFeatured();
+        res.status(200).json({ success: true, data: articles });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const updateArticle = async (req, res, next) => {
     try {
         const article = await articleRepo.update(req.params.id, req.body);

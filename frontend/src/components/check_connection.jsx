@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import wmsu_logo from '@/assets/wmsu_logo.png';
+import wmsu_logo from '@/assets/logo/logo.png';
 import { Loader2 } from "lucide-react";
 
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000" : import.meta.env.VITE_API_URL;
@@ -46,14 +46,12 @@ export function CheckConnection () {
                 isOnline ? (
                     null
                 ) : (
-                    <div className="fixed bottom-0 top-0 right-0 left-0 z-[60] bg-red border-y-[24px] border-red flex justify-center items-center">
-                    <div className="flex flex-col items-center gap-4 animate-pulse">
-                        <img src={wmsu_logo} alt="" srcset="" className="size-28" />
-                        <p className="text-center text-4xl drop-shadow-md text-custom-primary font-freshman ">WMSU SPORTS</p>
-            <p className="text-lg md:text-xl drop-shadow-md text-white">The Official WMSU Sports Event Website</p>
+                    <div className="fixed bottom-0 top-0 right-0 left-0 z-[60] bg-white  flex justify-center items-center">
+                    <div className="flex flex-col items-center gap-4 text-custom-secondary">
+                        <img src={wmsu_logo} alt="" srcset="" className="" />
                         <div className="flex flex-col items-center gap-2">
-                            <Loader2 className="size-5 animate-spin text-white" />
-                            <p className="font-bold text-2xl text-white ">Loading data...</p>
+                            <Loader2 className="size-5 animate-spin " />
+                            <p className="font-bold text-2xl  ">Loading data...</p>
                         </div>
                     </div>
                 </div>

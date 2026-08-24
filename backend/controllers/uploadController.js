@@ -1,5 +1,6 @@
 import multer from "multer";
 import { storage } from "../config/cloudinary.js";
+import { v2 as cloudinary } from "cloudinary";
 import { AppError } from "../middleware/errorHandler.js";
 
 const upload = multer({
@@ -26,3 +27,19 @@ export const uploadImage = (req, res, next) => {
     });
   });
 };
+
+export const deleteImage = async (req, res, next) => {
+  const { public_id } = req.params;
+  try {
+      await cloudinary.uploader.destroy(`wmsu_sports/${public_id}`, {
+        invalidate: true
+      });
+    res.status(200).json({
+      status: "success",
+      message: "Image deleted successfully"
+    });
+  } catch (error) {
+    next(new AppError(error.message, 500));
+  }
+} 
+

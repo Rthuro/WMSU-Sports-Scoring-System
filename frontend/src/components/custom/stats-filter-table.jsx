@@ -19,7 +19,7 @@ import { ChevronDown } from "lucide-react"
 import { Button } from "../ui/button"
 import { useParams } from "react-router-dom"
 import { tableHeadersBySport } from "@/data/table-headers-data"
-import { sportPlayersStats } from "@/data/sports-data"
+// import { sportPlayersStats } from "@/data/sports-data"
 
 export function StatsFilterTable() {
   const { sport } = useParams();  
@@ -37,9 +37,9 @@ export function StatsFilterTable() {
   //   return [...men, ...women];
   // });
 
-  const allPlayers = [ ...sportPlayersStats.arnis, ...sportPlayersStats.basketball, ...sportPlayersStats.volleyball, ...sportPlayersStats.tabletennis, ...sportPlayersStats.taekwondo, ...sportPlayersStats.pickleball ] 
+  // const allPlayers = [ ...sportPlayersStats.arnis, ...sportPlayersStats.basketball, ...sportPlayersStats.volleyball, ...sportPlayersStats.tabletennis, ...sportPlayersStats.taekwondo, ...sportPlayersStats.pickleball ] 
 
-  const sportPlayers = sportPlayersStats[sportsFilter.toLowerCase()] ;
+  // const sportPlayers = sportPlayersStats[sportsFilter.toLowerCase()] ;
 
   // const filteredPlayers = allPlayers.filter((player) => {
   //   const matchSport = sportsFilter === "All sports" || player.sport === sportsFilter.toLowerCase();
@@ -58,10 +58,10 @@ export function StatsFilterTable() {
         return data
   }
 
-   const tableDataAllSport = () => {
-        const data = searchInput ? allPlayers.filter( p => p.name.toLowerCase().includes(searchInput.toLowerCase())) : allPlayers ;
-        return data
-  }
+  //  const tableDataAllSport = () => {
+  //       const data = searchInput ? allPlayers.filter( p => p.name.toLowerCase().includes(searchInput.toLowerCase())) : allPlayers ;
+  //       return data
+  // }
 
   return (
     <>
@@ -253,11 +253,11 @@ export function StatsFilterTable() {
                       ))
                   )} 
                   
-                  { tableDataAllSport().length < 1  && (
+                  {/* { tableDataAllSport().length < 1  && (
                      <TableRow >
                        <TableCell  colSpan={ 3 } className="text-center">Name do not exist</TableCell>
                     </TableRow>
-                  )}
+                  )} */}
 
                   { sport && tableDataSport().length < 1 && (
                      <TableRow >

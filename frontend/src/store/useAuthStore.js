@@ -14,6 +14,15 @@ export const useAuthStore = create(
       loading: false,
       error: null,
 
+      validateEntry: async (email) => {
+        try {
+          const res = await axios.get(`${BASE_URL}/api/accounts/validate/${email}`)
+          return res.data.success
+        } catch (error) {
+          return error.response?.data?.success || false
+        }
+      },
+
       login: async (email, password) => {
         set({ loading: true, error: null });
         try {
@@ -119,6 +128,6 @@ export const useAuthStore = create(
         token: state.token,
         isAuthenticated: state.isAuthenticated,
       }),
-    }
+    },
   )
 );

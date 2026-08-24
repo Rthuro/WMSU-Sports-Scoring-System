@@ -18,7 +18,7 @@ import { TeamManagement } from "./pages/Team/Team-Management";
 import { MatchDetails } from "./pages/Match/Match-Details";
 import { CreateTeam } from "./pages/Team/Create-Team";
 import { TeamProfile } from "./pages/Team/Team-Profile";
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { Settings } from "./pages/Settings"
 import { Login } from "./pages/Public/Login"
@@ -35,6 +35,7 @@ import { PublicDepartments } from "./pages/Public/Departments";
 import { ManageMatches } from "./pages/Match/Manage-Matches";
 import { ManageAdmins } from "./pages/Admin/ManageAdmins";
 import { ManageWebsite } from "./pages/Website/ManageWebsite";
+import { Article } from "./pages/Website/Article";
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuthStore();
@@ -109,6 +110,7 @@ export default function App() {
             <Route path='/Admin/Settings' element={<Settings />}></Route>
             <Route path='/Admin/ManageAdmins' element={<ManageAdmins />}></Route>
             <Route path='/Admin/ManageWebsite' element={<ManageWebsite />}></Route>
+            <Route path='/Admin/Article' element={<Article />}></Route>
           </Route>
         </Routes>
       </Router>

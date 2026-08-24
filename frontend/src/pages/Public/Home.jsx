@@ -1,7 +1,7 @@
 import React, {useEffect} from "react"
 import hero_img from "@/assets/home/hero_img.png"
 import departments from "@/data/department_loop.js"
-import { ArrowRight, ArrowUpRight, FileText } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Dot, FileText } from 'lucide-react'
 import sample_event_img from "@/assets/home/sample_img_bg.jpg"
 import { events, events_match, event_winners } from '@/data/events.js'
 import Event_Match from "@/components/Event_Match"
@@ -10,21 +10,27 @@ import { Link } from 'react-router-dom'
 import { usePublicStore } from "@/store/usePublicStore";
 
 export function PublicHome() {
-      const { allMatches, allTournaments, fetchAllMatches, } = usePublicStore();
+      const { allMatches, allTournaments, fetchAllMatches, fetchArticles, articles, fetchArticleTypes, articleTypes  } = usePublicStore();
        useEffect(() => {
+            fetchArticles();
+            fetchArticleTypes();
             fetchAllMatches();
-        }, [fetchAllMatches]);
+        }, [fetchAllMatches, fetchArticles]);
 
       const limit = 4;
       const recentMatches = allMatches.slice(0, limit);
       const recentTournaments = allTournaments.slice(0, limit);
+        
+      const findArticleType = (id) => {
+        const type = articleTypes.find(type => type.articleType_id === id);
+        return type ? type.article_type : "";
+      }
   
   return (
-    <div className="pb-16">
-
-      <div id="hero" className="bg-fill h-[calc(100vh+68px)] w-full relative bg-center"
+    <div>
+      <p className="text-center py-3 font-playfair text-xl text-custom-primary font-medium bg-custom-secondary">The Official WMSU Sports Website</p>
+      {/* <div id="hero" className="bg-fill relative bg-center"
         style={{ backgroundImage: `url(${hero_img})` }} >
-        <div className="bg-custom-secondary/80 absolute right-0 left-0 top-0 bottom-0 w-full h-full -z-0"></div>
         <div className="flex flex-col items-center justify-center h-full gap-16 z-20">
           <div className="flex flex-col gap-3 items-center">
             <p className="text-center text-8xl drop-shadow-md text-custom-primary font-freshman ">WMSU SPORTS</p>
@@ -35,10 +41,38 @@ export function PublicHome() {
             <ArrowRight />
           </Link>
         </div>
-      </div>
+      </div> */}
+
+      {
+        articles?.length > 0 && articles?.map( (article, idx) => (
+            <div key={idx} className="w-full h-[500px] relative rounded-b-3xl overflow-hidden">
+              <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 p-8 flex flex-col gap-3 text-white">
+                <div className="flex items-center uppercase text-sm font-bold text-shadow-md -mb-3">
+                  <p className=" ">
+                    {findArticleType(article.articleType_id)}
+                  </p>
+                  <Dot/>
+                  <p className="">
+                    {new Date(article.created_at).toLocaleDateString("en-US", {month: "long", day: "numeric", year: "numeric"})}</p>
+                </div>
+                <h2 className="text-4xl font-bold font-playfair text-shadow-md">
+                  {article.title}</h2>
+                <p className=" max-w-[500px] line-clamp-2">
+                  {article.content}
+                </p>
+                <Link to={`/articles/${article.article_id}`} className="bg-custom-primary text-custom-secondary font-medium px-6 py-2 rounded-md hover:bg-custom-secondary/90 transition-colors w-fit flex items-center justify-center gap-2">
+                  Read More
+                  <ArrowRight size={20}/>
+                </Link>
+              </div>
+            </div>
+        ))
+      }
 
       {/* lists of wmsu department */}
-      <div className="overflow-hidden mx-3 md:mx-16 my-24">
+      <div className="overflow-hidden  my-12">
         <div className="flex gap-6 animate-loopScroll w-fit pr-24">
           {[...departments, ...departments].map((department, idx) => (
             <div key={idx} className="flex items-center min-w-fit gap-1">
@@ -52,7 +86,7 @@ export function PublicHome() {
       </div>
 
       {/* Example Events */}
-      <section className="mx-auto max-w-6xl my-16 flex flex-col gap-6 px-3">
+      <section className="my-16 flex flex-col gap-6 px-3">
         <div className="flex items-center justify-between bg-custom-primary px-6 py-5 rounded-t-2xl">
           <p className="font-freshman text-2xl tracking-wider flex items-center text-custom-secondary ">
             EVENTS </p>
@@ -94,8 +128,8 @@ export function PublicHome() {
           }
           {
             recentMatches.length === 0 && recentTournaments.length === 0 && (
-               <div className="text-center py-12 text-muted-foreground">
-                    <p className="text-white">No events created</p>
+               <div className="text-center col-span-full py-6 text-muted-foreground">
+                    <p className="text-primary font-semibold">No events created</p>
                 </div>
             )
           }
@@ -103,7 +137,7 @@ export function PublicHome() {
       </section>
 
       {/* Example Event Winners*/}
-      <section className="mx-auto max-w-6xl my-20 flex flex-col px-3">
+      <section className=" my-20 flex flex-col px-3">
         <div className="flex items-center justify-between py-5 border-b-4 border-custom-primary">
           <p className="font-freshman text-2xl tracking-wider  flex items-center text-custom-secondary gap-2">
             EVENT WINNERS
@@ -154,15 +188,15 @@ export function PublicHome() {
           }
           {
             recentMatches.length === 0 && recentTournaments.length === 0 && (
-               <div className="text-center py-12 text-muted-foreground">
-                    <p className="text-white">Nothing to show</p>
+                 <div className="text-center col-span-full py-6 text-muted-foreground">
+                    <p className="text-primary font-semibold">Nothing to show</p>
                 </div>
             )
           }
         </section>
       </section>
 
-      <section className="flex flex-col mx-auto max-w-6xl gap-6 my-16 px-3">
+      <section className="flex flex-col mx-auto gap-6 my-16 px-3">
         <div className="flex items-center justify-between bg-custom-secondary px-6 py-5 rounded-t-2xl">
           <p className="font-freshman tracking-widest text-2xl flex items-top text-custom-primary gap-2">
             <FileText className="mt-[2px]" />

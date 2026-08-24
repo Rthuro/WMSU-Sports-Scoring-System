@@ -29,7 +29,7 @@ export function PublicEvents() {
     const pastEvents = filteredEvents.filter(e => new Date(e.end_date || e.start_date) < now);
 
     return (
-        <div className="mx-auto my-24 max-w-6xl pt-8 pb-16 px-3 flex flex-col">
+        <div className="mx-auto my-12 max-w-6xl px-3 flex flex-col">
             <h1 className="mb-8 border-l-8 border-custom-primary pl-3 font-freshman tracking-wider text-custom-secondary text-2xl">
                 EVENTS
             </h1>

@@ -1,6 +1,6 @@
 import React from "react"
 import { Outlet } from "react-router-dom";
-
+import logo from "@/assets/logo/logo.png"
 import { Link } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { useState } from "react"
@@ -13,9 +13,9 @@ export function PublicLayout() {
   const [sidebarVisible, setSidebarVisibility] = useState(isOpen);
 
   return (
-    <main >
+    <main className="flex w-full">
       <CheckConnection />
-      <nav className="flex justify-between items-center fixed bg-custom-secondary text-custom-primary py-4 top-0 px-3  lg:px-16 right-0 left-0 z-50">
+      <nav className="flex md:hidden justify-between items-center fixed bg-custom-secondary text-custom-primary py-4 top-0 px-3  lg:px-16 right-0 left-0 z-50">
         <div className="flex items-center gap-3">
           <button onClick={() => setSidebarVisibility(visible => !visible)}>
             <Menu className={`${sidebarVisible ? 'hidden' : 'flex'} md:hidden`} />
@@ -32,7 +32,6 @@ export function PublicLayout() {
               <Link onClick={() => setSidebarVisibility(visible => !visible)} to="/Events">Events</Link>
               <Link onClick={() => setSidebarVisibility(visible => !visible)} to="/Tournaments">Tournaments</Link>
               <Link onClick={() => setSidebarVisibility(visible => !visible)} to="/Calendar">Calendar</Link>
-              <Link onClick={() => setSidebarVisibility(visible => !visible)} to="/Sports">Sports</Link>
               <Link onClick={() => setSidebarVisibility(visible => !visible)} to="/Departments">Departments</Link>
             </motion.div>
           )}
@@ -49,8 +48,20 @@ export function PublicLayout() {
           <Link to="/Departments">Departments</Link>
         </div>
       </nav>
-      <Outlet />
-      
+      <nav className="fixed top-0 left-0 bottom-0 flex flex-col items-center gap-8 py-10 w-[250px] px-4 h-screen shadow-2xl z-50 bg-white">
+          <img src={logo} alt="" className="h-30" />
+          <div className="flex flex-col gap-6 items-center text-sm font-lora text-custom-secondary font-bold uppercase">
+            <Link to="/" className="hover:border-b-2 hover:border-custom-secondary">Home</Link>
+            <Link to="/Events" className="hover:border-b-2 hover:border-custom-secondary">Events</Link>
+            <Link to="/Tournaments" className="hover:border-b-2 hover:border-custom-secondary">Tournaments</Link>
+            <Link to="/Calendar" className="hover:border-b-2 hover:border-custom-secondary">Calendar</Link>
+            <Link to="/Departments" className="hover:border-b-2 hover:border-custom-secondary">Departments</Link>
+          </div>
+          <Link to="/Login" className=" hover:bg-custom-secondary/95 py-3 px-5 bg-custom-secondary text-custom-primary font-semibold rounded w-full text-center mt-auto">Login</Link>
+      </nav>
+      <div className="w-[calc(100%-250px)] ml-[250px]">
+        <Outlet />
+      </div>
     </main>
   )
 }
